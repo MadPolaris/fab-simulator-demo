@@ -43,6 +43,7 @@ lazy val web = (project in file("web"))
     libraryDependencies ++= Seq(
       "net.imadz" %% "common-core" % "0.2",
       "net.imadz" %% "monarch-core" % "0.2",
+      "net.imadz" %% "monarch-persistence" % "0.2",
       "net.imadz" %% "saga-core" % "0.2",
       "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion,
       "com.typesafe.akka" %% "akka-stream" % akkaVersion,

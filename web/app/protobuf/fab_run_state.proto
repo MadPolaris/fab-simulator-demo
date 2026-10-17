@@ -1,0 +1,126 @@
+syntax = "proto3";
+
+package net.imadz.infrastructure.proto;
+
+option java_multiple_files = true;
+
+// Snapshot of one fab pipeline run, journaled by monarch-persistence inside
+// StageDone events for crash recovery. This is the resume state: the child
+// actor decodes the last snapshot and resumes the Monarch queue from it.
+//
+// Field numbers are the cross-version contract — never reuse a number.
+// "" encodes None for the optional strings (same convention as BankStateCodec).
+
+// ---- Run wrapper: S for PersistentMonarch[PipelineStage, FabRunState] ----
+
+message FabRunStateProto {
+  string scenario_id = 1;
+  string work_order_id = 2;
+  FabDemoStateProto state = 3;
+  // Position of the next stage to run; doubles as the "#index" cursor suffix.
+  // Advanced by the interpreter on every returned state, so it always equals
+  // the number of StageDone events journaled for this run.
+  int32 completed_count = 4;
+  // Set only when the most recent stage was recovered via OCAP rather than
+  // completing cleanly (message-field presence == Some).
+  StageErrorProto last_ocap_error = 5;
+}
+
+// ---- FabDemoState ----
+
+message FabDemoStateProto {
+  map<string, WaferInfoProto> wafers = 1;
+  int32 pass_count = 2;
+  int32 scrap_count = 3;
+  int32 iteration = 4;
+  int32 ledger_seq = 5;
+  bool pilot_passed = 6;
+  bool review_approved = 7;
+  string spawned_child_lot_key = 8;              // "" == None
+  int32 current_routing_step = 9;
+  map<string, int32> routing_step_reentry = 10;
+  repeated string area_visit_history = 11;
+  string current_area = 12;
+  map<string, ChildLotViewProto> child_lot_view = 13;
+  map<string, EquipmentStateProto> equipment_state = 14;
+  repeated OcapActionEntryProto ocap_actions = 15;
+}
+
+message WaferInfoProto {
+  string wafer_id = 1;
+  int32 rework_count = 2;
+  repeated double cd_value_history = 3;
+  string classification = 4;                     // "" == None
+  string sub_lot = 5;                            // "" == None
+  map<string, DoubleListProto> measurements = 6;
+}
+
+message DoubleListProto {
+  repeated double values = 1;
+}
+
+message EquipmentStateProto {
+  string equipment_id = 1;
+  string status = 2;
+  int32 error_count = 3;
+}
+
+message ChildLotViewProto {
+  string status = 1;
+  int32 wafer_count = 2;
+}
+
+message OcapActionEntryProto {
+  string rule_id = 1;
+  OcapActionPlanProto plan = 2;
+}
+
+// ---- OcapActionPlan ADT (recursive via composite) ----
+
+message OcapActionPlanProto {
+  oneof plan {
+    OcapHoldProto hold = 1;
+    OcapReworkProto rework = 2;
+    OcapScrapProto scrap = 3;
+    OcapNotifyProto notify = 4;
+    OcapAdjustRecipeProto adjust_recipe = 5;
+    OcapCompositeProto composite = 6;
+  }
+}
+
+message OcapHoldProto {
+  int64 duration_ms = 1;
+  string reason = 2;
+}
+
+message OcapReworkProto {
+  string recipe_id = 1;
+  int32 max_count = 2;
+}
+
+message OcapScrapProto {
+  string reason = 1;
+}
+
+message OcapNotifyProto {
+  string reason = 1;
+  string escalation_path = 2;
+}
+
+message OcapAdjustRecipeProto {
+  string recipe_id = 1;
+  double offset_nm = 2;
+}
+
+message OcapCompositeProto {
+  repeated OcapActionPlanProto actions = 1;
+}
+
+// ---- Structured stage error (for the OCAP-resolved marker) ----
+
+message StageErrorProto {
+  string stage_name = 1;
+  string equip_id = 2;                           // "" == None
+  string error_code = 3;
+  string detail = 4;
+}

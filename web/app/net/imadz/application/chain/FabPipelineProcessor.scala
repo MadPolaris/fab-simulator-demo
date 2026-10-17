@@ -17,8 +17,11 @@ import scala.concurrent.{ExecutionContext, Future}
  *     suffixed per queue entry)
  *   - the stage interpreter ([[FabScenarioPipeline.runStage]])
  *   - the failure interceptor ([[FabScenarioPipeline.invokeOcapInterceptor]])
- *   - the actor-journaled lifecycle callbacks (PhaseStarting/PhaseCompleted/
- *     PhaseFailed/OcapResolved protocols unchanged — journal and UI untouched)
+ *
+ * NOTE (M3.5 monarch-persistence migration): [[FabPipelineExecutionActor]] no longer
+ * builds engines via [[monarch]] — it spawns a `PersistentMonarch` child whose
+ * interpreter inlines `runStage` + OCAP and reuses only [[stageName]] here for
+ * cursor naming. [[monarch]] is kept for direct (non-actor) engine use.
  */
 object FabPipelineProcessor {
 
