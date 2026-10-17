@@ -1,0 +1,30 @@
+# Routes — fab-simulator-web
+# Fab 演示：仿真页面 + M3.5 自愈演示 + API + WebSocket
+
+# Fab Demo pages
+GET     /fab-demo                               controllers.FabDemoController.index()
+GET     /fab-designer                           controllers.FabDemoController.designer()
+
+# Fab Demo API
+GET     /ws/fab-demo/events                     controllers.FabDemoController.socket
+POST    /api/fab-demo/start/:scenarioId         controllers.FabDemoController.startDemo(scenarioId: String)
+POST    /api/fab-demo/product/:productId/start  controllers.FabDemoController.startProductDemo(productId: String)
+GET     /api/fab-demo/scenarios                 controllers.FabDemoController.getScenarios
+GET     /api/fab-demo/scenario/:id/ledger       controllers.FabDemoController.getScenarioLedger(id: String)
+GET     /api/fab-demo/entity-state/:workOrderId controllers.FabDemoController.getEntityState(workOrderId: String)
+GET     /api/fab-demo/scenario/:id/route-graph  controllers.FabDemoController.getRouteGraph(id: String)
+POST    /api/fab-demo/area/:areaId/down         controllers.FabDemoController.areaDown(areaId: String)
+POST    /api/fab-demo/area/:areaId/reset        controllers.FabDemoController.areaReset(areaId: String)
+
+# M3.5 Self-Healing Demo
+GET     /fab-demo/m35                           controllers.FabDemoController.m35Demo()
+GET     /fab-demo/m35-3d                        controllers.FabDemoController.m35ThreeD()
+GET     /ws/fab-demo/m35/events                 controllers.FabDemoController.m35Socket
+POST    /api/fab-demo/m35/start                 controllers.FabDemoController.m35Start()
+POST    /api/fab-demo/m35/inject-crash/:workOrderId  controllers.FabDemoController.m35InjectCrash(workOrderId: String)
+GET     /api/fab-demo/m35/ocap-rules            controllers.FabDemoController.m35GetOcapRules()
+GET     /api/fab-demo/m35/recovery-status/:id   controllers.FabDemoController.m35RecoveryStatus(id: String)
+GET     /api/fab-demo/m35/fault-history/:id     controllers.FabDemoController.m35FaultHistory(id: String)
+
+# Static assets
+GET     /assets/*file                           controllers.Assets.versioned(path="/public", file: Asset)

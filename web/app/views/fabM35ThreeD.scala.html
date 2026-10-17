@@ -1,0 +1,1909 @@
+@()
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fab M3.5 · 3D Digital Twin</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { overflow:hidden; background:#0b1220; color:#e6edf3;
+       font-family:"Microsoft YaHei",system-ui,sans-serif; }
+#stage3d { position:fixed; inset:0; z-index:1; }
+.site-nav { position:fixed; top:0; left:0; right:0; z-index:30;
+  background:rgba(11,18,32,0.92); padding:8px 20px;
+  display:flex; align-items:center; gap:10px;
+  border-bottom:1px solid rgba(255,255,255,0.08); }
+.site-nav .logo { font-weight:700; font-size:0.9rem; color:#fff; text-decoration:none; }
+.site-nav nav { display:flex; gap:6px; margin-left:auto; }
+.site-nav nav a { color:rgba(255,255,255,0.8); text-decoration:none;
+  font-size:0.78rem; padding:4px 10px; border-radius:4px; }
+.site-nav nav a:hover { color:#fff; background:rgba(255,255,255,0.1); }
+.hud { position:fixed; z-index:20; background:rgba(13,23,38,0.88);
+  border:1px solid rgba(255,255,255,0.1); border-radius:10px;
+  padding:10px 12px; font-size:12px; }
+#hudLeft { left:14px; top:104px; width:274px; }
+#hudRight { right:14px; top:104px; width:300px; max-height:52vh; overflow-y:auto; }
+/* 顶部演示控制条 */
+#ctrlBar { position:fixed; top:52px; left:0; right:0; z-index:35; display:flex;
+  align-items:center; gap:10px; padding:8px 16px; background:rgba(11,18,32,0.88);
+  backdrop-filter:blur(8px); border-bottom:1px solid rgba(255,255,255,0.08); }
+#ctrlBar select { flex:0 0 360px; padding:6px 8px; background:#0d1726; color:#e6edf3;
+  border:1px solid rgba(255,255,255,0.15); border-radius:6px; font-size:12px; }
+#ctrlBar button { padding:7px 14px; border:none; border-radius:6px; font-size:12px;
+  font-weight:600; cursor:pointer; }
+#ctrlBar button.hidden { display:none; }
+#btnStart { background:#1a7f37; color:#fff; }
+#btnCrash { background:#7a3c10; color:#ffd8b0; }
+#btnCam { background:#263442; color:#cfe0f0; }
+#runBadge { margin-left:auto; font-size:11px; color:#8fb8e8; letter-spacing:.5px; }
+#faultWrap { display:none; align-items:center; gap:6px; padding:2px 10px 2px 14px;
+  border-left:1px solid rgba(255,255,255,0.12); }
+#faultWrap.show { display:flex; }
+#faultWrap label { font-size:11px; color:#93a7bb; white-space:nowrap; }
+#faultSlider { width:110px; accent-color:#ff9800; }
+#faultVal { font-size:11px; color:#ffb74d; min-width:30px; }
+/* 底部动态工艺路线条 */
+#routeStrip { position:fixed; bottom:14px; left:50%; transform:translateX(-50%); z-index:34;
+  display:flex; align-items:center; gap:6px; padding:8px 14px;
+  background:rgba(11,18,32,0.85); border:1px solid rgba(255,255,255,0.12);
+  border-radius:10px; backdrop-filter:blur(6px); }
+.rnode { padding:3px 10px; border-radius:5px; font-size:11px; font-weight:600;
+  color:#7f92a8; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08);
+  letter-spacing:.5px; transition:all .25s; }
+.rnode.done { color:#9fe19f; border-color:rgba(26,127,55,0.55); }
+.rnode.active { color:#111; background:#ffb300; border-color:#ffb300;
+  box-shadow:0 0 12px rgba(255,179,0,.75); }
+.rarrow { color:#5a6b7d; font-size:11px; }
+/* OCAP 规则库 */
+#ruleLib .ruleRow { display:flex; align-items:center; gap:6px; font-size:11px;
+  padding:3px 0; color:#93a7bb; border-bottom:1px dashed rgba(255,255,255,0.05); }
+#ruleLib .ruleRow .act { color:#6b7f95; font-size:10px; }
+#ruleLib .ruleRow .cnt { margin-left:auto; color:#ffd54f; font-weight:700; }
+#ruleLib .ruleRow.fired { color:#e6edf3; }
+  #ruleLib .ruleRow.muted { color:#5a6b7d; border-bottom:none; }
+  /* 批次路线卡抽屉 */
+  #lotDrawer { position:fixed; top:104px; right:326px; width:392px; max-height:calc(100vh - 130px);
+    z-index:50; background:rgba(11,18,32,0.94); border:1px solid rgba(255,255,255,0.16);
+    border-radius:10px; padding:12px 14px; overflow-y:auto; display:none;
+    box-shadow:0 8px 28px rgba(0,0,0,.5); }
+  #lotDrawer.show { display:block; }
+  #lotDrawer h4 { margin:0 0 8px; font-size:12px; color:#8fb8e8; display:flex;
+    justify-content:space-between; align-items:center; letter-spacing:.5px;
+    cursor:pointer; user-select:none; }
+  #lotDrawer h4:hover { color:#b9d4f2; }
+  #lotDrawer.collapsed #lotDrawerBody { display:none; }
+  #lotDrawer.collapsed { overflow-y:hidden; }
+  /* 路线定义长横条：通栏贴底，横向铺开完整 DAG */
+  #routeDefStrip { position:fixed; bottom:8px; left:14px; right:14px; z-index:46;
+    background:rgba(11,18,32,0.94); border:1px solid rgba(255,255,255,0.14);
+    border-radius:10px; padding:8px 12px 10px; display:none;
+    box-shadow:0 8px 28px rgba(0,0,0,.5); }
+  #routeDefStrip.show { display:block; }
+  #routeDefStrip .rdsHead { display:flex; justify-content:space-between; align-items:center;
+    font-size:11.5px; color:#8fb8e8; margin-bottom:6px; }
+  #routeDefStrip .rdsHead .rdsName { font-weight:700; letter-spacing:.5px; }
+  #routeDefStrip .rdsHead .rdsDesc { color:#7f95ab; font-size:10.5px; margin-left:10px; }
+  #rdsClose { cursor:pointer; color:#789; padding:0 4px; }
+  #rdsClose:hover { color:#e6edf3; }
+  #rdsCanvas { overflow-x:auto; border-radius:7px; background:rgba(0,0,0,0.25); }
+  #btnRouteDef { padding:6px 12px; border:1px solid rgba(255,255,255,0.15); border-radius:6px;
+    font-size:12px; font-weight:600; cursor:pointer; background:#12314f; color:#8fb8e8; }
+  #btnRouteDef.active { color:#ffd54f; border-color:rgba(255,213,79,0.4); }
+  /* 工艺剖面动画面板：芯片制造过程的实时示意动画 */
+  #xsecPanel { position:fixed; right:14px; bottom:8px; z-index:47; width:308px;
+    background:rgba(11,18,32,0.94); border:1px solid rgba(255,255,255,0.14);
+    border-radius:10px; padding:8px 10px; box-shadow:0 8px 28px rgba(0,0,0,.5); }
+  .xsecHead { display:flex; justify-content:space-between; align-items:center;
+    font-size:11px; color:#8fb8e8; margin-bottom:6px; }
+  #xsecStep { color:#ffd54f; font-weight:600; font-size:10px; max-width:190px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #xsecCanvas { display:block; border-radius:6px; background:rgba(0,0,0,0.32); }
+  .ldRow { display:flex; gap:8px; font-size:11.5px; color:#cfe0f0; padding:2px 0; }
+  .ldk { font-size:10.5px; color:#7f95ab; display:block; }
+  #ldWo, #ldPhase { color:#e6edf3; }
+  #ldTrail { display:flex; flex-wrap:wrap; gap:4px; align-items:center; }
+  #ldLanes { display:flex; flex-direction:column; gap:8px; margin:6px 0; }
+  .laneRow { border:1px solid rgba(255,255,255,0.09); border-radius:8px;
+    padding:6px 8px; background:rgba(255,255,255,0.03); }
+  .laneRow.active { border-color:rgba(66,165,245,0.55); background:rgba(66,165,245,0.06); }
+  .laneHead { font-size:11px; color:#e6edf3; margin-bottom:4px; }
+  .laneHead .wcnt { color:#8fb8e8; margin-left:6px; font-size:10px; }
+  .laneHead em { color:#789; font-style:normal; margin-left:6px; font-size:10px; }
+  .laneFork { font-size:10px; color:#ce93d8; margin:2px 0 4px; }
+  .laneAreas { display:flex; flex-wrap:wrap; gap:4px; align-items:center; }
+  .trailNode { padding:2px 8px; border-radius:4px; font-size:10px; font-weight:600;
+    background:rgba(255,255,255,0.06); color:#7f92a8; border:1px solid rgba(255,255,255,0.08); }
+  .trailNode.visited { color:#9fe19f; border-color:rgba(26,127,55,0.5); }
+  .trailNode.current { color:#111; background:#ffb300; border-color:#ffb300;
+    box-shadow:0 0 8px rgba(255,179,0,.6); }
+  .trailNode.dyn { color:#ce93d8; border-color:rgba(186,104,200,0.5); }
+  .trailArrow { color:#5a6b7d; font-size:10px; }
+  #lotWafers { width:100%; font-size:10.5px; border-collapse:collapse; margin-top:2px; }
+  #lotWafers td { padding:2.5px 5px; border-bottom:1px solid rgba(255,255,255,0.05); color:#b8c9da; }
+  .cls-PASS { color:#69f0ae; } .cls-FAIL { color:#ff8a80; }
+  .cls-SCRAP { color:#ff5252; } .cls-BORDERLINE { color:#ffd54f; }
+.hud h3 { margin:0 0 8px; font-size:12px; text-transform:uppercase;
+  letter-spacing:1px; color:#8fb8e8; }
+.chip { display:inline-block; padding:3px 10px; border-radius:12px;
+  margin:2px; font-size:11px; background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.12); }
+.chip.on { background:rgba(66,165,245,0.25); border-color:#42a5f5; color:#cfe8ff; }
+.chip.done { background:rgba(26,127,55,0.25); border-color:#1a7f37; color:#c9f0cf; }
+.chip.fail { background:rgba(198,40,40,0.3); border-color:#c62828; color:#ffd2cd; }
+.feed { max-height:50vh; overflow-y:auto; font-family:Consolas,monospace;
+  font-size:11px; line-height:1.8; color:#9fe19f; }
+.feed .err { color:#ff9b8a; }
+.kpi { display:flex; gap:8px; margin:6px 0; flex-wrap:wrap; }
+.kpi .chip b { color:#fff; }
+#banner { position:fixed; top:100px; left:50%; transform:translateX(-50%);
+  z-index:40; padding:10px 22px; border-radius:10px; font-size:14px;
+  font-weight:600; display:none; }
+#banner.recovering { display:block; background:rgba(255,152,0,0.92); color:#1a1a1a; }
+#banner.crash { display:block; background:rgba(198,40,40,0.92); color:#fff; }
+#banner.done { display:block; background:rgba(26,127,55,0.92); color:#fff; }
+.btnrow { display:flex; gap:8px; margin-top:8px; }
+.btnrow button { flex:1; padding:8px 0; border:none; border-radius:6px;
+  cursor:pointer; font-size:12px; font-weight:600; }
+#btnStart { background:#1a7f37; color:#fff; }
+#btnCrash { background:#c62828; color:#fff; }
+#btnStart:disabled { background:#455a64; }
+#btnCam { background:#37474f; color:#cfd8dc; }
+  .hint { font-size:11px; color:#6b7f95; margin-top:8px; line-height:1.5;
+    border-top:1px solid rgba(255,255,255,0.07); padding-top:7px; }
+  #areaGrid { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:4px; }
+  .areaCell { display:flex; align-items:center; gap:4px; padding:4px 5px; cursor:pointer;
+    background:rgba(255,255,255,0.045); border:1px solid rgba(255,255,255,0.09);
+    border-radius:7px; font-size:10px; color:#c8d6e5; white-space:nowrap;
+    overflow:hidden; transition:border-color .3s; }
+  .areaCell:hover { border-color:rgba(255,255,255,0.25); }
+  .areaCell.sel { border-color:#42a5f5; }
+  .areaCell.queued { border-color:rgba(255,179,0,0.55); }
+  .qbadge { color:#ffd54f; font-weight:700; font-size:9.5px; flex:none; }
+  #loadSummary { margin-top:6px; font-size:10.5px; color:#7f95ab; display:flex; gap:10px; }
+  #loadSummary b { color:#cfe0f0; }
+  .areaCell .dot { width:7px; height:7px; border-radius:50%;
+    background:#3d4d5f; flex:none; transition:background .3s, box-shadow .3s; }
+  @@keyframes cellPulse { 0%{ box-shadow:0 0 0 0 rgba(66,165,245,.55);} 70%{ box-shadow:0 0 0 7px rgba(66,165,245,0);} 100%{ box-shadow:0 0 0 0 rgba(66,165,245,0);} }
+  .areaCell.pulse { animation:cellPulse 1s ease-out 2; border-color:#42a5f5; }
+  /* 工作区状态强化：背景着色 + 右侧状态字，一眼可读 */
+  .areaCell .st { margin-left:auto; font-size:9.5px; font-weight:600; letter-spacing:1px; color:#7f95ab; }
+  .areaCell.st-LOADED  { background:rgba(255,179,0,0.14);  border-color:#ffb300; }
+  .areaCell.st-LOADED  .st { color:#ffb300; }
+  .areaCell.st-BUSY    { background:rgba(66,165,245,0.18); border-color:#42a5f5; }
+  .areaCell.st-BUSY    .st { color:#64b5f6; }
+  .areaCell.st-FINISHED{ background:rgba(0,230,118,0.13);  border-color:#00e676; }
+  .areaCell.st-FINISHED .st { color:#00e676; }
+  .areaCell.st-UNLOADING{ background:rgba(255,213,79,0.13); border-color:#ffd54f; }
+  .areaCell.st-UNLOADING .st { color:#ffd54f; }
+  .areaCell.st-DOWN    { background:rgba(255,82,82,0.17);  border-color:#ff5252; }
+  .areaCell.st-DOWN    .st { color:#ff8a80; }
+  @@keyframes cellDown { 0%,100% { box-shadow:0 0 0 0 rgba(255,82,82,.35); }
+                         50%     { box-shadow:0 0 9px 2px rgba(255,82,82,.30); } }
+  .areaCell.st-DOWN { animation:cellDown 1.3s ease-in-out infinite; }
+  /* 干预按钮：与驾驶舱同语言的语义色 */
+  #areaIv { display:none; align-items:center; gap:7px; margin-top:8px;
+    font-size:11px; color:#7f95ab; }
+  #areaIv b { color:#e6edf3; }
+  #ivDown, #ivReset { padding:4px 14px; border-radius:6px; font-size:11.5px; font-weight:600;
+    letter-spacing:2px; cursor:pointer; background:rgba(255,255,255,0.04);
+    border:1px solid; transition:all .2s; }
+  #ivDown  { color:#ff8a80; border-color:rgba(255,82,82,0.5); }
+  #ivDown:hover  { background:rgba(255,82,82,0.14);  box-shadow:0 0 9px rgba(255,82,82,0.28); }
+  #ivReset { color:#69f0ae; border-color:rgba(105,240,174,0.5); }
+  #ivReset:hover { background:rgba(105,240,174,0.10); box-shadow:0 0 9px rgba(105,240,174,0.24); }
+  @@keyframes kpiPop { 0%{display:inline-block; transform:scale(1.7); color:#ffd54f} 100%{display:inline-block; transform:scale(1)} }
+  .chip b.pop { animation:kpiPop .45s ease-out; }
+  #narr { position:fixed; bottom:64px; left:50%; transform:translateX(-50%); z-index:45;
+    max-width:70vw; padding:9px 20px; border-radius:22px; background:rgba(13,23,38,.9);
+    border:1px solid rgba(255,255,255,.2); font-size:13.5px; color:#cfe8ff;
+    display:none; align-items:center; gap:9px; backdrop-filter:blur(6px);
+    box-shadow:0 4px 18px rgba(0,0,0,.45); }
+  #narr.show { display:flex; }
+  #narr .ico { font-size:17px; }
+  #narr b { color:#ffd54f; }
+</style>
+</head>
+<body>
+
+<div class="site-nav">
+  <a href="/" class="logo">Reactive MES Kernel</a>
+  <nav>
+    <a href="/">首页</a>
+    <a href="/saga">M1 Saga</a>
+    <a href="/m2">M2 DAG</a>
+    <a href="/m3">M3</a>
+    <a href="/fab-demo/m35">2D 演示</a>
+    <a href="/bank-batch">银行批量</a>
+    <a href="/fab-demo/m35-3d" style="color:#9fe19f;font-weight:600">3D 孪生</a>
+  </nav>
+</div>
+
+<div id="dbg" style="position:fixed;bottom:10px;right:10px;z-index:99;
+  background:#1a1a2e;color:#0f0;font-family:monospace;font-size:12px;
+  padding:8px 12px;border-radius:4px;max-width:500px;">
+  <div id="dbgMsg">⏳ Loading Three.js…</div>
+</div>
+<div id="stage3d"></div>
+<div id="banner"></div>
+<div id="narr"></div>
+
+<div class="hud" id="hudLeft">
+  <h3>运行状态</h3>
+  <div class="kpi">
+    <span class="chip">在途 <b id="kpiWip">0</b></span>
+    <span class="chip">恢复 <b id="kpiRec">0</b></span>
+    <span class="chip">OCAP <b id="kpiOcap">0</b></span>
+    <span class="chip">拆批 <b id="kpiSplit">0</b></span>
+    <span class="chip">合批 <b id="kpiMerge">0</b></span>
+    <span class="chip">报废 <b id="kpiScrap">0</b></span>
+  </div>
+  <h3 style="margin-top:12px">批次谱系（拆批 / 合批）</h3>
+  <div id="lotTree"></div>
+  <h3 style="margin-top:12px">九大工作区</h3>
+  <div id="areaGrid"></div>
+  <div id="loadSummary"></div>
+  <div id="areaIv">
+    <span>干预 <b id="areaIvName"></b></span>
+    <button id="ivDown">停机</button>
+    <button id="ivReset">复位</button>
+  </div>
+  <h3 style="margin-top:12px">OCAP 规则库</h3>
+  <div id="ruleLib"><div class="ruleRow muted">加载中…</div></div>
+</div>
+
+<!-- 顶部演示控制条 -->
+<div id="ctrlBar">
+  <span style="font-size:11px;font-weight:700;color:#ffd54f;letter-spacing:1px;">LIVE DEMO</span>
+  <select id="scenarioSel">
+    <option value="m35">M3.5 自愈演示（宕机注入 + 断点续跑）</option>
+    <option value="cxmt-dram-full-25">长鑫 CXMT DRAM 满批：25 片整 FOUP · 拆批返工 + 报废</option>
+    <option value="hynix-hbm3e">海力士 HBM3E：12-Hi 堆叠 TSV 全流程（12 片）</option>
+    <option value="photo-cell-5wafer">拆批返工：2 返工 → PASS + 1 报废（5 片）</option>
+    <option value="send-ahead-pilot">拆批试投：1 片先导 → 量测 → 合批（5 片）</option>
+    <option value="sampling-demo">拆批抽检：抽 2 片量测 → 合批（6 片）</option>
+    <option value="hold-release">暂扣与放行：HOLD → 评审 15s → 合批（5 片）</option>
+    <option value="scrap-downgrade">直接报废：SCRAP 子批分流（3 片）</option>
+  </select>
+  <button id="btnStart">▶ 启动</button>
+  <button id="btnCrash">⚡ 注入宕机</button>
+  <button id="btnCam">🎥 剧情镜头</button>
+  <button id="btnRouteDef">📐 路线定义</button>
+  <span id="faultWrap">
+    <label>故障率</label>
+    <input type="range" id="faultSlider" min="0" max="100" value="20">
+    <span id="faultVal">20%</span>
+  </span>
+  <span id="runBadge">WS 连接中…</span>
+</div>
+
+<!-- 底部动态工艺路线条 -->
+<div id="routeStrip"></div>
+
+<div id="errPanel" style="position:fixed;bottom:14px;left:14px;right:14px;z-index:100;
+  background:#1a0000;color:#ff6b6b;font-family:Consolas,monospace;font-size:11px;
+  padding:10px;border-radius:8px;display:none;max-height:250px;overflow-y:auto;
+  border:1px solid #ff6b6b;white-space:pre-wrap;">
+  <b>=== JS 错误面板 ===</b>
+</div>
+<script>
+// 全局错误捕获——任何 JS 错误直接显示在页面上
+window.onerror = function(msg, src, line, col) {
+  var el = document.getElementById("errPanel");
+  el.style.display = "block";
+  el.textContent += "\n[ERROR] " + msg + "\n  at " + (src||"?").split("/").pop() + ":" + line + ":" + col + "\n";
+};
+window.addEventListener("unhandledrejection", function(e) {
+  var el = document.getElementById("errPanel");
+  el.style.display = "block";
+  el.textContent += "\n[REJECTION] " + (e.reason && e.reason.message ? e.reason.message : String(e.reason)) + "\n";
+});
+</script>
+
+<div class="hud" id="hudRight">
+  <h3>事件流</h3>
+  <div id="feed" style="max-height:50vh;overflow-y:auto;font-family:Consolas,monospace;font-size:11px;line-height:1.8;color:#9fe19f;"></div>
+</div>
+
+<!-- 批次路线卡抽屉（点击批次谱系或详情按钮展开） -->
+<div id="lotDrawer">
+  <h4 id="lotDrawerHead" title="点击折叠 / 展开">
+    <span>📋 批次路线卡</span>
+    <span style="display:flex;align-items:center;gap:9px;">
+      <span id="lotDrawerCaret" style="color:#789;">▾</span>
+      <span id="lotDrawerClose" style="cursor:pointer;color:#789;">✕</span>
+    </span>
+  </h4>
+  <div id="lotDrawerBody">
+    <div class="ldRow"><span class="ldk">批次</span><span id="ldWo">—</span></div>
+    <div class="ldRow"><span class="ldk">状态</span><span id="ldPhase">—</span></div>
+    <div class="ldRow"><span class="ldk">分布</span><span id="ldSummary" style="color:#e6edf3;">—</span></div>
+    <div class="ldk" style="margin:10px 0 4px;">批次泳道（分叉 / 合并 / 报废）</div>
+    <div id="ldLanes"></div>
+    <div class="ldk" style="margin:10px 0 4px;">晶圆明细</div>
+    <table id="lotWafers"></table>
+  </div>
+</div>
+
+<div id="routeDefStrip">
+  <div class="rdsHead">
+    <span><span class="rdsName" id="rdsName">路线定义</span><span class="rdsDesc" id="rdsDesc"></span></span>
+    <span id="rdsClose" title="收起">✕</span>
+  </div>
+  <div id="rdsCanvas"></div>
+</div>
+
+<div id="xsecPanel">
+  <div class="xsecHead">
+    <span>🔬 工艺剖面 · HBM3E</span>
+    <span id="xsecStep">待机</span>
+  </div>
+  <canvas id="xsecCanvas" width="284" height="176"></canvas>
+</div>
+
+<script type="importmap">
+{ "imports": {
+    "three": "/assets/javascripts/lib/three/0.160.0/three.module.min.js",
+    "three/addons/": "/assets/javascripts/lib/three/0.160.0/examples/jsm/"
+} }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+var dbg = function(msg) { var e = document.getElementById('dbgMsg'); if (e) e.textContent = msg; };
+dbg('Three.js module loaded');
+
+/* ===== 渲染器 / 场景 / 相机 ===== */
+var container = document.getElementById('stage3d');
+var renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+container.appendChild(renderer.domElement);
+dbg('renderer created');
+
+var scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0b1220);
+scene.fog = new THREE.Fog(0x0b1220, 70, 190);
+
+var camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 400);
+camera.position.set(-6, 27, 33);
+var controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.target.set(-2, 2, -1);
+
+scene.add(new THREE.AmbientLight(0xbfd4ff, 0.55));
+var keyL = new THREE.DirectionalLight(0xffffff, 1.5);
+keyL.position.set(20, 40, 18); keyL.castShadow = true; scene.add(keyL);
+var fillL = new THREE.PointLight(0x88aaff, 0.45, 90);
+fillL.position.set(-20, 16, -14); scene.add(fillL);
+
+/* ===== 洁净室：九大工作区 + 物流环线 =====
+   权威定义：fab-simulation/net/imadz/fab/model/EquipmentArea.scala
+   9 工艺区（CLEAN/DIFF/LITHO/ETCH/IMPL/DEP/CMP/MET/DRY）+ STOCKER + LOG 物流指挥 */
+var floor = new THREE.Mesh(new THREE.PlaneGeometry(84, 52),
+  new THREE.MeshStandardMaterial({ color: 0x1a2634, roughness: 0.85 }));
+floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+var gridH = new THREE.GridHelper(84, 84, 0x2a3b52, 0x1c2a3c);
+gridH.position.y = 0.01; scene.add(gridH);
+var wallMat = new THREE.MeshStandardMaterial({ color: 0x14202e, transparent: true, opacity: 0.35, roughness: 0.4 });
+[[0, -26], [0, 26]].forEach(function(p) {
+  var wall = new THREE.Mesh(new THREE.BoxGeometry(84, 6, 0.3), wallMat);
+  wall.position.set(p[0], 3, p[1]); scene.add(wall);
+});
+[[-42, 0], [42, 0]].forEach(function(p) {
+  var wall = new THREE.Mesh(new THREE.BoxGeometry(0.3, 6, 52), wallMat);
+  wall.position.set(p[0], 3, p[1]); scene.add(wall);
+});
+[-24, 24].forEach(function(z) {
+  var truss = new THREE.Mesh(new THREE.BoxGeometry(82, 0.45, 0.8),
+    new THREE.MeshStandardMaterial({ color: 0x37474f, metalness: 0.8, roughness: 0.3 }));
+  truss.position.set(0, 5.6, z); scene.add(truss);
+});
+
+/* ===== 区域坐标与命名 ===== */
+var AREA_POS = {
+  STOCKER: new THREE.Vector3(-34, 0, 0),
+  CLEAN:   new THREE.Vector3(-24, 0, -17),
+  DIFF:    new THREE.Vector3(-12, 0, -17),
+  LITHO:   new THREE.Vector3(0, 0, -17),
+  ETCH:    new THREE.Vector3(12, 0, -17),
+  IMPL:    new THREE.Vector3(24, 0, -17),
+  DEP:     new THREE.Vector3(33, 0, 0),
+  CMP:     new THREE.Vector3(24, 0, 17),
+  MET:     new THREE.Vector3(12, 0, 17),
+  DRY:     new THREE.Vector3(0, 0, 17),
+  LOG:     new THREE.Vector3(0, 0, 0)
+};
+AREA_POS.METROLOGY = AREA_POS.MET;   // 后端别名
+AREA_POS.CDSEM = AREA_POS.MET;       // 设备名别名
+var AREA_NAME = {
+  CLEAN: '湿法清洗', DIFF: '扩散/氧化', LITHO: '光刻', ETCH: '刻蚀',
+  IMPL: '离子注入', DEP: '薄膜沉积', CMP: '化学机械抛光',
+  MET: '量测', DRY: '干燥', LOG: '物流指挥', STOCKER: '晶圆仓库'
+};
+var EQUIP_BY_AREA = {};
+
+/* ===== 建造辅助 ===== */
+function mat(color, metal, rough) {
+  return new THREE.MeshStandardMaterial({ color: color, metalness: metal, roughness: rough });
+}
+function lampFor(group, x, y, z) {
+  var lamp = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 10),
+    new THREE.MeshStandardMaterial({ color: 0x0aa8a0, emissive: 0x0aa8a0, emissiveIntensity: 1.1 }));
+  lamp.position.set(x, y, z); group.add(lamp); group.userData.lamp = lamp;
+}
+function labelSprite(text, x, y, z, accent) {
+  var cv = document.createElement('canvas'); cv.width = 512; cv.height = 128;
+  var c = cv.getContext('2d');
+  var sep = text.indexOf('·');
+  var en = sep > 0 ? text.slice(0, sep).trim() : '';
+  var cn = sep > 0 ? text.slice(sep + 1).trim() : text;
+  var fontStack = '"Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", sans-serif';
+  c.fillStyle = 'rgba(9,15,25,0.78)';
+  c.beginPath();
+  var r = 20;
+  c.moveTo(r, 0); c.lineTo(512 - r, 0); c.quadraticCurveTo(512, 0, 512, r);
+  c.lineTo(512, 128 - r); c.quadraticCurveTo(512, 128, 512 - r, 128);
+  c.lineTo(r, 128); c.quadraticCurveTo(0, 128, 0, 128 - r);
+  c.lineTo(0, r); c.quadraticCurveTo(0, 0, r, 0);
+  c.fill();
+  c.fillStyle = accent; c.fillRect(14, 30, 8, 68);          // 左侧色条
+  c.textAlign = 'left'; c.textBaseline = 'middle';
+  if (en) { c.font = '500 30px ' + fontStack; c.fillStyle = 'rgba(143,184,232,0.95)'; c.fillText(en, 42, 40); }
+  c.font = 'bold 50px ' + fontStack;
+  c.fillStyle = '#eef4fb';
+  c.shadowColor = 'rgba(0,0,0,0.9)'; c.shadowBlur = 6;
+  c.fillText(cn, en ? 40 : 42, 92);
+  c.shadowBlur = 0;
+  var tex = new THREE.CanvasTexture(cv);
+  tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  var sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
+  sp.scale.set(7.0, 1.75, 1); sp.position.set(x, y, z);
+  scene.add(sp);
+}
+
+/* ===== ① CLEAN 湿法清洗 —— 湿法台 + 冲洗槽 ===== */
+(function() {
+  var g = new THREE.Group();
+  var bench = new THREE.Mesh(new THREE.BoxGeometry(6, 1.6, 2.4), mat(0x00695c, 0.5, 0.4));
+  bench.position.y = 0.8; g.add(bench);
+  for (var i = 0; i < 4; i++) {
+    var tank = new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.0, 1.8), mat(0x26c6da, 0.3, 0.2));
+    tank.position.set(-2.1 + i * 1.4, 2.1, 0); g.add(tank);
+  }
+  lampFor(g, 0, 3.2, 0); g.position.copy(AREA_POS.CLEAN); scene.add(g);
+  EQUIP_BY_AREA.CLEAN = g;
+  labelSprite('CLEAN · 湿法清洗', AREA_POS.CLEAN.x, 4.6, AREA_POS.CLEAN.z, '#26c6da');
+})();
+
+/* ===== ② DIFF 扩散/氧化 —— 立式炉管阵 ===== */
+(function() {
+  var g = new THREE.Group();
+  var base = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.5, 2.2), mat(0x4e342e, 0.4, 0.5));
+  base.position.y = 0.25; g.add(base);
+  for (var i = 0; i < 3; i++) {
+    var tube = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 4.2, 14), mat(0xbf360c, 0.6, 0.35));
+    tube.position.set(-1.5 + i * 1.5, 2.35, 0); g.add(tube);
+  }
+  lampFor(g, 0, 4.9, 0); g.position.copy(AREA_POS.DIFF); scene.add(g);
+  EQUIP_BY_AREA.DIFF = g;
+  labelSprite('DIFF · 扩散/氧化', AREA_POS.DIFF.x, 5.7, AREA_POS.DIFF.z, '#ff7043');
+})();
+
+/* ===== ③ LITHO 光刻 —— Stepper ===== */
+(function() {
+  var g = new THREE.Group();
+  var body = new THREE.Mesh(new THREE.BoxGeometry(5, 3.4, 3), mat(0x283593, 0.6, 0.35));
+  body.position.y = 1.7; body.castShadow = true; g.add(body);
+  var win = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 1.1),
+    new THREE.MeshStandardMaterial({ color: 0x111111, emissive: 0x40c4ff, emissiveIntensity: 0.9 }));
+  win.position.set(0, 2.2, 1.52); g.add(win); g.userData.panel = win;
+  lampFor(g, 0, 4.1, 0); g.position.copy(AREA_POS.LITHO); scene.add(g);
+  EQUIP_BY_AREA.LITHO = g;
+  labelSprite('LITHO · 光刻', AREA_POS.LITHO.x, 4.9, AREA_POS.LITHO.z, '#40c4ff');
+})();
+
+/* ===== ④ ETCH 刻蚀 —— 双腔刻蚀机 ===== */
+(function() {
+  var g = new THREE.Group();
+  var frame = new THREE.Mesh(new THREE.BoxGeometry(5.6, 1.4, 2.6), mat(0x263238, 0.5, 0.4));
+  frame.position.y = 0.7; g.add(frame);
+  [-1.4, 1.4].forEach(function(x) {
+    var ch = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.95, 1.9, 16), mat(0x455a64, 0.7, 0.3));
+    ch.position.set(x, 2.35, 0); g.add(ch);
+    var cap = new THREE.Mesh(new THREE.SphereGeometry(0.95, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2),
+      mat(0x607d8b, 0.7, 0.3));
+    cap.position.set(x, 3.3, 0); g.add(cap);
+  });
+  lampFor(g, 0, 3.9, 1.7); g.position.copy(AREA_POS.ETCH); scene.add(g);
+  EQUIP_BY_AREA.ETCH = g;
+  labelSprite('ETCH · 刻蚀', AREA_POS.ETCH.x, 5.1, AREA_POS.ETCH.z, '#80deea');
+})();
+
+/* ===== ⑤ IMPL 离子注入 —— 束流线 ===== */
+(function() {
+  var g = new THREE.Group();
+  var line = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 6, 14), mat(0x37474f, 0.75, 0.25));
+  line.rotation.z = Math.PI / 2; line.position.y = 1.5; g.add(line);
+  var source = new THREE.Mesh(new THREE.BoxGeometry(1.3, 2.2, 1.6), mat(0x512da8, 0.6, 0.35));
+  source.position.set(-3, 1.1, 0); g.add(source);
+  var target = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.8, 2), mat(0x7e57c2, 0.5, 0.4));
+  target.position.set(3, 0.9, 0); g.add(target);
+  lampFor(g, 0, 3.1, 0); g.position.copy(AREA_POS.IMPL); scene.add(g);
+  EQUIP_BY_AREA.IMPL = g;
+  labelSprite('IMPL · 离子注入', AREA_POS.IMPL.x, 4.4, AREA_POS.IMPL.z, '#b388ff');
+})();
+
+/* ===== ⑥ DEP 薄膜沉积 —— Cluster Tool ===== */
+(function() {
+  var g = new THREE.Group();
+  var hub = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 1.5, 18), mat(0x00838f, 0.7, 0.3));
+  hub.position.y = 1.4; g.add(hub);
+  for (var i = 0; i < 4; i++) {
+    var a = i * Math.PI / 2;
+    var ch = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.62, 1.9, 14), mat(0x00acc1, 0.6, 0.35));
+    ch.position.set(Math.cos(a) * 2.1, 1.6, Math.sin(a) * 2.1); g.add(ch);
+  }
+  lampFor(g, 0, 3.2, 0); g.position.copy(AREA_POS.DEP); scene.add(g);
+  EQUIP_BY_AREA.DEP = g;
+  labelSprite('DEP · 薄膜沉积', AREA_POS.DEP.x, 4.5, AREA_POS.DEP.z, '#26c6da');
+})();
+
+/* ===== ⑦ CMP 化学机械抛光 —— 研磨盘 ===== */
+(function() {
+  var g = new THREE.Group();
+  var base = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.9, 1.0, 24), mat(0x455a64, 0.6, 0.4));
+  base.position.y = 0.5; g.add(base);
+  var platen = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.2, 0.35, 24), mat(0xff7043, 0.3, 0.6));
+  platen.position.y = 1.18; g.add(platen);
+  var arm = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.8, 0.4), mat(0x90a4ae, 0.7, 0.3));
+  arm.position.set(-2.6, 1.9, -1.6); g.add(arm);
+  lampFor(g, 0, 3.3, 0); g.position.copy(AREA_POS.CMP); scene.add(g);
+  EQUIP_BY_AREA.CMP = g;
+  labelSprite('CMP · 化学机械抛光', AREA_POS.CMP.x, 4.6, AREA_POS.CMP.z, '#ffab91');
+})();
+
+/* ===== ⑧ MET 量测 —— CD-SEM ===== */
+(function() {
+  var g = new THREE.Group();
+  var col = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.8, 2.6, 16), mat(0x37474f, 0.75, 0.3));
+  col.position.y = 1.3; g.add(col);
+  var chamber = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.1, 2.2), mat(0x263238, 0.5, 0.4));
+  chamber.position.y = 0.55; g.add(chamber);
+  lampFor(g, 0, 3.1, 0); g.position.copy(AREA_POS.MET); scene.add(g);
+  EQUIP_BY_AREA.MET = g;
+  labelSprite('MET · 量测', AREA_POS.MET.x, 4.3, AREA_POS.MET.z, '#a5d6a7');
+})();
+
+/* ===== ⑨ DRY 干燥 —— 旋转脱水/马兰戈尼 ===== */
+(function() {
+  var g = new THREE.Group();
+  var bath = new THREE.Mesh(new THREE.CylinderGeometry(1.9, 2.1, 1.3, 20), mat(0x00695c, 0.4, 0.5));
+  bath.position.y = 0.65; g.add(bath);
+  var lid = new THREE.Mesh(new THREE.SphereGeometry(1.7, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2),
+    new THREE.MeshStandardMaterial({ color: 0x4db6ac, transparent: true, opacity: 0.55, roughness: 0.2 }));
+  lid.position.y = 1.3; g.add(lid);
+  lampFor(g, 0, 3.1, 0); g.position.copy(AREA_POS.DRY); scene.add(g);
+  EQUIP_BY_AREA.DRY = g;
+  labelSprite('DRY · 干燥', AREA_POS.DRY.x, 4.3, AREA_POS.DRY.z, '#80cbc4');
+})();
+
+/* ===== STOCKER 晶圆仓库 —— 自动货架 ===== */
+(function() {
+  var g = new THREE.Group();
+  var rack = new THREE.Mesh(new THREE.BoxGeometry(4.6, 5.2, 1.6), mat(0x1c2a3a, 0.4, 0.5));
+  rack.position.y = 2.6; g.add(rack);
+  for (var r = 0; r < 4; r++) {
+    var strip = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.16, 0.1),
+      new THREE.MeshStandardMaterial({ color: 0x111111, emissive: 0x69f0ae, emissiveIntensity: 0.9 }));
+    strip.position.set(0, 1.1 + r * 1.15, 0.82); g.add(strip);
+  }
+  lampFor(g, 0, 6.0, 0); g.position.copy(AREA_POS.STOCKER); scene.add(g);
+  EQUIP_BY_AREA.STOCKER = g;
+  labelSprite('STOCKER · 晶圆仓库', AREA_POS.STOCKER.x, 6.8, AREA_POS.STOCKER.z, '#69f0ae');
+})();
+
+/* ===== LOG 物流指挥塔 —— 中央调度 ===== */
+(function() {
+  var g = new THREE.Group();
+  var pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.7, 5.6, 12), mat(0x37474f, 0.75, 0.3));
+  pillar.position.y = 2.8; g.add(pillar);
+  var radar = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.24, 0.5), mat(0xffb300, 0.6, 0.3));
+  radar.position.y = 5.8; g.add(radar); g.userData.radar = radar;
+  var beacon0 = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 12),
+    new THREE.MeshStandardMaterial({ color: 0x1a7f37, emissive: 0x1a7f37, emissiveIntensity: 1.4 }));
+  beacon0.position.y = 6.5; g.add(beacon0);
+  g.position.copy(AREA_POS.LOG); scene.add(g);
+  EQUIP_BY_AREA.LOG = g;
+  labelSprite('LOG · 物流指挥', AREA_POS.LOG.x, 7.8, AREA_POS.LOG.z, '#ffd54f');
+})();
+
+/* ===== OHT 物流环线（单向闭合 AMHS） ===== */
+var trackMat = new THREE.MeshStandardMaterial({ color: 0x546e7a, metalness: 0.8, roughness: 0.3 });
+var ringPts = [
+  new THREE.Vector3(-28, 5.15, -12), new THREE.Vector3(0, 5.15, -12),
+  new THREE.Vector3(28, 5.15, -12), new THREE.Vector3(31, 5.15, 0),
+  new THREE.Vector3(28, 5.15, 12), new THREE.Vector3(0, 5.15, 12),
+  new THREE.Vector3(-28, 5.15, 12), new THREE.Vector3(-31, 5.15, 0)
+];
+var trackCurve = new THREE.CatmullRomCurve3(ringPts, true, 'catmullrom', 0.5);
+var track = new THREE.Mesh(new THREE.TubeGeometry(trackCurve, 220, 0.09, 8), trackMat);
+scene.add(track);
+for (var pi = 0; pi < 16; pi++) {
+  var pp = trackCurve.getPointAt(pi / 16);
+  var post = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.12, pp.y, 8), trackMat);
+  post.position.set(pp.x, pp.y / 2, pp.z); scene.add(post);
+}
+/* 每个区域在环线上的参数（最近采样点） */
+var RING_SAMPLES = 512;
+var ringSamples = trackCurve.getSpacedPoints(RING_SAMPLES);
+var AREA_T = {};
+['STOCKER', 'CLEAN', 'DIFF', 'LITHO', 'ETCH', 'IMPL', 'DEP', 'CMP', 'MET', 'DRY', 'LOG']
+  .forEach(function(k) {
+    var best = 0, bd = Infinity;
+    for (var i = 0; i <= RING_SAMPLES; i++) {
+      var dx = ringSamples[i].x - AREA_POS[k].x, dz = ringSamples[i].z - AREA_POS[k].z;
+      var d = dx * dx + dz * dz;
+      if (d < bd) { bd = d; best = i; }
+    }
+    AREA_T[k] = best / RING_SAMPLES;
+  });
+AREA_T.METROLOGY = AREA_T.MET;   // 后端别名（CDSEM/METROLOGY 事件）
+AREA_T.CDSEM = AREA_T.MET;
+
+/* ===== OHT 天车 + FOUP ===== */
+var oht = new THREE.Group();
+var bridge = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.28, 0.7), mat(0xffb300, 0.6, 0.3));
+oht.add(bridge);
+var trolley = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), mat(0xffcc80, 0.2, 0.5));
+trolley.position.y = -0.45; oht.add(trolley);
+var beacon = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 10),
+  new THREE.MeshStandardMaterial({ color: 0x1a7f37, emissive: 0x1a7f37, emissiveIntensity: 1.2 }));
+beacon.position.set(0, 0.3, 0); oht.add(beacon); oht.userData.beacon = beacon;
+scene.add(oht);
+
+var foup = new THREE.Group();
+var foupBody = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.55, 0.55), mat(0xeceff1, 0.3, 0.4));
+foup.add(foupBody);
+var led = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8),
+  new THREE.MeshStandardMaterial({ color: 0x00e676, emissive: 0x00e676, emissiveIntensity: 1.5 }));
+led.position.set(0.2, 0.2, 0.28); foup.add(led); foup.userData.led = led;
+scene.add(foup); foup.visible = false;
+
+var curT = AREA_T.STOCKER;
+oht.position.copy(trackCurve.getPointAt(curT));
+
+/* ===== 各工位装载端口 Load Port（FOUP 上下车的垫台） ===== */
+var PADS = {};
+Object.keys(AREA_T).forEach(function(k) {
+  if (k === 'LOG') return;                      // 物流塔在环线中央，无端口
+  var rp = trackCurve.getPointAt(AREA_T[k]);
+  var sp = AREA_POS[k];
+  var dir = new THREE.Vector3(rp.x - sp.x, 0, rp.z - sp.z);
+  var dist = dir.length(); dir.normalize();
+  var off = Math.max(1.7, Math.min(3.2, dist - 1.0));
+  var pad = sp.clone().addScaledVector(dir, off); pad.y = 1.32;
+  PADS[k] = pad;
+  var ped = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.66, 1.3, 10), mat(0x263238, 0.6, 0.4));
+  ped.position.set(pad.x, 0.65, pad.z); scene.add(ped);
+  var plate = new THREE.Mesh(new THREE.CylinderGeometry(0.74, 0.74, 0.1, 12),
+    new THREE.MeshStandardMaterial({ color: 0x0aa8a0, emissive: 0x0aa8a0, emissiveIntensity: 0.5 }));
+  plate.position.set(pad.x, 1.34, pad.z); scene.add(plate);
+});
+
+/* ===== 工位状态屏（实时显示 待机/进站/加工中/完成/宕机） ===== */
+var BOARDS = {};
+var boardTimers = {};   // boardFlash 回落定时器（须在 boardSet 首次调用前赋值）
+var BOARD_Y = { CLEAN: 4.6, DIFF: 5.7, LITHO: 4.9, ETCH: 5.1, IMPL: 4.4, DEP: 4.5,
+                CMP: 4.6, MET: 4.3, DRY: 4.3, STOCKER: 6.8, LOG: 7.8 };
+function boardSet(key, text, color) {
+  var b = BOARDS[key]; if (!b) return;
+  clearTimeout(boardTimers[key]);   // 新状态接管屏幕：作废任何待触发的“回落待机”定时器
+  var c = b.ctx;
+  var W = 512, H = 128;
+  c.clearRect(0, 0, W, H);
+  c.fillStyle = 'rgba(9,15,25,0.80)';
+  c.beginPath();
+  var r = 22;
+  c.moveTo(r, 0); c.lineTo(W - r, 0); c.quadraticCurveTo(W, 0, W, r);
+  c.lineTo(W, H - r); c.quadraticCurveTo(W, H, W - r, H);
+  c.lineTo(r, H); c.quadraticCurveTo(0, H, 0, H - r);
+  c.lineTo(0, r); c.quadraticCurveTo(0, 0, r, 0);
+  c.fill();
+  c.strokeStyle = color; c.lineWidth = 4; c.stroke();
+  c.shadowColor = 'rgba(0,0,0,0.85)'; c.shadowBlur = 8;
+  c.font = 'bold 56px "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", sans-serif';
+  c.fillStyle = color; c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.fillText(text, W / 2, H / 2 + 2);
+  c.shadowBlur = 0;
+  b.tex.needsUpdate = true;
+}
+function boardFlash(key, text, color, revertMs) {
+  boardSet(key, text, color);
+  clearTimeout(boardTimers[key]);
+  boardTimers[key] = setTimeout(function() { boardSet(key, '待机', '#0aa8a0'); }, revertMs || 3000);
+}
+
+/* 上浮气泡：每区最多 3 条最近状态变更，向上飘散、3 秒淡出 */
+var BUBBLES = {};
+function bubblePush(key, text, color) {
+  var list = BUBBLES[key];
+  if (!list) return;
+  var cv = document.createElement('canvas'); cv.width = 512; cv.height = 104;
+  var c = cv.getContext('2d');
+  var fontStack = '"Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", sans-serif';
+  c.fillStyle = 'rgba(11,19,31,0.88)';
+  c.beginPath();
+  var r = 24;
+  c.moveTo(r, 0); c.lineTo(512 - r, 0); c.quadraticCurveTo(512, 0, 512, r);
+  c.lineTo(512, 104 - r); c.quadraticCurveTo(512, 104, 512 - r, 104);
+  c.lineTo(r, 104); c.quadraticCurveTo(0, 104, 0, 104 - r);
+  c.lineTo(0, r); c.quadraticCurveTo(0, 0, r, 0);
+  c.fill();
+  c.strokeStyle = color; c.lineWidth = 4; c.stroke();
+  c.font = 'bold 44px ' + fontStack;
+  c.fillStyle = '#eef4fb'; c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.shadowColor = 'rgba(0,0,0,0.85)'; c.shadowBlur = 6;
+  c.fillText(text, 256, 54);
+  c.shadowBlur = 0;
+  var tex = new THREE.CanvasTexture(cv);
+  tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  var sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.95, depthWrite: false, depthTest: false }));
+  sp.scale.set(4.9, 1.0, 1);
+  var p = AREA_POS[key];
+  sp.position.set(p.x + (Math.random() * 0.8 - 0.4), (BOARD_Y[key] || 4.5) + 3.4, p.z);
+  sp.renderOrder = 50;
+  scene.add(sp);
+  list.push({ sp: sp, tex: tex, born: performance.now() });
+  while (list.length > 3) {   // 只留最近 3 条
+    var old = list.shift();
+    scene.remove(old.sp); old.sp.material.dispose(); old.tex.dispose();
+  }
+}
+Object.keys(EQUIP_BY_AREA).forEach(function(k) {
+  var cv = document.createElement('canvas'); cv.width = 512; cv.height = 128;
+  var tex = new THREE.CanvasTexture(cv);
+  tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  var sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
+  sp.scale.set(6.4, 1.6, 1);
+  var ly = BOARD_Y[k] || 4.5;
+  sp.position.set(AREA_POS[k].x, ly + 2.0, AREA_POS[k].z);
+  scene.add(sp);
+  BOARDS[k] = { cv: cv, ctx: cv.getContext('2d'), tex: tex };
+  BUBBLES[k] = [];
+  boardSet(k, '待机', '#0aa8a0');
+});
+
+/* ===== FOUP 上下车状态机 ===== */
+var foupState = 'hidden';        // hidden | riding | docked | entering | inside | exiting
+var lastPadKey = 'STOCKER';      // 当前所在工位（装卸端口）
+var foupAnchor = new THREE.Vector3();
+function liftFoup() { foupState = 'riding'; foup.visible = true; beaconColor(0xffb300); }
+function dockFoup(areaKey) {
+  lastPadKey = PADS[areaKey] ? areaKey : 'STOCKER';
+  foupState = 'docked'; foup.visible = true;
+  foupAnchor.copy(PADS[lastPadKey]); foupAnchor.y += 0.3;
+  beaconColor(0x1a7f37);
+}
+function enterFoup(areaKey) {
+  if (foupState !== 'docked' && foupState !== 'entering') return;
+  foupState = 'entering';
+  foupAnchor.copy(AREA_POS[areaKey]); foupAnchor.y += 1.4;
+}
+function exitFoup() {
+  foupState = 'exiting'; foup.visible = true;
+  foupAnchor.copy(PADS[lastPadKey]); foupAnchor.y += 0.3;
+}
+
+/* ===== 注意力引导：地面脉冲光环 + 工位箭头 + 解说字幕 + 剧情镜头 ===== */
+var pulseRings = [];
+(function() {
+  for (var i = 0; i < 2; i++) {
+    var r = new THREE.Mesh(new THREE.RingGeometry(0.85, 1.02, 40),
+      new THREE.MeshBasicMaterial({ color: 0x40c4ff, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }));
+    r.rotation.x = -Math.PI / 2; r.position.y = 0.06; r.visible = false;
+    scene.add(r);
+    pulseRings.push({ mesh: r, t: 2, delay: i * 0.22, center: new THREE.Vector3() });
+  }
+})();
+function pulseAt(key, colorHex) {
+  var p = AREA_POS[key]; if (!p) return;
+  pulseRings.forEach(function(pr) {
+    pr.center.set(p.x, 0.06, p.z);
+    pr.mesh.material.color.setHex(colorHex || 0x40c4ff);
+    pr.t = -pr.delay;
+  });
+}
+var focusArrow = new THREE.Mesh(new THREE.ConeGeometry(0.42, 0.95, 4),
+  new THREE.MeshBasicMaterial({ color: 0xffd54f }));
+focusArrow.rotation.x = Math.PI; scene.add(focusArrow); focusArrow.visible = false;
+var focusKey = null;
+var focusTopY = { CLEAN: 4.6, DIFF: 5.7, LITHO: 4.9, ETCH: 5.1, IMPL: 4.4, DEP: 4.5,
+                  CMP: 4.6, MET: 4.3, DRY: 4.3, STOCKER: 6.8, LOG: 7.8 };
+function setFocus(key) { focusKey = key; focusArrow.visible = !!key; }
+
+var narrEl = document.getElementById('narr');
+var narrTimer = null;
+function narrate(icon, html, ms, focusArea, pulseColor) {
+  narrEl.innerHTML = '<span class="ico">' + icon + '</span><span>' + html + '</span>';
+  narrEl.className = 'show';
+  clearTimeout(narrTimer);
+  narrTimer = setTimeout(function() { narrEl.className = ''; }, ms || 3600);
+  if (focusArea) {
+    setFocus(focusArea);
+    chipPulse(focusArea);
+    pulseAt(focusArea, pulseColor || 0x40c4ff);
+  }
+}
+function chipPulse(key) {
+  var el = document.getElementById('cell-' + key);
+  if (!el) return;
+  el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse');
+}
+/* ===== 事件处理（WS 实时引擎事件） ===== */
+var wipCount = 0, recCount = 0, ocapCount = 0;
+var moveAnim = null;
+var feedEl = document.getElementById('feed');
+var bannerEl = document.getElementById('banner');
+var bannerTimer = null;
+
+function feedAdd(line, isErr) {
+  var div = document.createElement('div');
+  if (isErr) div.className = 'err';
+  div.textContent = line; feedEl.prepend(div);
+  while (feedEl.children.length > 60) feedEl.removeChild(feedEl.lastChild);
+}
+function banner(text, cls) {
+  bannerEl.textContent = text; bannerEl.className = 'banner ' + (cls || '');
+  clearTimeout(bannerTimer); bannerTimer = setTimeout(function() { bannerEl.className = ''; }, 6000);
+}
+function setKpi(id, v) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  if (el.textContent !== String(v)) {
+    el.textContent = v;
+    el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+  }
+}
+
+/* ===== 演示用例 / 批次谱系（拆批·合批） ===== */
+var currentScenario = 'm35';
+var lotMainCount = 0, scrappedCount = 0, splitCount = 0, mergeCount = 0;
+var CHILD_LOT_META = {
+  RWK:    { name: '返工批', color: 0xff9800 },
+  PILOT:  { name: '试投批', color: 0x40c4ff },
+  SAMPLE: { name: '抽检批', color: 0xba68c8 },
+  HOLD:   { name: '暂扣批', color: 0xffd54f },
+  SCRAP:  { name: '报废批', color: 0xff5252 }
+};
+var childLots = {};    // suffix -> 在批片数（UUID 兼容路径的回退计数）
+var childFoups = {};   // suffix -> THREE.Group（挂在 OHT 下的彩色子批 FOUP）
+var seenSagaKeys = {}; // saga 事务幂等去重（同一 txId 的重复 COMMITTED 不重复计数）
+var scrappedWafers = {};
+var waferLoc = {};     // waferId -> 'main' | suffix | 'SCRAP'（片级精确追踪）
+var lastAreaStatus = {}; // areaId -> 设备区 Actor 最近一次推送的状态
+function lotMeta(suffix) { return CHILD_LOT_META[suffix] || { name: suffix || '子批', color: 0xff9800 }; }
+function isWaferName(v) { return typeof v === 'string' && v.length > 0 && v.length < 15 && v.indexOf('-') < 0; }
+function renderLotTree() {
+  var el = document.getElementById('lotTree');
+  if (!el) return;
+  var html;
+  if (Object.keys(waferLoc).length > 0) {
+    var main = 0, children = {};
+    Object.keys(waferLoc).forEach(function(wid) {
+      var loc = waferLoc[wid];
+      if (loc === 'SCRAP') return;
+      if (loc === 'main') main++;
+      else children[loc] = (children[loc] || 0) + 1;
+    });
+    html = '<span class="chip on">主批 <b>' + main + '</b></span>';
+    Object.keys(children).forEach(function(sfx) {
+      var m = lotMeta(sfx), c = m.color;
+      html += '<span class="chip on" style="border-color:rgb(' + ((c >> 16) & 255) + ',' + ((c >> 8) & 255) + ',' + (c & 255) + ')">'
+            + m.name + ' <b>' + children[sfx] + '</b></span>';
+    });
+    if (scrappedCount > 0) html += '<span class="chip fail">报废 <b>' + scrappedCount + '</b></span>';
+  } else {
+    html = '<span class="chip on">主批 <b>' + lotMainCount + '</b></span>';
+    Object.keys(childLots).forEach(function(sfx) {
+      var m = lotMeta(sfx), c = m.color;
+      html += '<span class="chip on" style="border-color:rgb(' + ((c >> 16) & 255) + ',' + ((c >> 8) & 255) + ',' + (c & 255) + ')">'
+            + m.name + ' <b>' + childLots[sfx] + '</b></span>';
+    });
+    if (scrappedCount > 0) html += '<span class="chip fail">报废 <b>' + scrappedCount + '</b></span>';
+  }
+  el.innerHTML = html;
+}
+function spawnChildFoup(suffix) {
+  if (childFoups[suffix]) return;
+  var c = lotMeta(suffix).color;
+  var g = new THREE.Group();
+  var body = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.5, 0.5),
+    new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: 0.3, metalness: 0.3, roughness: 0.4 }));
+  g.add(body);
+  var ledc = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8),
+    new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: 1.6 }));
+  ledc.position.set(0.15, 0.02, 0.26); g.add(ledc);
+  g.position.set(-0.62, -0.85, 0);
+  oht.add(g);
+  childFoups[suffix] = g;
+}
+function removeChildFoup(suffix) {
+  var g = childFoups[suffix];
+  if (!g) return;
+  oht.remove(g);
+  delete childFoups[suffix];
+}
+function resetDemoState() {
+  Object.keys(childFoups).forEach(removeChildFoup);
+  childLots = {};
+  seenSagaKeys = {}; scrappedWafers = {}; waferLoc = {}; lastAreaStatus = {}; areaLoad = {};
+  window.__lotPos = { main: 'STOCKER' };
+  window.__stageState = { main: '存放' };
+  lotMainCount = 0; scrappedCount = 0; splitCount = 0; mergeCount = 0;
+  setKpi('kpiSplit', 0); setKpi('kpiMerge', 0); setKpi('kpiScrap', 0);
+  recCount = 0; ocapCount = 0; setKpi('kpiRec', 0); setKpi('kpiOcap', 0);
+  wipCount = 0; setKpi('kpiWip', 0);
+  foup.visible = false; moveAnim = null; moveQueue = [];
+  window.__lanes = []; window.__curLane = null;
+  foupState = 'hidden'; lastPadKey = 'STOCKER';
+  foup.scale.setScalar(1);
+  setFocus(null);
+  curT = AREA_T.STOCKER;
+  oht.position.copy(trackCurve.getPointAt(curT));
+  renderLotTree();
+}
+function handleSaga(d) {
+  var op = d.operation || '', status = d.status || '';
+  var suffix = op === 'MergeLot'
+    ? (d.sourceLotId || '').split('-').pop().toUpperCase()
+    : (d.targetLotId || '').split('-').pop().toUpperCase();
+  var n = (d.relatedWaferIds || []).length || 1;
+  var cn = lotMeta(suffix).name;
+  if (status.indexOf('PREPARE') === 0) {
+    feedAdd('📋 [TCC] ' + (op === 'SplitLot' ? '拆批' : op === 'MergeLot' ? '合批' : '报废') + ' Try（' + cn + ' ' + n + ' 片）');
+    return;
+  }
+  if (status.indexOf('FAILED') === 0) {
+    feedAdd('❌ [TCC] ' + op + ' ' + status + '（' + cn + '）', true);
+    banner('❌ Saga ' + (op === 'SplitLot' ? '拆批' : '合批') + ' 失败：' + status, 'crash');
+    return;
+  }
+  if (status !== 'COMMITTED') return;
+  var sagaKey = (d.transactionId || '') + '|' + op + '|' + suffix;
+  if (seenSagaKeys[sagaKey]) return;   // 同一 TCC 事务的重复 COMMITTED（重试/重放）只计一次
+  seenSagaKeys[sagaKey] = true;
+  var wids = (d.relatedWaferIds || []).filter(isWaferName);
+  if (op === 'SplitLot') {
+    splitCount++; setKpi('kpiSplit', splitCount);
+    spawnChildFoup(suffix);
+    if (wids.length === (d.relatedWaferIds || []).length && wids.length > 0) {
+      wids.forEach(function(w) { waferLoc[w] = suffix; });   // 片级迁移：主批 → 子批
+    } else {
+      childLots[suffix] = (childLots[suffix] || 0) + n;
+      lotMainCount = Math.max(0, lotMainCount - n);
+    }
+    // 泳道分叉：子批从当前泳道的当前位置分出
+    var pl = window.__curLane;
+    var startArea = pl && pl.areas.length ? pl.areas[pl.areas.length - 1] : 'CDSEM';
+    var child = { name: cn, wafers: n, areas: [startArea], forkFrom: pl || null, state: 'active', key: suffix };
+    window.__lanes.push(child);
+    window.__curLane = child;
+    window.__lotPos[suffix] = window.__lotPos.main || startArea;
+    window.__stageState[suffix] = window.__stageState.main || '存放';
+    renderLotTree();
+    banner('✂️ 拆批已提交：' + n + ' 片 → ' + cn, 'recovering');
+    feedAdd('✂️ SplitLot COMMITTED → ' + cn + '（' + n + ' 片）');
+    narrate('✂️', 'TCC 拆批提交：<b>' + n + ' 片</b> 移入 ' + cn, 3600);
+  } else if (op === 'MergeLot') {
+    mergeCount++; setKpi('kpiMerge', mergeCount);
+    if (wids.length === (d.relatedWaferIds || []).length && wids.length > 0) {
+      wids.forEach(function(w) { waferLoc[w] = 'main'; });   // 片级迁移：子批 → 主批
+    } else {
+      lotMainCount += childLots[suffix] || n;
+      delete childLots[suffix];
+    }
+    // 泳道合并：子泳道标记已并回，活跃泳道切回主批
+    if (window.__curLane && window.__curLane.forkFrom) {
+      window.__curLane.state = 'merged';
+      window.__lotPos.main = window.__lotPos[suffix] || window.__lotPos.main;
+      window.__stageState.main = window.__stageState[suffix] || window.__stageState.main;
+      window.__curLane = window.__curLane.forkFrom;
+    }
+    removeChildFoup(suffix);
+    renderLotTree();
+    banner('🧩 合批已提交：' + cn + ' 并回主批', 'done');
+    feedAdd('🧩 MergeLot COMMITTED ← ' + cn + '（' + n + ' 片）');
+    narrate('🧩', 'TCC 合批提交：' + cn + ' <b>' + n + ' 片</b> 并回主批', 3600);
+  } else if (op === 'ScrapLot') {
+    if (wids.length === (d.relatedWaferIds || []).length && wids.length > 0) {
+      wids.forEach(function(w) { waferLoc[w] = 'SCRAP'; });
+    }
+    removeChildFoup(suffix);
+    delete childLots[suffix];
+    renderLotTree();
+    feedAdd('🗑 ScrapLot COMMITTED（' + cn + '）', true);
+  }
+}
+
+var AREA_KEYS = ['STOCKER', 'LITHO', 'ETCH', 'IMPL', 'DEP', 'CMP', 'MET', 'CLEAN', 'DIFF', 'DRY', 'LOG'];
+function findArea(id) {
+  if (!id) return null;
+  for (var i = 0; i < AREA_KEYS.length; i++) { if (id.indexOf(AREA_KEYS[i]) >= 0) return AREA_KEYS[i]; }
+  if (id.indexOf('CDSEM') >= 0 || id.indexOf('METROLOGY') >= 0) return 'MET';
+  return null;
+}
+var moveQueue = [];    // 两段式：leg1 赶到发货站 → leg2 驶向收货站（只沿环线正向）
+var departAt = 0;      // FOUP 上车延迟
+function moveOHT(fromArea, toArea, etaMs) {
+  var tf = AREA_T[fromArea];
+  var tt = (AREA_T[toArea] !== undefined) ? AREA_T[toArea]
+         : (tf !== undefined ? tf : AREA_T.MET);
+  moveQueue = [];
+  var probe = curT;
+  if (tf !== undefined) {
+    var s1 = (tf - curT + 1) % 1;
+    if (s1 > 0.012) {                                  // 不在发货站：先正向赶到
+      moveQueue.push({ t0: probe, span: s1, eta: Math.min(1100, 350 + s1 * 2400) });
+      probe = tf;
+    }
+  }
+  var s2 = (tt - probe + 1) % 1;
+  if (s2 <= 0.004) s2 += 1;                            // 同站目标 = 空跑一圈回本站
+  moveQueue.push({ t0: probe, span: s2, eta: Math.max(800, Math.min(etaMs || 1600, 5200)) });
+  departAt = performance.now() + 650;                  // 给 FOUP 上车留时间
+  liftFoup();
+}
+function beaconColor(hex) {
+  beacon.material.color.setHex(hex);
+  beacon.material.emissive.setHex(hex);
+}
+var panelTimers = {};
+function panelColor(areaKey, hex) {
+  var eq = EQUIP_BY_AREA[areaKey] || EQUIP_BY_AREA[findArea(areaKey)];
+  if (!eq) return;
+  var lamp = eq.userData.lamp, panel = eq.userData.panel;
+  if (!eq.userData.orig) {
+    eq.userData.orig = {
+      lampC: lamp ? lamp.material.color.getHex() : 0,
+      lampE: lamp ? lamp.material.emissive.getHex() : 0,
+      panC: panel ? panel.material.color.getHex() : 0,
+      panE: panel ? panel.material.emissive.getHex() : 0
+    };
+  }
+  var o = eq.userData.orig;
+  if (lamp) { lamp.material.color.setHex(hex); lamp.material.emissive.setHex(hex); }
+  if (panel) { panel.material.color.setHex(hex); panel.material.emissive.setHex(hex); }
+  clearTimeout(panelTimers[areaKey]);
+  panelTimers[areaKey] = setTimeout(function() {
+    if (lamp) { lamp.material.color.setHex(o.lampC); lamp.material.emissive.setHex(o.lampE); }
+    if (panel) { panel.material.color.setHex(o.panC); panel.material.emissive.setHex(o.panE); }
+  }, 4000);
+}
+
+var wsUrl = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws/fab-demo/m35/events';
+var ws;
+function connect() {
+  ws = new WebSocket(wsUrl);
+  ws.onmessage = function(ev) { handleEvent(JSON.parse(ev.data)); };
+  dbg('WS connected');
+  ws.onclose = function() { setTimeout(connect, 2000); };
+  ws.onerror = function() { ws.close(); };
+}
+function handleEvent(frame) {
+  try { handleEvent0(frame); } catch (e) { dbg('event error: ' + e.message); }
+}
+function handleEvent0(frame) {
+  var t = frame.type, d = frame.data || {};
+  if (t === 'DemoStarted') {
+    window.__activeWo = d.workOrderId || null;
+    wipCount = d.waferCount || d.lotSize || (d.waferIds ? d.waferIds.length : 5);
+    lotMainCount = wipCount; childLots = {};
+    waferLoc = {};
+    if (d.waferIds) d.waferIds.forEach(function(w) { if (isWaferName(w)) waferLoc[w] = 'main'; });
+    seenSagaKeys = {}; scrappedWafers = {};
+    splitCount = 0; mergeCount = 0; scrappedCount = 0;
+    setKpi('kpiSplit', 0); setKpi('kpiMerge', 0); setKpi('kpiScrap', 0);
+    setKpi('kpiWip', wipCount);
+    renderLotTree();
+    if (!window.__lanes.length) {
+      var main = { name: '主批', wafers: wipCount, areas: ['STOCKER'], forkFrom: null, state: 'active' };
+      window.__lanes = [main];
+      window.__curLane = main;
+    }
+    window.__lotPos = { main: 'STOCKER' };
+    window.__stageState = { main: '存放' };
+    var badge = document.getElementById('runBadge');
+    if (badge) badge.textContent = '● 运行中 · ' + (d.name || '演示');
+    routeActive('STOCKER');
+    banner('🚀 ' + (d.name || '演示') + '：' + wipCount + ' 片晶圆入库', 'recovering');
+    feedAdd('▶ ' + (d.name || d.scenarioId || '演示') + ' 启动（' + wipCount + ' 片）');
+    narrate('🎬', '用例启动：<b>' + (d.name || '演示') + '</b>，' + wipCount + ' 片晶圆出库', 4000, 'STOCKER', 0x00e676);
+  } else if (t === 'FoupInTransit') {
+    moveOHT(d.fromArea, d.toArea, d.etaMs);
+    routeActive(d.toArea);
+    trailPush(d.toArea);   // 批次路线卡：实际轨迹追加
+    // 位置归属：子批泳道开启时移动子批，否则移动主批
+    var movingLane = (window.__curLane && window.__curLane.forkFrom) ? window.__curLane.key : 'main';
+    window.__lotPos[movingLane] = d.toArea;
+    window.__stageState[movingLane] = '运输中';
+    if (window.__lotDrawerOpen && window.__lastES) renderLotDrawer(window.__lastES);
+    var fn = AREA_NAME[d.fromArea] || d.fromArea || '', tn2 = AREA_NAME[d.toArea] || d.toArea || '';
+    if (tn2) narrate('🚗', '天车满载 FOUP：<b>' + fn + '</b> → <b>' + tn2 + '</b>', 3200, d.toArea);
+  } else if (t === 'FoupArrivedAtPort') {
+    var portArea = findArea(d.equipmentId) || 'STOCKER';
+    dockFoup(portArea);
+    // 到站：STOCKER 即存放，设备装载端口即待进站
+    var arrivedLane = (window.__curLane && window.__curLane.forkFrom) ? window.__curLane.key : 'main';
+    window.__stageState[arrivedLane] = (portArea === 'STOCKER') ? '存放' : '待进站';
+    if (BOARDS[portArea]) boardFlash(portArea, '在站 · 待加工', '#ffb300', 2500);
+    narrate('🛬', 'FOUP 在 <b>' + (AREA_NAME[portArea] || portArea) + '</b> 装载端口降落', 3000, portArea);
+  } else if (t === 'ProcessingStarted') {
+    var area = findArea(d.equipmentId);
+    var procLane = (window.__curLane && window.__curLane.forkFrom) ? window.__curLane.key : 'main';
+    window.__stageState[procLane] = '加工中';
+    xsecStart(d.recipeId);
+    if (window.__lotDrawerOpen && window.__lastES) renderLotDrawer(window.__lastES);
+    if (area) {
+      panelColor(area, 0xffb300); boardSet(area, '⚙ 加工中', '#42a5f5');
+      narrate('⚙️', '<b>' + (AREA_NAME[area] || area) + '</b> 加工中 · 配方 ' + (d.recipeId || ''), 3200, area, '#42a5f5');
+    }
+    setKpi('kpiWip', wipCount);
+  } else if (t === 'ProcessingCompleted') {
+    var area2 = findArea(d.equipmentId);
+    var doneLane = (window.__curLane && window.__curLane.forkFrom) ? window.__curLane.key : 'main';
+    window.__stageState[doneLane] = d.success === false ? '加工异常' : '待出站';
+    xsecDone(d.recipeId);
+    if (window.__lotDrawerOpen && window.__lastES) renderLotDrawer(window.__lastES);
+    if (area2) {
+      panelColor(area2, d.success === false ? 0xff5252 : 0x00e676);
+      boardFlash(area2, d.success === false ? '✖ 异常' : '完成 ✓', d.success === false ? '#ff5252' : '#00e676', 3000);
+      narrate(d.success === false ? '❌' : '✅', '<b>' + (AREA_NAME[area2] || area2) + '</b> ' + (d.success === false ? '加工异常' : '加工完成，待出站'), 3000, area2, d.success === false ? '#ff5252' : 0x00e676);
+    }
+  } else if (t === 'EquipmentStateChanged') {
+    var eqArea = findArea(d.equipmentId);
+    if (d.areaId) panelColor(d.areaId, d.status === 'RUN' ? 0x00e676 : (d.status === 'DOWN' ? 0xff5252 : 0xffb300));
+    if (d.status === 'Load' && eqArea) {                 // trackIn：FOUP 从端口进入设备
+      enterFoup(eqArea);
+      if (BOARDS[eqArea]) boardSet(eqArea, '进站中', '#ffb300');
+      narrate('📥', 'trackIn：晶圆批进入 <b>' + (AREA_NAME[eqArea] || eqArea) + '</b>', 3000, eqArea, '#ffb300');
+    } else if (d.status === 'Busy' && eqArea && BOARDS[eqArea]) {
+      boardSet(eqArea, '⚙ 加工中', '#42a5f5');
+    } else if (d.status === 'DOWN' && eqArea && BOARDS[eqArea]) {
+      boardSet(eqArea, '⚠ 宕机', '#ff5252');
+      narrate('⚠️', '<b>' + (AREA_NAME[eqArea] || eqArea) + '</b> 设备宕机！', 3200, eqArea, '#ff5252');
+    } else if (d.status === 'Idle' && eqArea && BOARDS[eqArea] &&
+               lastAreaStatus[eqArea] !== 'FINISHED' && lastAreaStatus[eqArea] !== 'UNLOADING') {
+      // 出站流程的状态屏由区域 Actor 驱动（UNLOADING→IDLE），此处仅兜底非 Actor 路径
+      boardFlash(eqArea, '待机', '#0aa8a0', 4000);
+    }
+  } else if (t === 'FoupStateChanged') {
+    if (d.status === 'UNLOADED') {                       // trackOut：FOUP 回到装载端口
+      exitFoup();
+      if (BOARDS[lastPadKey]) boardFlash(lastPadKey, '出站', '#ffd54f', 3000);
+      narrate('📤', 'trackOut：FOUP 离开 <b>' + (AREA_NAME[lastPadKey] || '') + '</b>', 3000, lastPadKey, '#ffd54f');
+    }
+  } else if (t === 'AreaStateChanged') {
+    // 设备区 Actor 的权威状态：状态屏以此为准（覆盖旁白事件的推断值）
+    // Actor 发的是 CamelCase（Busy/Down…），此处统一大写后再喂给色表/状态屏
+    var aK = d.areaId;
+    var aSt = (d.status || '').toUpperCase();
+    lastAreaStatus[aK] = aSt;
+    areaCellState(aK, aSt);
+    areaLoad[aK] = { status: aSt, q: d.queueDepth || 0 };
+    renderLoadSummary();
+    var waitBadge = document.getElementById('runBadge');
+    if (waitBadge && waitBadge.textContent === '● 等待设备恢复…' && aSt !== 'DOWN' &&
+        Object.keys(areaLoad).some(function(k) { return areaLoad[k].status !== 'DOWN'; })) {
+      waitBadge.textContent = '● 运行中';
+    }
+    if (BOARDS[aK]) {
+      var stMap = { IDLE: ['待机', '#0aa8a0'], LOADED: ['已装载 · 待加工', '#ffb300'],
+                    BUSY: ['⚙ 加工中', '#42a5f5'], FINISHED: ['完成 ✓ 待出站', '#00e676'],
+                    UNLOADING: ['📤 出站中', '#ffd54f'], DOWN: ['⚠ 宕机', '#ff5252'] };
+      var st = stMap[aSt];
+      if (st) {
+        var q = d.queueDepth || 0;
+        boardSet(aK, st[0] + (q > 0 ? ' ⏳' + q : ''), st[1]);
+        // 气泡展示事件动作（Actor 迁移 detail），而非状态名
+        var evMap = { trackIn: '📥 进站', processing: '⚙ 开始加工', 'process done': '✅ 加工完成',
+                      'trackOut unloading': '📤 出站', 'trackOut (auto-finish busy job)': '📤 出站',
+                      'unload complete — equipment idle': '💤 转待机', reset: '♻ 复位' };
+        bubblePush(aK, evMap[d.detail] || (d.detail || d.status), st[1]);
+      }
+    }
+    if (d.status === 'DOWN') {
+      panelColor(aK, 0xff5252);
+      narrate('⚠️', '<b>' + (d.displayName || aK) + '</b> 设备宕机！' + (d.detail || ''), 3600, aK, '#ff5252');
+    }
+  } else if (t === 'SagaOperationEvent') {
+    handleSaga(d);
+  } else if (t === 'DecisionMade') {
+    feedAdd('⚖️ ' + d.waferId + ' → ' + d.action);
+  } else if (t === 'ScrapEvent') {
+    if (!scrappedWafers[d.waferId]) { scrappedWafers[d.waferId] = 1; scrappedCount++; }
+    if (waferLoc[d.waferId]) waferLoc[d.waferId] = 'SCRAP';
+    setKpi('kpiScrap', scrappedCount);
+    renderLotTree();
+    feedAdd('🗑 ' + d.waferId + ' 报废：' + (d.reason || ''), true);
+  } else if (t === 'MeasurementResultEvent') {
+    feedAdd('📏 ' + d.waferId + ' CD=' + d.cdNm + 'nm → ' + d.classification);
+  } else if (t === 'PipelineStageFailed') {
+    feedAdd('❌ ' + (d.phase || '') + '：' + (d.detail || ''), true);
+    banner('❌ 阶段失败：' + (d.detail || ''), 'crash');
+  } else if (t === 'OcapActionTriggered') {
+    ocapCount++; setKpi('kpiOcap', ocapCount);
+    banner('🛠 OCAP 拦截', 'recovering');
+    feedAdd('🛠 OCAP 处置');
+    ruleFired(d.ruleId);
+    narrate('🛠️', 'OCAP 异常处置介入：' + (d.ruleName || '') + ' → ' + (d.actionType || ''), 3200);
+  } else if (t === 'RecoveryEvent') {
+    recCount++; setKpi('kpiRec', recCount);
+    banner('🔄 [' + (d.batchId || '') + '] 断点续跑（' + (d.phasesSkipped || 0) + ' 道已完成）', 'recovering');
+    feedAdd('🔄 断点续跑');
+    narrate('🔄', '宕机恢复：跳过 <b>' + (d.phasesSkipped || 0) + '</b> 道已完成工序，从断点继续', 3800);
+  } else if (t === 'GlobalStatusChanged') {
+    if ((d.status || '').indexOf('Complete') >= 0) {
+      banner('✅ 全部完成', 'done');
+      var badge2 = document.getElementById('runBadge');
+      if (badge2) badge2.textContent = '● 已完成 ✓';
+    } else if ((d.status || '') === 'WAIT_RECOVERY') {
+      banner('⏳ ' + (d.detail || '设备不可用，等待恢复') + '……', 'crash');
+      narrate('⏳', '<b>' + (d.detail || '') + '</b>——流水线原地等待，FOUP 停靠端口不会入站', 5000);
+      var badge3 = document.getElementById('runBadge');
+      if (badge3) badge3.textContent = '● 等待设备恢复…';
+    }
+  } else if (t === 'DynamicStageInjected') {
+    // 动态工序注入：追加到批次路线卡轨迹（⚡ 标记）
+    if (window.__curLane) {
+      window.__curLane.areas.push('⚡ ' + (d.injectedStageType || d.parentNodeId || 'DYN'));
+      renderDrawerLanes();
+    }
+    feedAdd('⚡ 动态注入工序：' + (d.injectedStageType || d.parentNodeId || ''));
+    narrate('⚡', 'OCAP 动态注入工序：<b>' + (d.injectedStageType || d.parentNodeId || '') + '</b>', 3600);
+    if ((d.status || '').indexOf('Complete') >= 0) {
+      banner('✅ 全部完成', 'done');
+      var badge2 = document.getElementById('runBadge');
+      if (badge2) badge2.textContent = '● 已完成 ✓';
+    }
+  }
+}
+/* 九大工作区网格：状态点由区域 Actor 状态驱动；点击格子可干预（停机/复位） */
+var AREA_ORDER = ['CLEAN', 'DIFF', 'LITHO', 'ETCH', 'IMPL', 'DEP', 'CMP', 'MET', 'DRY'];
+var areaGridEl = document.getElementById('areaGrid');
+var ivArea = null;   // 当前选中待干预的区域
+AREA_ORDER.forEach(function(k) {
+  var cell = document.createElement('div');
+  cell.className = 'areaCell'; cell.id = 'cell-' + k;
+  cell.innerHTML = '<span class="dot"></span><span>' + AREA_NAME[k] + '</span><span class="st">空闲</span><span class="qbadge"></span>';
+  cell.addEventListener('click', function() {
+    ivArea = (ivArea === k) ? null : k;
+    document.querySelectorAll('.areaCell.sel').forEach(function(c) { c.classList.remove('sel'); });
+    if (ivArea) cell.classList.add('sel');
+    var bar = document.getElementById('areaIv');
+    var label = document.getElementById('areaIvName');
+    if (bar) {
+      bar.style.display = ivArea ? 'flex' : 'none';
+      if (label) label.textContent = ivArea ? (AREA_NAME[ivArea] || ivArea) : '';
+    }
+  });
+  areaGridEl.appendChild(cell);
+});
+document.getElementById('ivDown').addEventListener('click', function() {
+  if (!ivArea) return;
+  fetch('/api/fab-demo/area/' + ivArea + '/down', { method: 'POST' });
+  narrate('⏻', '驾驶舱干预：<b>' + (AREA_NAME[ivArea] || ivArea) + '</b> 人工停机（待复位）', 3600, ivArea, '#ff5252');
+});
+document.getElementById('ivReset').addEventListener('click', function() {
+  if (!ivArea) return;
+  fetch('/api/fab-demo/area/' + ivArea + '/reset', { method: 'POST' });
+  narrate('🛠', '驾驶舱干预：<b>' + (AREA_NAME[ivArea] || ivArea) + '</b> 修复复位', 3600, ivArea, '#00e676');
+  ivArea = null;
+  document.getElementById('areaIv').style.display = 'none';
+  document.querySelectorAll('.areaCell.sel').forEach(function(c) { c.classList.remove('sel'); });
+});
+var CELL_STATUS_COLOR = { IDLE: '#455a64', LOADED: '#ffb300', BUSY: '#42a5f5',
+                          FINISHED: '#00e676', UNLOADING: '#ffd54f', DOWN: '#ff5252' };
+var AREA_STATUS_CN = { IDLE: '空闲', LOADED: '上料', BUSY: '加工', FINISHED: '完成',
+                       UNLOADING: '出站', DOWN: '宕机' };
+function areaCellState(key, status) {
+  var cell = document.getElementById('cell-' + key);
+  if (!cell) return;
+  var color = CELL_STATUS_COLOR[status] || '#455a64';
+  cell.querySelector('.dot').style.background = color;
+  cell.querySelector('.dot').style.boxShadow = (status === 'IDLE' || status === 'Down') ? 'none' : '0 0 6px ' + color;
+  cell.style.borderColor = (status === 'IDLE') ? 'rgba(255,255,255,0.09)' : color;
+  cell.classList.remove('st-LOADED', 'st-BUSY', 'st-FINISHED', 'st-UNLOADING', 'st-DOWN');
+  if (status !== 'IDLE') cell.classList.add('st-' + status);
+  var st = cell.querySelector('.st');
+  if (st) {
+    st.textContent = AREA_STATUS_CN[status] || status || '—';
+    st.style.color = (status === 'IDLE') ? '#7f95ab' : color;
+  }
+}
+var areaLoad = {};   // areaId -> {status, q}
+function renderLoadSummary() {
+  var el = document.getElementById('loadSummary');
+  if (!el) return;
+  var idle = 0, working = 0, queued = 0;
+  Object.keys(areaLoad).forEach(function(k) {
+    var st = areaLoad[k].status, q = areaLoad[k].q || 0;
+    if (st === 'IDLE') idle++;
+    else if (q > 0) queued += q;
+    else working++;
+  });
+  el.innerHTML = '<span>空闲 <b>' + idle + '</b></span><span>加工 <b>' + working + '</b></span>' +
+    (queued > 0 ? '<span style="color:#ffd54f">排队 <b>' + queued + '</b></span>' : '');
+}
+function updateCellQueue(key, q) {
+  var cell = document.getElementById('cell-' + key);
+  if (!cell) return;
+  cell.classList.toggle('queued', q > 0);
+  cell.querySelector('.qbadge').textContent = q > 0 ? '⏳' + q : '';
+}
+renderLotTree();
+connect();
+
+/* ===== 动态工艺路线条（底部） ===== */
+var ROUTE = ['CLEAN', 'DIFF', 'LITHO', 'ETCH', 'IMPL', 'DEP', 'CMP', 'MET', 'DRY'];
+(function() {
+  var strip = document.getElementById('routeStrip');
+  ROUTE.forEach(function(k, i) {
+    var n = document.createElement('span');
+    n.className = 'rnode'; n.id = 'rn-' + k; n.textContent = k;
+    strip.appendChild(n);
+    if (i < ROUTE.length - 1) {
+      var a = document.createElement('span');
+      a.className = 'rarrow'; a.textContent = '→';
+      strip.appendChild(a);
+    }
+  });
+})();
+function routeActive(areaKey) {
+  if (!areaKey) return;
+  var nodes = document.querySelectorAll('.rnode');
+  for (var i = 0; i < nodes.length; i++) nodes[i].classList.remove('active');
+  var n = document.getElementById('rn-' + areaKey);
+  if (n) n.classList.add('active');
+}
+/* ===== 批次路线卡抽屉：实际轨迹 + 晶圆明细（entity-state 轮询） ===== */
+window.__lotTrail = [];     // 实际走过的区域轨迹（事件追加）
+window.__lotDrawerOpen = false;
+var lotDrawerTimer = null;
+function trailPush(area) {
+  var lane = window.__curLane;
+  if (!lane) return;
+  if (lane.areas[lane.areas.length - 1] !== area) lane.areas.push(area);
+  renderDrawerLanes();
+}
+function renderDrawerLanes() {
+  var el = document.getElementById('ldLanes');
+  if (!el || !window.__lotDrawerOpen) return;
+  var html = '';
+  window.__lanes.forEach(function(lane) {
+    var isActive = lane === window.__curLane;
+    html += '<div class="laneRow' + (isActive ? ' active' : '') + '">';
+    html += '<div class="laneHead"><b>' + lane.name + '</b><span class="wcnt">' + lane.wafers + ' 片</span>' +
+      (lane.state === 'merged' ? '<em>↩ 已并回主批</em>' : lane.state === 'scrapped' ? '<em>🗑 已报废</em>' : '') + '</div>';
+    if (lane.forkFrom) html += '<div class="laneFork">↘ 从 ' + lane.forkFrom.name + ' 分叉</div>';
+    html += '<div class="laneAreas">';
+    lane.areas.forEach(function(a, i) {
+      var dyn = typeof a === 'string' && a.indexOf('⚡') === 0;
+      html += '<span class="trailNode' + (dyn ? ' dyn' : ' visited') + '">' + a + '</span>';
+      if (i < lane.areas.length - 1) html += '<span class="trailArrow">→</span>';
+    });
+    html += '</div></div>';
+  });
+  el.innerHTML = html;
+}
+function openLotDrawer() {
+  window.__lotDrawerOpen = true;
+  var d = document.getElementById('lotDrawer');
+  if (d) {
+    d.classList.add('show');
+    d.classList.remove('collapsed');           // 新一轮演示默认展开
+    var caret = document.getElementById('lotDrawerCaret');
+    if (caret) caret.textContent = '▾';
+  }
+  var wo = document.getElementById('ldWo');
+  if (wo) wo.textContent = (window.__activeWo || '').slice(0, 8) || '—';
+  loadRouteDef(currentScenario);
+  if (!window.__lanes.length) {
+    var main = { name: '主批', wafers: (wipCount || 5), areas: ['STOCKER'], forkFrom: null, state: 'active' };
+    window.__lanes = [main];
+    window.__curLane = main;
+  }
+  renderDrawerLanes();
+  if (!lotDrawerTimer) lotDrawerTimer = setInterval(pollLotDrawer, 4000);
+}
+
+/* ===== 路线定义图（计划 DAG）— 底部通栏长横条，横向铺开 =====
+ * 流程图天然横向：用服务端布局坐标原尺寸绘制，宽屏无需滚动即可看全。
+ * 异常流虚线橙色；按场景缓存。 */
+var __routeDefCache = {};
+var __routeDefFor = null;
+function renderRouteDef(g) {
+  var box = document.getElementById('rdsCanvas');
+  if (!box || !g || !g.nodes) return;
+  document.getElementById('rdsName').textContent = g.name || '路线定义';
+  document.getElementById('rdsDesc').textContent = g.description || '';
+  var nodes = g.nodes, edges = g.edges || [];
+  var byId = {};
+  nodes.forEach(function(n) { byId[n.id] = n; });
+  var maxX = 0, maxY = 0;
+  nodes.forEach(function(n) { maxX = Math.max(maxX, n.x + n.w); maxY = Math.max(maxY, n.y + n.h); });
+  var THEME = {
+    equipment: { fill: 'rgba(18,49,79,0.92)',  stroke: '#42a5f5', w: 1.5 },
+    transport: { fill: 'rgba(22,48,72,0.92)',  stroke: '#5b87b0', w: 1 },
+    saga:      { fill: 'rgba(20,61,31,0.92)',  stroke: '#66bb6a', w: 1.5 },
+    classify:  { fill: 'rgba(58,52,16,0.92)',  stroke: '#c0ca33', w: 1.5 },
+    decision:  { fill: 'rgba(58,36,16,0.92)',  stroke: '#ff9800', w: 1.5 }
+  };
+  var svg = '<svg width="' + (maxX + 10) + '" height="' + (maxY + 12) + '" style="display:block">'
+    + '<defs>'
+    + '<marker id="ldArrow" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#5b87b0"/></marker>'
+    + '<marker id="ldArrowEx" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#ff9800"/></marker>'
+    + '</defs>';
+  edges.forEach(function(e) {
+    var a = byId[e.from], b = byId[e.to];
+    if (!a || !b) return;
+    var x1 = a.x + a.w, y1 = a.y + a.h / 2, x2 = b.x, y2 = b.y + b.h / 2;
+    var ex = e.type === 'exception';
+    var mx = (x1 + x2) / 2;
+    svg += '<path d="M' + x1 + ',' + y1 + ' C' + mx + ',' + y1 + ' ' + mx + ',' + y2 + ' ' + x2 + ',' + y2
+      + '" fill="none" stroke="' + (ex ? '#ff9800' : '#5b87b0') + '" stroke-width="1.5"'
+      + (ex ? ' stroke-dasharray="4,3"' : '') + ' marker-end="url(#' + (ex ? 'ldArrowEx' : 'ldArrow') + ')"/>';
+    if (e.label) svg += '<text x="' + mx + '" y="' + ((y1 + y2) / 2 - 4) + '" fill="'
+      + (ex ? '#ff9800' : '#7f95ab') + '" font-size="9" text-anchor="middle">' + e.label + '</text>';
+  });
+  nodes.forEach(function(n) {
+    var t = THEME[n.type] || THEME.equipment;
+    if (n.type === 'decision') {
+      svg += '<ellipse cx="' + (n.x + n.w / 2) + '" cy="' + (n.y + n.h / 2) + '" rx="' + (n.w / 2)
+        + '" ry="' + (n.h / 2) + '" fill="' + t.fill + '" stroke="' + t.stroke + '" stroke-width="1.5"/>';
+    } else {
+      svg += '<rect x="' + n.x + '" y="' + n.y + '" width="' + n.w + '" height="' + n.h
+        + '" rx="' + (n.type === 'transport' ? 5 : 9) + '" fill="' + t.fill
+        + '" stroke="' + t.stroke + '" stroke-width="' + t.w + '"/>';
+    }
+    var lines = (n.label || '').split('\n');
+    var lh = n.type === 'transport' ? 13 : 15;
+    var ty = n.y + n.h / 2 - (lines.length - 1) * lh / 2 + 3.5;
+    lines.forEach(function(ln, i) {
+      svg += '<text x="' + (n.x + n.w / 2) + '" y="' + (ty + i * lh)
+        + '" fill="#cfe3f7" font-size="10" text-anchor="middle">' + ln + '</text>';
+    });
+  });
+  box.innerHTML = svg + '</svg>';
+}
+function setRouteDefStrip(show) {
+  var strip = document.getElementById('routeDefStrip');
+  if (strip) strip.classList.toggle('show', show);
+  var btn = document.getElementById('btnRouteDef');
+  if (btn) btn.classList.toggle('active', show);
+}
+function loadRouteDef(sc) {
+  var box = document.getElementById('rdsCanvas');
+  if (!box) return;
+  if (sc === 'm35' || !sc) {
+    box.innerHTML = '<div style="padding:10px;font-size:11px;color:#7f95ab;">M3.5 混沌用例使用动态 OCAP 路线，无静态定义图</div>';
+    document.getElementById('rdsName').textContent = '路线定义';
+    document.getElementById('rdsDesc').textContent = '';
+    setRouteDefStrip(false);
+    return;
+  }
+  var draw = function(g) {
+    renderRouteDef(g);
+    if (!__rdsUserClosed) setRouteDefStrip(true);
+  };
+  if (__routeDefCache[sc]) { draw(__routeDefCache[sc]); return; }
+  __routeDefFor = sc;
+  box.innerHTML = '<div style="padding:10px;font-size:11px;color:#7f95ab;">加载路线定义…</div>';
+  fetch('/api/fab-demo/scenario/' + sc + '/route-graph').then(function(r) { return r.json(); })
+    .then(function(g) { __routeDefCache[sc] = g; if (__routeDefFor === sc) draw(g); })
+    .catch(function() { box.innerHTML = '<div style="padding:10px;font-size:11px;color:#ff8a80;">路线定义加载失败</div>'; });
+}
+function pollLotDrawer() {
+  if (!window.__lotDrawerOpen || !window.__activeWo) return;
+  fetch('/api/fab-demo/entity-state/' + window.__activeWo)
+    .then(function(r) { return r.json(); })
+    .then(function(d) { window.__lastES = d; renderLotDrawer(d); })
+    .catch(function() {});
+}
+
+/* ===== 工艺剖面动画（HBM3E）=====
+ * 芯片制造过程的实时示意动画：随 ProcessingStarted/Completed 驱动，
+ * 在晶圆截面上演绎 光刻曝光/刻蚀沟槽/离子注入/薄膜生长/CMP 抛光/TSV 钻孔/
+ * 微凸点/减薄/MR-MUF 整体注塑（掺导热颗粒环氧）+ 一次性固化。 */
+var xsecCv = document.getElementById('xsecCanvas');
+var xsecCtx = xsecCv ? xsecCv.getContext('2d') : null;
+var xsecLayers = [];          // 已生长的薄膜层 {h,color,carved}
+var xsecTsv = [];             // 信号 TSV 列 x
+var xsecThr = [];             // 散热通道列 x
+var xsecBumps = false, xsecThinK = 1, xsecCured = false;
+var xsecStackMode = false, xsecEpoxy = 0;
+var xsecFx = [];              // 进行中的特效 {type,t0}
+var xsecSeed = 7;
+function xsecRnd() { xsecSeed = (xsecSeed * 16807) % 2147483647; return xsecSeed / 2147483647; }
+
+function xsecStart(recipeId) {
+  var r = recipeId || '';
+  var stepEl = document.getElementById('xsecStep');
+  if (stepEl) stepEl.textContent = r;
+  if (!xsecCtx) return;
+  var T = { type: '', t0: performance.now() };
+  if (r.indexOf('LITHO') >= 0)           T.type = 'litho';
+  else if (r.indexOf('TSV-DRIE') >= 0)   T.type = 'drill';
+  else if (r.indexOf('THRM') >= 0)     { T.type = 'drill'; T.thermal = true; }
+  else if (r.indexOf('ETCH') >= 0)       T.type = 'etch';
+  else if (r.indexOf('IMPL') >= 0)       T.type = 'impl';
+  else if (r.indexOf('CMP') >= 0)        T.type = 'cmp';
+  else if (r.indexOf('MET-') >= 0 || r.indexOf('CD-MEASURE') >= 0) T.type = 'met';
+  else if (r.indexOf('CLEAN') >= 0)      T.type = 'clean';
+  else if (r.indexOf('DIFF') >= 0)       T.type = 'diff';
+  else if (r.indexOf('MOLD') >= 0)     { T.type = 'mold'; xsecStackMode = true; xsecEpoxy = 0; }
+  else if (r.indexOf('CURE') >= 0)       T.type = 'cure';
+  else if (r.indexOf('VOID') >= 0)       T.type = 'void';
+  else if (r.indexOf('BUMP') >= 0)       T.type = 'bump';
+  else if (r.indexOf('THIN') >= 0)       T.type = 'thin';
+  else                                   T.type = 'dep';
+  xsecFx.push(T);
+}
+function xsecDone(recipeId) {
+  var r = recipeId || '';
+  xsecFx = [];
+  if (r.indexOf('DEP') >= 0 && r.indexOf('TSV') < 0 && r.indexOf('MRMUF') < 0 && r.indexOf('BUMP') < 0)
+    xsecLayers.push({ h: 9, color: ['#80cbc4','#ce93d8','#ffb74d','#a5d6a7','#90caf9'][xsecLayers.length % 5], carved: false });
+  if (r.indexOf('TSV-DRIE') >= 0) xsecTsv = [66, 104, 142, 180, 218];
+  if (r.indexOf('THRM') >= 0)     xsecThr = [85, 123, 161, 199];
+  if (r.indexOf('CMP') >= 0)      xsecLayers.forEach(function(l) { l.carved = false; });
+  if (r.indexOf('BUMP') >= 0)     xsecBumps = true;
+  if (r.indexOf('THIN') >= 0)     xsecThinK = 0.55;
+  if (r.indexOf('CURE') >= 0)     xsecCured = true;
+  var stepEl = document.getElementById('xsecStep');
+  if (stepEl) stepEl.textContent = '✓ 完成';
+}
+function xsecFilmTop() {
+  var filmH = 0; xsecLayers.forEach(function(l) { filmH += l.h; });
+  return xsecCv.height - 16 - 26 * xsecThinK - filmH;
+}
+function xsecDrawFx(now) {
+  var ctx = xsecCtx;
+  if (!ctx) return;
+  xsecFx = xsecFx.filter(function(f) {
+    var t = (now - f.t0) / 3600;
+    if (t >= 1 && f.type !== 'mold') return false;
+    var top = xsecFilmTop(), x0 = 20, x1 = xsecCv.width - 20;
+    var i, x;
+    if (f.type === 'litho') {                       // 曝光光束扫过 + 掩膜格
+      x = x0 + (x1 - x0) * Math.min(t, 1);
+      ctx.globalAlpha = 0.25; ctx.fillStyle = '#b388ff';
+      ctx.fillRect(x0, top - 16, x - x0, 16); ctx.globalAlpha = 1;
+      ctx.fillStyle = '#b388ff'; ctx.fillRect(x - 2, top - 20, 4, 22);
+      for (i = x0; i < x1; i += 14) { ctx.fillRect(i, top - 14, 7, 12); }
+    } else if (f.type === 'etch') {                 // 刻蚀粒子
+      for (i = 0; i < 10; i++) { x = x0 + 12 + ((i * 37 + (now / 4 | 0)) % (x1 - x0 - 20));
+        ctx.fillStyle = '#ff8a65'; ctx.fillRect(x, top + 2 + (i % 3) * 4, 3, 3); }
+    } else if (f.type === 'impl') {                 // 离子注入
+      for (i = 0; i < 12; i++) { x = x0 + 10 + ((i * 23 + (now / 3 | 0)) % (x1 - x0 - 16));
+        ctx.fillStyle = '#69f0ae'; ctx.fillRect(x, top - 18 + (i * 7 + now / 2 | 0) % 18, 2, 5); }
+    } else if (f.type === 'cmp') {                  // 抛光垫
+      x = x0 + (x1 - x0 - 46) * (0.5 + 0.5 * Math.sin(now / 240));
+      ctx.fillStyle = 'rgba(224,224,224,0.85)'; ctx.fillRect(x, top - 10, 46, 8);
+    } else if (f.type === 'met') {                  // 探针量测
+      for (i = 0; i < 5; i++) { x = x0 + 30 + i * (x1 - x0 - 60) / 4;
+        ctx.strokeStyle = '#4dd0e1'; ctx.beginPath(); ctx.moveTo(x, top - 14); ctx.lineTo(x, top - 2); ctx.stroke(); }
+      ctx.fillStyle = '#4dd0e1'; ctx.font = '10px sans-serif';
+      ctx.fillText('CD ' + (31.6 + (now % 97) / 40).toFixed(1) + 'nm ✓', x0 + 8, top - 18);
+    } else if (f.type === 'clean') {                // 清洗水膜
+      ctx.globalAlpha = 0.35; ctx.fillStyle = '#4fc3f7';
+      ctx.fillRect(x0, top - 6, x1 - x0, 8 + 3 * Math.sin(now / 150)); ctx.globalAlpha = 1;
+    } else if (f.type === 'diff') {                 // 热处理红光
+      ctx.globalAlpha = 0.18 + 0.08 * Math.sin(now / 120); ctx.fillStyle = '#ff7043';
+      ctx.fillRect(x0, top - 30, x1 - x0, 30 + (xsecCv.height - top)); ctx.globalAlpha = 1;
+    } else if (f.type === 'drill') {                // TSV/散热通道钻孔
+      var cols = f.thermal ? [85, 123, 161, 199] : [66, 104, 142, 180, 218];
+      ctx.fillStyle = f.thermal ? '#ff7043' : '#ffd54f';
+      cols.forEach(function(cx2, ci) { var depth = Math.min(1, t * 1.4 - ci * 0.08);
+        if (depth > 0) ctx.fillRect(cx2, top - 4, 4, depth * (xsecCv.height - 16 - top)); });
+    } else if (f.type === 'bump') {                 // 微凸点
+      for (x = x0 + 12; x < x1 - 8; x += 17) { ctx.fillStyle = '#ffd54f';
+        ctx.fillRect(x, top - 4, 6, 4); }
+    } else if (f.type === 'thin') {                 // 减薄：基片变薄
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      ctx.fillRect(x0, xsecCv.height - 16 - 26 + 26 * xsecThinK * 0.5, x1 - x0, 10);
+    } else if (f.type === 'mold') {                 // MR-MUF：环氧液面上升 + 导热颗粒
+      xsecEpoxy = Math.min(1, t);
+      for (i = 0; i < 14; i++) { x = x0 + 8 + ((i * 41 + (now / 3 | 0)) % (x1 - x0 - 16));
+        var py = xsecCv.height - 22 - ((i * 29 + now / 5 | 0) % (xsecCv.height - 44 | 0));
+        ctx.fillStyle = i % 3 === 0 ? '#ff7043' : '#ffe0b2'; ctx.fillRect(x, py, 3, 3); }
+    } else if (f.type === 'cure') {                 // 一次性固化
+      ctx.globalAlpha = 0.16 + 0.10 * Math.sin(now / 110); ctx.fillStyle = '#ff5252';
+      ctx.fillRect(x0 - 6, 8, x1 - x0 + 12, xsecCv.height - 20); ctx.globalAlpha = 1;
+      ctx.fillStyle = '#ffd54f'; ctx.font = '10px sans-serif';
+      ctx.fillText('一次性固化 · 微凸点同步焊接', x0 + 4, 16);
+    } else if (f.type === 'void') {                 // X-Ray 扫描
+      var sx = x0 + (x1 - x0) * ((now / 900) % 1);
+      ctx.strokeStyle = '#4dd0e1'; ctx.beginPath(); ctx.moveTo(sx, 10); ctx.lineTo(sx, xsecCv.height - 14); ctx.stroke();
+      ctx.fillStyle = '#4dd0e1'; ctx.font = '10px sans-serif'; ctx.fillText('X-Ray 无空洞 ✓', x0 + 8, 16);
+    }
+    return true;
+  });
+}
+function xsecLoop() {
+  requestAnimationFrame(xsecLoop);
+  if (!xsecCtx) return;
+  var ctx = xsecCtx, W = xsecCv.width, H = xsecCv.height, now = performance.now(), i, x;
+  ctx.clearRect(0, 0, W, H);
+  // 背景网格
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  for (x = 20; x < W - 10; x += 22) { ctx.beginPath(); ctx.moveTo(x, 6); ctx.lineTo(x, H - 12); ctx.stroke(); }
+  if (xsecStackMode) {
+    // 堆叠视图：12 层 DRAM die + 微凸点 + MR-MUF 环氧
+    var dieH = 8, gap = 4, x0 = 36, w = W - 72, total = 12 * (dieH + gap) - gap;
+    var y0 = H - 18 - total;
+    var eh = total * xsecEpoxy;
+    ctx.globalAlpha = xsecCured ? 0.5 : 0.34; ctx.fillStyle = '#ff8a65';
+    ctx.fillRect(x0 - 5, y0 + total - eh - 2, w + 10, eh + 4); ctx.globalAlpha = 1;
+    for (i = 0; i < 12; i++) {
+      var y = y0 + i * (dieH + gap);
+      ctx.fillStyle = i === 0 ? '#5d4037' : '#4a6fa5'; ctx.fillRect(x0, y, w, dieH);
+      ctx.fillStyle = '#90caf9'; ctx.fillRect(x0, y, w, 2);
+      for (x = x0 + 8; x < x0 + w - 6; x += 17) { ctx.fillStyle = '#ffd54f'; ctx.fillRect(x, y + dieH, 5, gap); }
+      if (xsecCured) { ctx.fillStyle = 'rgba(255,112,67,0.5)';
+        for (x = x0 + 14; x < x0 + w - 6; x += 23) ctx.fillRect(x, y + 3, 3, 3); }
+    }
+    ctx.fillStyle = '#7f95ab'; ctx.font = '9px sans-serif';
+    ctx.fillText(xsecCured ? 'MR-MUF 固化 ✓ 导热颗粒分布均匀' : 'MR-MUF 整体注塑 · 掺导热颗粒环氧', x0, y0 - 6);
+  } else {
+    // 晶圆截面视图：基片 + 薄膜叠层 + TSV/散热通道 + 微凸点
+    var baseH = 26 * xsecThinK, yb = H - 16 - baseH, filmH = 0;
+    xsecLayers.forEach(function(l) { filmH += l.h; });
+    var top = yb - filmH;
+    ctx.fillStyle = '#5d4037'; ctx.fillRect(20, yb, W - 40, baseH);
+    ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fillRect(20, yb, W - 40, 3);
+    xsecTsv.concat(xsecThr).forEach(function(cx2) {
+      ctx.fillStyle = xsecThr.indexOf(cx2) >= 0 ? '#ff7043' : '#ffd54f';
+      ctx.fillRect(cx2, top - 2, 4, filmH + baseH + 2);
+    });
+    var fy = yb;
+    xsecLayers.forEach(function(l) {
+      fy -= l.h;
+      ctx.globalAlpha = l.carved ? 0.5 : 0.9; ctx.fillStyle = l.color;
+      ctx.fillRect(20, fy, W - 40, l.h);
+      if (l.carved) for (x = 26; x < W - 46; x += 18) ctx.clearRect(x, fy, 8, l.h);
+      ctx.globalAlpha = 1;
+    });
+    if (xsecBumps) for (x = 32; x < W - 38; x += 17) { ctx.fillStyle = '#ffd54f'; ctx.fillRect(x, top - 5, 6, 4); }
+    ctx.fillStyle = '#7f95ab'; ctx.font = '9px sans-serif';
+    ctx.fillText('Si 基片', 24, H - 4);
+  }
+  xsecDrawFx(now);
+}
+xsecLoop();
+function renderLotDrawer(d) {
+  var src = d.sourceLot || {};
+  var phase = document.getElementById('ldPhase');
+  if (phase) phase.textContent = src.phase || '—';
+  renderDrawerLanes();
+  var names = d.waferNames || {}, lotNames = d.lotNames || {};
+  var tbl = document.getElementById('lotWafers');
+  if (!tbl) return;
+  var summary = {};
+  var rows = '<tr><td>晶圆</td><td>归属批</td><td>当前工位</td><td>工序态</td><td>分类</td></tr>';
+  var pos = window.__lotPos || {};
+  var stages = window.__stageState || {};
+  // 工序态配色：与状态屏语义一致
+  var STAGE_C = { '存放': '#8a9aa8', '运输中': '#ffb300', '待进站': '#ffb300',
+                  '加工中': '#42a5f5', '待出站': '#ffd54f', '加工异常': '#ff5252' };
+  // 泳道 key 归一：后端 lotKey(rework/pilot/…) ↔ 泳道后缀(RWK/PILOT/…)
+  var LANE_OF = { REWORK: 'RWK', RWK: 'RWK', PILOT: 'PILOT', SCRAP: 'SCRAP', SAMPLE: 'SAMPLE', HOLD: 'HOLD' };
+  (d.wafers || []).forEach(function(w) {
+    var nm = names[w.waferId] || w.waferId.slice(0, 8);
+    var laneKey = LANE_OF[(w.lotKey || 'main').toUpperCase()] || 'main';
+    var lotLabel = lotNames[w.lotId] || '主批';
+    var cls = w.classification || w.status || '—';
+    var st = stages[laneKey] || '存放';
+    rows += '<tr><td>' + nm + '</td><td>' + lotLabel + '</td><td>' + (pos[laneKey] || '—') +
+      '</td><td style="color:' + (STAGE_C[st] || '#c8d6e5') + '">' + st +
+      '</td><td class="cls-' + cls + '">' + cls + '</td></tr>';
+    summary[cls] = (summary[cls] || 0) + 1;
+  });
+  tbl.innerHTML = rows;
+  var sumEl = document.getElementById('ldSummary');
+  if (sumEl) {
+    var parts = [];
+    Object.keys(summary).forEach(function(c) { parts.push(c + ' ' + summary[c]); });
+    sumEl.textContent = parts.join(' · ') || '—';
+  }
+}
+document.getElementById('lotDrawerClose').addEventListener('click', function(e) {
+  e.stopPropagation(); // ✕ 彻底关闭，不触发标题折叠
+  document.getElementById('lotDrawer').classList.remove('show');
+  window.__lotDrawerOpen = false;
+});
+/* 点标题折叠 / 展开抽屉本体 */
+document.getElementById('lotDrawerHead').addEventListener('click', function() {
+  var d = document.getElementById('lotDrawer');
+  var folded = d.classList.toggle('collapsed');
+  var caret = document.getElementById('lotDrawerCaret');
+  if (caret) caret.textContent = folded ? '▸' : '▾';
+});
+/* 路线定义横条：ctrlBar 按钮 / 横条 ✕ 开合 */
+var __rdsUserClosed = false;
+document.getElementById('btnRouteDef').addEventListener('click', function() {
+  var strip = document.getElementById('routeDefStrip');
+  var willShow = !strip.classList.contains('show');
+  __rdsUserClosed = !willShow;
+  setRouteDefStrip(willShow);
+  if (willShow) loadRouteDef(currentScenario);
+});
+document.getElementById('rdsClose').addEventListener('click', function() {
+  __rdsUserClosed = true;
+  setRouteDefStrip(false);
+});
+/* ===== OCAP 规则库（拉取全量规则 + 实时触发计数） ===== */
+var RULE_COUNTS = {};
+(function() {
+  fetch('/api/fab-demo/m35/ocap-rules').then(function(r) { return r.json(); }).then(function(rules) {
+    var el = document.getElementById('ruleLib');
+    if (!el || !rules.length) return;
+    el.innerHTML = '';
+    rules.forEach(function(r) {
+      var row = document.createElement('div');
+      row.className = 'ruleRow'; row.id = 'rule-' + r.ruleId;
+      row.innerHTML = '<span>' + r.name + '</span><span class="act">' + r.actionType +
+        '</span><span class="cnt">·</span>';
+      el.appendChild(row);
+    });
+  }).catch(function() {
+    var el = document.getElementById('ruleLib');
+    if (el) el.innerHTML = '<div class="ruleRow muted">OCAP 规则库（选择 M3.5 用例后加载）</div>';
+  });
+})();
+function ruleFired(ruleId) {
+  RULE_COUNTS[ruleId] = (RULE_COUNTS[ruleId] || 0) + 1;
+  var row = document.getElementById('rule-' + ruleId);
+  if (row) {
+    row.querySelector('.cnt').textContent = '×' + RULE_COUNTS[ruleId];
+    row.classList.add('fired');
+  }
+}
+/* ===== 启动/宕机按钮（按用例分发） ===== */
+var selEl = document.getElementById('scenarioSel');
+var btnCrashEl = document.getElementById('btnCrash');
+function syncCrashVisibility() {
+  var isM35 = selEl.value === 'm35';
+  btnCrashEl.classList.toggle('hidden', !isM35);
+  document.getElementById('faultWrap').classList.toggle('show', isM35);
+}
+selEl.addEventListener('change', function() { syncCrashVisibility(); });
+syncCrashVisibility();
+/* 故障率旋钮（chaos dial，仅 M3.5 用例） */
+var faultSlider = document.getElementById('faultSlider');
+var faultVal = document.getElementById('faultVal');
+faultSlider.addEventListener('input', function() { faultVal.textContent = faultSlider.value + '%'; });
+faultSlider.addEventListener('change', function() {
+  fetch('/api/fab-demo/m35/fault-probability', { method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ probability: faultSlider.value / 100 }) });
+});
+document.getElementById('btnStart').addEventListener('click', function() {
+  var sc = selEl.value;
+  resetDemoState();
+  __rdsUserClosed = false;      // 新一轮演示重新自动展开路线定义横条
+  currentScenario = sc;
+  var url = sc === 'm35' ? '/api/fab-demo/m35/start'
+          : sc === 'hynix-hbm3e' ? '/api/fab-demo/product/hynix-hbm3e/start'
+          : '/api/fab-demo/start/' + sc;
+  // 捕获 workOrderId：批次路线卡抽屉的数据抓手
+  fetch(url, { method: 'POST' }).then(function(r) { return r.json(); }).then(function(j) {
+    if (j && j.workOrderId) {
+      window.__activeWo = j.workOrderId;
+      openLotDrawer();
+    }
+  }).catch(function() {});
+  banner('🚀 ' + (sc === 'm35' ? 'M3.5 自愈演示' : selEl.options[selEl.selectedIndex].text) + ' 启动中……', 'recovering');
+});
+btnCrashEl.addEventListener('click', function() {
+  if (!window.__activeWo || selEl.value !== 'm35') return;
+  fetch('/api/fab-demo/m35/inject-crash/' + window.__activeWo, {method: 'POST'});
+  banner('⚡ 宕机已注入——断点续跑即将开始', 'crash');
+});
+var camBtn = document.getElementById('btnCam');
+var followCam = false;         // 模式1：镜头追天车
+var camMode = 2;               // 0 自由 / 1 跟随天车 / 2 剧情镜头（默认）
+camBtn.textContent = '🎬 剧情镜头';
+camBtn.addEventListener('click', function() {
+  camMode = (camMode + 1) % 3;
+  followCam = camMode === 1;
+  camBtn.textContent = ['🎥 自由视角', '🎥 跟随 OHT', '🎬 剧情镜头'][camMode];
+});
+
+/* ===== 渲染循环 ===== */
+var clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  if (!moveAnim && moveQueue.length && performance.now() >= departAt) {
+    var leg = moveQueue.shift();
+    moveAnim = { t0: leg.t0, span: leg.span, start: performance.now(), eta: leg.eta };
+  }
+  if (moveAnim) {
+    var k = Math.min(1, (performance.now() - moveAnim.start) / moveAnim.eta);
+    var ease = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    curT = (moveAnim.t0 + moveAnim.span * ease) % 1;
+    oht.position.copy(trackCurve.getPointAt(curT));
+    var tan = trackCurve.getTangentAt(curT);
+    oht.rotation.y = Math.atan2(tan.x, tan.z);
+    if (k >= 1) {
+      curT = (moveAnim.t0 + moveAnim.span) % 1;
+      moveAnim = null;
+      beaconColor(moveQueue.length ? 0xffb300 : 0x1a7f37);
+    }
+  }
+  /* FOUP 锚点追踪：骑行跟车 / 端口停靠 / 进出设备（缩放入腔） */
+  var rideOffX = Object.keys(childFoups).length > 0 ? 0.35 : 0;
+  if (foupState === 'riding') {
+    foupAnchor.set(oht.position.x + rideOffX, oht.position.y - 0.92, oht.position.z);
+  } else if (foupState === 'docked' || foupState === 'exiting') {
+    foupAnchor.copy(PADS[lastPadKey] || PADS.STOCKER); foupAnchor.y += 0.3;
+  } else if (foupState === 'entering' || foupState === 'inside') {
+    foupAnchor.copy(AREA_POS[lastPadKey]); foupAnchor.y += 1.4;
+  }
+  foup.position.lerp(foupAnchor, foupState === 'riding' ? 0.35 : 0.07);
+  var ts = (foupState === 'entering' || foupState === 'inside') ? 0.2 : 1;
+  var ns = foup.scale.x + (ts - foup.scale.x) * 0.12;
+  foup.scale.setScalar(ns);
+  if (foupState === 'entering' && ns < 0.26) foupState = 'inside';
+  foup.visible = (foupState !== 'hidden') && !(foupState === 'inside' && ns < 0.3);
+  if (EQUIP_BY_AREA.LOG && EQUIP_BY_AREA.LOG.userData.radar)
+    EQUIP_BY_AREA.LOG.userData.radar.rotation.y += 0.02;
+  beacon.material.emissiveIntensity = 1.0 + Math.sin(performance.now() * 0.008) * 0.6;
+  pulseRings.forEach(function(pr) {
+    pr.t += 0.016;
+    if (pr.t < 0 || pr.t > 1) { pr.mesh.visible = false; return; }
+    pr.mesh.visible = true;
+    pr.mesh.position.copy(pr.center);
+    var rr = 1 + pr.t * 7;
+    pr.mesh.scale.set(rr, rr, 1);
+    pr.mesh.material.opacity = 0.85 * (1 - pr.t);
+  });
+  /* 上浮气泡：飘升 + 3 秒淡出 */
+  var nowMs = performance.now();
+  Object.keys(BUBBLES).forEach(function(k) {
+    BUBBLES[k] = BUBBLES[k].filter(function(bub) {
+      var age = (nowMs - bub.born) / 3000;
+      if (age >= 1) { scene.remove(bub.sp); bub.sp.material.dispose(); bub.tex.dispose(); return false; }
+      bub.sp.position.y += 0.014;
+      bub.sp.material.opacity = 0.95 * (1 - age * age);
+      return true;
+    });
+  });
+  if (focusKey && AREA_POS[focusKey]) {
+    focusArrow.visible = true;
+    var ftop = focusTopY[focusKey] || 4.5;
+    focusArrow.position.set(AREA_POS[focusKey].x, ftop + 1.4 + Math.sin(performance.now() * 0.005) * 0.3, AREA_POS[focusKey].z);
+  } else focusArrow.visible = false;
+  if (camMode === 1) {
+    camera.position.lerp(new THREE.Vector3(oht.position.x + 4, 8, oht.position.z + 8), 0.04);
+    controls.target.lerp(new THREE.Vector3(oht.position.x, 2, oht.position.z), 0.06);
+  } else if (camMode === 2 && focusKey && AREA_POS[focusKey]) {
+    controls.target.lerp(new THREE.Vector3(AREA_POS[focusKey].x, 2.2, AREA_POS[focusKey].z), 0.025);
+  }
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+/* 窗口尺寸变化：同步相机纵横比与渲染器尺寸 */
+window.addEventListener('resize', function() {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+});
+</script>
+</body>
+</html>

@@ -1,45 +1,48 @@
 # fab-simulator-demo
 
-Semiconductor fab **equipment simulators** — Akka Typed actors that emulate fab
-tools (AMHS, stocker, lithography scanner, CD-SEM, generic equipment) for
-integration testing and demos without real hardware.
+Semiconductor fab **equipment simulators** + **demo web UI** — Akka Typed actors
+that emulate fab tools (AMHS, stocker, lithography scanner, CD-SEM, generic
+equipment), with a Play web frontend for the fab demo and M3.5 self-healing demo.
 
 Part of the [MadPolaris](https://github.com/MadPolaris) engine family.
 Extracted from [MadPolaris/playAkkaCQRS](https://github.com/MadPolaris/playAkkaCQRS)
-(`fab-simulation/` module). [中文版](README-zh.md).
+(`fab-simulation/` module + fab web UI). [中文版](README-zh.md).
 
-## What's inside
+## Modules
 
-| Package | Contents |
-|---------|----------|
-| `net.imadz.fab.simulation` | Equipment simulators: `AmhsSimulator`, `StockerSimulator`, `LithographySimulator`, `CdSemSimulator`, `GenericEquipmentSimulator` (+ `EquipmentSimulator` trait, `FabSimulationConfig`) |
-| `net.imadz.fab.protocol` | `FabEquipmentProtocol` message vocabulary, `EquipmentAdapter` / `ActorEquipmentAdapter` |
-| `net.imadz.fab.model` | `EquipmentArea`, `MeasurementResult` |
+| Module | Description |
+|--------|-------------|
+| `core/` | Equipment simulators: `AmhsSimulator`, `StockerSimulator`, `LithographySimulator`, `CdSemSimulator`, `GenericEquipmentSimulator` (+ protocol, model) |
+| `web/` | Play 2.8 demo: fab simulation dashboard, M3.5 self-healing demo (3D view, fault injection, OCAP rules), WebSocket event streams |
 
-Each simulator is a stateful `Behavior` — send it protocol messages, get realistic
-timing and responses back. Designed to plug into a larger fab orchestration
-(e.g. the M3.5 self-healing demo in playAkkaCQRS) or to run standalone.
+The `web` module contains the full CQRS stack extracted from playAkkaCQRS
+(`net.imadz.domain` / `net.imadz.application` / `net.imadz.infrastructure` —
+133 files): aggregates, projections, sagas, routing, repositories.
 
-## Use it
+## Run it
 
-```scala
-import akka.actor.typed.scaladsl.Behaviors
-import net.imadz.fab.simulation._
-
-val litho = ctx.spawn(LithographySimulator.behavior(config), "litho-01")
-litho ! FabEquipmentProtocol.Expose(wafers, replyTo)
+```bash
+sbt "web / run"
 ```
+
+- Fab demo: http://localhost:9000/fab-demo
+- Fab designer: http://localhost:9000/fab-designer
+- M3.5 self-healing: http://localhost:9000/fab-demo/m35
+- M3.5 3D view: http://localhost:9000/fab-demo/m35-3d
+
+Requires MongoDB at `127.0.0.1:27017` (journal + read models); see
+`web/conf/application.conf`.
 
 ## Build
 
 ```bash
 sbt compile
-sbt test
+sbt "web / Test / compile"
 ```
 
 ## Note
 
-This is a demo/support library, not a published artifact: it is never published
+This is a demo application, not a published artifact: it is never published
 to Maven Central (`publish / skip := true`).
 
 License: Apache-2.0.
