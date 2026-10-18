@@ -1,0 +1,11 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: messageFields
+name: OcapHandledFields
+name_zh: OCAP 处置字段
+description: Fields of OcapHandled.
+description_zh: OcapHandled 的字段。
+fields:
+- 'stepName: string'
+- 'ruleId: string'
+- 'action: string'

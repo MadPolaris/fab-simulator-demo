@@ -1,0 +1,8 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: valueObject
+name: StepError
+name_zh: 步骤错误
+description: 'Classified step failure: stepName, equipmentId, errorCode (HARDWARE_FAULT | COMM_TIMEOUT
+  | SENSOR_ANOMALY | POWER_FLUCTUATION | ABORTED), detail.'
+description_zh: 已分类的步骤失败：步骤名、设备、错误码、细节。

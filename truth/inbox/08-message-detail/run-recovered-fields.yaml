@@ -1,0 +1,10 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: messageFields
+name: RunRecoveredFields
+name_zh: 断点恢复字段
+description: Fields of RunRecovered.
+description_zh: RunRecovered 的字段。
+fields:
+- 'workOrderId: string'
+- 'completedStepCount: integer'

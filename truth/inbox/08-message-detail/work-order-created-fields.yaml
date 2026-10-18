@@ -1,0 +1,11 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: messageFields
+name: WorkOrderCreatedFields
+name_zh: 工单创建字段
+description: Fields of WorkOrderCreated.
+description_zh: WorkOrderCreated 的字段。
+fields:
+- 'workOrderId: string — 工单号'
+- 'lotId: string — 首批 Lot'
+- 'scenarioId: string'

@@ -1,0 +1,11 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: aggregateRelation
+name: RunToLotReference
+name_zh: 流水线运行→Lot（引用）
+description: 一次运行驱动多个 Lot 的步骤推进：运行向 Lot 下发'记录量测/分类/切分'等通知，Lot 必须确认收到（Lot 通知确认保障）后该步骤才算完成。基数：一对多。业务含义：运行是'指挥'方，Lot
+  是'执行'方；指挥不等执行确认就不往下走。
+description_zh: 一次运行驱动多个 Lot 的步骤推进：运行向 Lot 下发“记录量测/分类/切分”等通知，Lot 必须确认收到（Lot 通知确认保障）后该步骤才算完成。基数：一对多。业务含义：运行是“指挥”方，Lot
+  是“执行”方；指挥不等执行确认就不往下走。
+cardinality: 1:N
+meaning: 运行指挥多 Lot 推进，通知必须确认

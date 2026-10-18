@@ -1,0 +1,7 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: valueObject
+name: OcapActionPlan
+name_zh: OCAP 处置预案
+description: 'Six variants: Hold, Rework, Scrap, Notify, AdjustRecipe, Composite (combination).'
+description_zh: 六种：暂存、返工、报废、通知、调整配方、组合。

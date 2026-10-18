@@ -1,0 +1,15 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: command
+name: ScrapWafers
+name_zh: 报废晶圆
+description: Scrap wafers out of the lot — terminal, no rework.
+description_zh: 把晶圆报废出 Lot——终态，不再返工。
+triggers:
+- 'policy: 晶圆处置'
+produces:
+- wafers-scrapped
+parameters:
+- 'lotId: string'
+- 'waferIds: string[]'
+- 'reason: string'

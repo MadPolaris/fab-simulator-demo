@@ -1,0 +1,10 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: messageFields
+name: WaferClassifiedFields
+name_zh: 晶圆分类字段
+description: Fields of WaferClassified.
+description_zh: WaferClassified 的字段。
+fields:
+- 'waferId: string'
+- 'verdict: string — PASS|BORDERLINE|FAIL|SCRAP'

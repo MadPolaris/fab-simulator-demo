@@ -1,0 +1,8 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: valueObject
+name: DecisionConfig
+name_zh: 判定配置
+description: 'Classification thresholds: lowerSpecNm, upperSpecNm, borderlineWindowNm, maxReworkCount
+  (default 2).'
+description_zh: 分类阈值：下限、上限、边缘窗口、最大返工次数（默认 2）。

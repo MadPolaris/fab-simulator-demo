@@ -1,0 +1,11 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: messageFields
+name: WaferMeasuredFields
+name_zh: 晶圆量测字段
+description: Fields of WaferMeasured.
+description_zh: WaferMeasured 的字段。
+fields:
+- 'waferId: string'
+- 'cdNm: number'
+- 'equipmentId: string'

@@ -1,0 +1,18 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: command
+name: HandleOcap
+name_zh: 执行 OCAP 处置
+description: 'A step failed and an OCAP rule matched: carry out its action plan in priority order. The
+  queue then moves on.'
+description_zh: 某步骤失败且命中 OCAP 规则：按优先级执行处置预案，然后队列继续。
+triggers:
+- 'policy: OCAP 求值'
+produces:
+- ocap-handled
+parameters:
+- 'stepName: string — 失败的步骤'
+- 'ruleId: string — 命中的规则'
+guards:
+- 步骤已失败且规则触发条件成立
+- 规则未超本 Lot 的 maxTriggersPerLot

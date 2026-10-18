@@ -1,0 +1,12 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: event
+name: SubLotMerged
+name_zh: 合并子 Lot
+description: The child lot's wafers returned to the parent lot; the child-lot view transitions.
+description_zh: 子 Lot 的晶圆回归母 Lot；子 Lot 视图迁移。
+sequence: 7
+payload_fields:
+- 'parentLotId: string'
+- 'childLotId: string'
+- 'waferIds: string[]'

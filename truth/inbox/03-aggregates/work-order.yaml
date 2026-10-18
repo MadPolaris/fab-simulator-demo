@@ -1,0 +1,8 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: aggregate
+name: WorkOrder
+name_zh: 工单
+description: 'The production order that triggers one fab pipeline run: which lot, which scenario, which
+  POR.'
+description_zh: 触发一次 fab 流水线运行的生产工单：哪个 Lot、哪个场景、哪套 POR。

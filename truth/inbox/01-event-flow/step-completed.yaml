@@ -1,0 +1,12 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: event
+name: StepCompleted
+name_zh: 步骤完成
+description: One queue step finished cleanly. Records which step finished and the full run state at that
+  moment — the resume breakpoint.
+description_zh: 队列中某步骤干净完成。记下完成的步骤与当时完整运行状态——这就是断点。
+sequence: 3
+payload_fields:
+- 'stepName: string — 步骤名（断点）'
+- 'outputInfo: map — 步骤产出信息'

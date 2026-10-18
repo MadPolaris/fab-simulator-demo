@@ -1,0 +1,14 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: event
+name: OcapHandled
+name_zh: OCAP 处置完成
+description: 'A step failed and an OCAP rule matched: its action plan was carried out (hold / rework /
+  scrap / notify / adjust recipe, or a combination). The queue moved on — the save is recorded as its
+  own fact, because a rescued step is not a clean completion.'
+description_zh: 某步骤失败且命中 OCAP 规则：执行其处置预案（暂存/返工/报废/通知/调整配方，或组合）。队列继续往下走——救回记为一条独立事实，因为被救回的步骤不算干净完成。
+sequence: 12
+payload_fields:
+- 'stepName: string — 被救回的步骤'
+- 'ruleId: string — 命中的 OCAP 规则'
+- 'action: string — 执行的处置预案'

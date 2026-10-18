@@ -1,0 +1,11 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: event
+name: WafersScrapped
+name_zh: 晶圆报废
+description: Wafers left the lot as scrap — terminal, no rework.
+description_zh: 晶圆报废离 Lot——终态，不再返工。
+sequence: 10
+payload_fields:
+- 'lotId: string'
+- 'waferIds: string[]'

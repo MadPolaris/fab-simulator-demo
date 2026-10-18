@@ -1,0 +1,11 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: aggregateRelation
+name: LotToLotReference
+name_zh: Lot→Lot（父子引用）
+description: 切分产生子 Lot（返工/先导/报废），合并时晶圆回归母 Lot。基数：一对多（一个母 Lot → 多个子 Lot）。业务含义：血缘可查——子 Lot 记得自己从哪来，母 Lot
+  记得自己切出过谁。
+description_zh: 切分产生子 Lot（返工/先导/报废），合并时晶圆回归母 Lot。基数：一对多（一个母 Lot → 多个子 Lot）。业务含义：血缘可查——子 Lot 记得自己从哪来，母
+  Lot 记得自己切出过谁。
+cardinality: 1:N
+meaning: 母 Lot 切分子 Lot，血缘可查

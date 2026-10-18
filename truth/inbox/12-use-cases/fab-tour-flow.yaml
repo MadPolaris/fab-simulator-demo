@@ -1,0 +1,14 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: useCase
+name: FabTourFlow
+name_zh: Fab 参观流程
+description: 'FabTourFlow: 创建参观工单; 看 Lot 在 10 个设备区之间流转; 看设备看板与流水线时间线.'
+description_zh: Fab 参观流程：创建参观工单；看 Lot 在 10 个设备区之间流转；看设备看板与流水线时间线。
+preconditions:
+- 演示场景就绪
+steps:
+- 创建参观工单
+- 看 Lot 在 10 个设备区之间流转
+- 看设备看板与流水线时间线
+extensions: []

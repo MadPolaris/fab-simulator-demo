@@ -1,0 +1,9 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: messageFields
+name: RunCompletedFields
+name_zh: 流水线完工字段
+description: Fields of RunCompleted.
+description_zh: RunCompleted 的字段。
+fields:
+- 'workOrderId: string'

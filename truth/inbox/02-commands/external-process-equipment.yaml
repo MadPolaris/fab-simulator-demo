@@ -1,0 +1,8 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: externalSystem
+name: ProcessEquipment
+name_zh: 工艺设备
+description: 'External equipment across the 10 areas (湿法清洗/扩散/光刻/刻蚀/离子注入/薄膜沉积/CMP/量测/干燥/物流): receives
+  recipes (track-in), runs them, reports track-out and faults.'
+description_zh: 10 个设备区的外部设备（湿法清洗/扩散/光刻/刻蚀/离子注入/薄膜沉积/CMP/量测/干燥/物流）：接收配方（track-in）、执行、上报 track-out 与故障。

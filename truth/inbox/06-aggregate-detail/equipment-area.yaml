@@ -1,0 +1,9 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: valueObject
+name: EquipmentArea
+name_zh: 设备区
+description: 'The 10 fab areas: CLEAN 湿法清洗, DIFF 扩散/氧化, LITHO 光刻, ETCH 刻蚀, IMPL 离子注入, DEP 薄膜沉积, CMP 化学机械抛光,
+  MET 量测, DRY 干燥, LOG 物流指挥.'
+description_zh: 10 个设备区：CLEAN 湿法清洗、DIFF 扩散/氧化、LITHO 光刻、ETCH 刻蚀、IMPL 离子注入、DEP 薄膜沉积、CMP 化学机械抛光、MET 量测、DRY
+  干燥、LOG 物流指挥。

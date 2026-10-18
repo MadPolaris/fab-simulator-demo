@@ -1,0 +1,13 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: lineage
+name: RoutePositionLineage
+name_zh: 工艺路线位置血缘
+description: 'A lot''s position on its route card and the run''s currentRoutingStep describe the same
+  fact from two sides. The lot is authoritative (like a real fab''s MES): on recovery the run reconciles
+  from lot-reported positions.'
+description_zh: Lot 在 route card 上的位置与运行的 currentRoutingStep 是同一事实的两面。以 Lot 为准（如真实晶圆厂的 MES）：恢复时运行按 Lot
+  上报的位置对账。
+links:
+- lot.routeCard position ↔ run.currentRoutingStep
+- lot is the authority on recovery

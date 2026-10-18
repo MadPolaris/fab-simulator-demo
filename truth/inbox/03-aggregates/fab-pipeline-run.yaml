@@ -1,0 +1,8 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: aggregate
+name: FabPipelineRun
+name_zh: Fab 流水线运行
+description: One execution of the fab step queue for a single work order, from start to seal. One work
+  order, one run.
+description_zh: 一个工单的 fab 步骤队列的一次执行，从启动到封单。一个工单，一次运行。

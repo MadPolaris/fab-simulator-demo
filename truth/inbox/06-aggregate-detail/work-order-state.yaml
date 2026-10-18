@@ -1,0 +1,8 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: aggregateState
+name: WorkOrderState
+name_zh: 工单状态
+description: 'State slots: workOrderId, lotId (first lot), scenarioId, porId. A work order is sealed when
+  its run completes.'
+description_zh: 状态槽位：workOrderId、lotId（首批 Lot）、scenarioId、porId。运行完工则工单封单。

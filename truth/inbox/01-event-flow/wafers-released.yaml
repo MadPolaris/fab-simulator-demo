@@ -1,0 +1,11 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: event
+name: WafersReleased
+name_zh: 晶圆放行
+description: Held wafers were released back into the flow.
+description_zh: 暂存的晶圆放行，回到流程中。
+sequence: 9
+payload_fields:
+- 'lotId: string'
+- 'waferIds: string[]'

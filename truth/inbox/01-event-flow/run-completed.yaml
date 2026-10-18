@@ -1,0 +1,10 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: event
+name: RunCompleted
+name_zh: 流水线完工
+description: All queue steps finished; the work order is sealed.
+description_zh: 队列步骤全部完成；工单封单。
+sequence: 13
+payload_fields:
+- 'workOrderId: string'

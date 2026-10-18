@@ -1,0 +1,12 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: policy
+name: LotNotificationGuarantee
+name_zh: Lot 通知确认保障
+description: When the pipeline tells a lot 'record this measurement / classification / split', the lot
+  must confirm receipt before the step counts as complete. Unconfirmed notifications fail the step as
+  LOT_ACK_TIMEOUT through the normal failure path (OCAP evaluates).
+description_zh: 流水线通知 Lot'记录量测/分类/切分'时，Lot 必须确认收到该步骤才算完成。未确认的通知按 LOT_ACK_TIMEOUT 走正常失败路径（进 OCAP 求值）。
+triggers:
+- run-started
+invokes: []

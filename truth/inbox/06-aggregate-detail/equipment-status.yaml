@@ -1,0 +1,7 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: valueObject
+name: EquipmentStatus
+name_zh: 设备状态
+description: Per-equipment status and error counts feeding OCAP equipment conditions.
+description_zh: 单台设备的状态与错误计数，喂给 OCAP 的设备条件。

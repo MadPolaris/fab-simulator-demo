@@ -1,0 +1,11 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: lineage
+name: TransactionNumberLineage
+name_zh: 事务编号血缘
+description: Cross-lot transaction numbers are derived workOrderId + step name + execution index. On recovery
+  the same inputs reproduce the same number — no duplicate transactions.
+description_zh: 跨 Lot 事务编号由工单号+步骤名+执行序号派生。恢复时同样输入算出同样编号——不产生重复事务。
+links:
+- (workOrderId, stepName, execIndex) → transaction number
+- recovery reuses the number

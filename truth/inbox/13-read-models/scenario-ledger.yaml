@@ -1,0 +1,15 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: readModel
+name: ScenarioLedger
+name_zh: 场景台账
+description: 'Per-scenario ledger: lots launched, wafers by verdict, scrap count — the demo''s scoreboard.'
+description_zh: 按场景的台账：投了哪些 Lot、各去向晶圆数、报废数——演示的记分牌。
+served_by: fab-demo summary
+sources:
+- fab-pipeline-run
+- lot
+fields:
+- 'lotsLaunched: integer'
+- 'wafersByVerdict: map ← PASS/BORDERLINE/FAIL/SCRAP 计数'
+- 'scrapCount: integer'

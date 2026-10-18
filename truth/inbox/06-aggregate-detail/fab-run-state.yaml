@@ -1,0 +1,7 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: valueObject
+name: FabRunState
+name_zh: 运行快照
+description: 'The full run state recorded with each step''s progress: the resume payload.'
+description_zh: 每步进度记录里含的完整运行状态：续跑载荷。

@@ -1,0 +1,14 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: lineage
+name: CdToDisposition
+name_zh: CD 量测→处置血缘
+description: 'wafer-measured.cdNm → classify against DecisionConfig (lowerSpecNm/upperSpecNm/borderlineWindowNm)
+  → wafer-classified.verdict → wafer-disposition: PASS continues, BORDERLINE waits for review, FAIL reworks
+  (until maxReworkCount), SCRAP is terminal. The measurement is pure data; the judgment lives in the policy.'
+description_zh: 量测的 CD 值 → 按 DecisionConfig（下限/上限/边缘窗口）分类 → 晶圆去向判定 → 处置策略：PASS 继续、BORDERLINE 等复核、FAIL
+  返工（预算内）、SCRAP 终态。量测是纯数据，判断在策略里。
+links:
+- wafer-measured.cdNm → wafer-classified.verdict
+- verdict → split/hold/scrap slices
+- decision-config thresholds → classification

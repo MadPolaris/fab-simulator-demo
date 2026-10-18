@@ -1,0 +1,12 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: policy
+name: WaferDisposition
+name_zh: 晶圆处置
+description: 'Every classified wafer is routed exactly once: PASS continues, BORDERLINE waits for review,
+  FAIL goes to rework (until its rework budget runs out), SCRAP is terminal.'
+description_zh: 每片已分类晶圆有且仅被路由一次：PASS 继续、BORDERLINE 等复核、FAIL 返工（预算用完为止）、SCRAP 终态。
+triggers:
+- wafer-classified
+invokes:
+- split-sublot

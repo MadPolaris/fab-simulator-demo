@@ -1,0 +1,10 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: event
+name: CrashInjected
+name_zh: 宕机注入
+description: 'M3.5 demo-only: the run was interrupted; progress records were kept.'
+description_zh: M3.5 仅演示用：运行被打断，进度记录保留。
+sequence: 14
+payload_fields:
+- 'workOrderId: string'

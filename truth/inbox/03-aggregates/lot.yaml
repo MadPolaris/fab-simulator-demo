@@ -1,0 +1,8 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: aggregate
+name: WaferLot
+name_zh: 晶圆 Lot
+description: 'A batch of wafers traveling together in a FOUP. Tracks membership, per-wafer classification,
+  the route card, and child lots. The authority on recovery: a lot''s position on its route IS the state.'
+description_zh: 装在 FOUP 里一起走的一批晶圆。跟踪成员、每片分类、route card 与子 Lot。恢复时的权威：Lot 在工艺路线上的位置就是状态。

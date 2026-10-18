@@ -1,0 +1,11 @@
+# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+kind: note
+type: messageFields
+name: WafersHeldFields
+name_zh: 晶圆暂存字段
+description: Fields of WafersHeld.
+description_zh: WafersHeld 的字段。
+fields:
+- 'lotId: string'
+- 'waferIds: string[]'
+- 'reason: string'
