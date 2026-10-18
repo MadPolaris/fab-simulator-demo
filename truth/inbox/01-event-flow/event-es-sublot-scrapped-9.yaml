@@ -2,7 +2,7 @@
 
 kind: note
 type: event
-name: WafersScrapped
+name: SubLotScrapped
 origin:
   stage: eventStorming
   board: reconstructed
@@ -10,8 +10,8 @@ origin:
 payload:
   {
     "type": "event",
-    "name": "WafersScrapped",
-    "name_zh": "晶圆报废",
+    "name": "SubLotScrapped",
+    "name_zh": "子批次报废",
     "description": "Wafers left the lot as scrap — terminal, no rework.",
     "description_zh": "晶圆报废离 Lot——终态，不再返工。",
     "links": [

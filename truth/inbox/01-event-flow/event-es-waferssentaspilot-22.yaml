@@ -1,0 +1,27 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: WafersSentAsPilot
+origin:
+  stage: eventStorming
+  board: extracted
+  seq: 22
+payload:
+  {
+      "type": "event",
+      "name": "WafersSentAsPilot",
+      "name_zh": "先行片发出",
+      "description": "Wafers are sent ahead as pilot (send-ahead) wafers.",
+      "description_zh": "晶圆作为先行片发出。",
+      "info": {
+          "timeline": "lot",
+          "extracted_from": "web/app/net/imadz/domain/entities/LotEntity.scala:108",
+          "confidence": "high",
+          "extraction_note": "Persisted LotEvent.",
+          "payloadFields": [
+              "waferIds: set"
+          ]
+      }
+  }

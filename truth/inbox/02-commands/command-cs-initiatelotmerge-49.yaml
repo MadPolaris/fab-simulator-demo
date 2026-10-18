@@ -1,0 +1,28 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: command
+name: InitiateLotMerge
+origin:
+  stage: commandStorming
+  board: extracted
+  seq: 49
+payload:
+  {
+      "type": "command",
+      "name": "InitiateLotMerge",
+      "name_zh": "发起批次合并事务",
+      "description": "Initiate a lot-merge saga.",
+      "description_zh": "发起批次合并事务。",
+      "info": {
+          "timeline": "fab-pipeline",
+          "extracted_from": "web/app/net/imadz/application/services/transactor/FabSagaProtocol.scala:30",
+          "confidence": "high",
+          "extraction_note": "Emits TransactionInitiated.",
+          "payloadFields": [
+              "lotId",
+              "otherLotId"
+          ]
+      }
+  }

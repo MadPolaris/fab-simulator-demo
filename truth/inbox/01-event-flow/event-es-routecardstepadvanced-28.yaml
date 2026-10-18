@@ -1,0 +1,27 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: RouteCardStepAdvanced
+origin:
+  stage: eventStorming
+  board: extracted
+  seq: 28
+payload:
+  {
+      "type": "event",
+      "name": "RouteCardStepAdvanced",
+      "name_zh": "工艺卡步骤推进",
+      "description": "The lot's route card advances one step.",
+      "description_zh": "批次的工艺卡前进一步。",
+      "info": {
+          "timeline": "lot",
+          "extracted_from": "web/app/net/imadz/domain/entities/LotEntity.scala:129",
+          "confidence": "high",
+          "extraction_note": "Persisted LotEvent; the dynamic POR mechanism.",
+          "payloadFields": [
+              "stepIndex: int"
+          ]
+      }
+  }

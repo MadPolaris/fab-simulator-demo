@@ -8,10 +8,10 @@ origin:
   board: reconstructed
   seq: 45
 triggers:
-  - event: run-started
+  - event: WorkOrderCreated
     aggregate: Fab Pipeline Run
 invokes:
-  - command: start-pipeline-run
+  - command: start-process
     aggregate: Fab Pipeline Run
 payload:
   {
@@ -22,19 +22,19 @@ payload:
     "description": "When the pipeline tells a lot \"record this measurement / classification / split\", the lot must confirm it received and journaled the fact before the step counts as done. A lot that crashed or is too slow fails the step (LOT_ACK_TIMEOUT) instead of leaving the two sides silently diverged — and the failure flows through the normal step-failure path (OCAP evaluation). 2026-10-18 ARBITRATED: fire-and-forget lot notifications are retired; every notification is acknowledged per step. The guarantee is established when the run starts and governs every step.",
     "description_zh": "流水线通知 Lot\"记下这次量测 / 分类 / 分批\"时，Lot 必须确认收到并记账， 该步骤才算完成。崩溃或过慢的 Lot 会让步骤失败（LOT_ACK_TIMEOUT）， 而不是让两边悄悄脱节——失败走正常的步骤失败路径（OCAP 求值）。 2026-10-18 已仲裁：fire-and-forget 的 Lot 通知退役，每条通知按步骤确认。",
     "links": [
-      "event:run-started",
-      "command:start-pipeline-run"
+      "event:WorkOrderCreated",
+      "command:start-process"
     ],
     "info": {
       "triggers": [
         {
-          "event": "run-started",
+          "event": "WorkOrderCreated",
           "aggregate": "Fab Pipeline Run"
         }
       ],
       "invokes": [
         {
-          "command": "start-pipeline-run",
+          "command": "start-process",
           "aggregate": "Fab Pipeline Run"
         }
       ]

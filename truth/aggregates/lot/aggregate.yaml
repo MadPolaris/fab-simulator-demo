@@ -4,7 +4,7 @@ kind: aggregate
 name: "Wafer Lot"
 order:
   commands: ["classify-wafer","hold-wafers","merge-sublot","record-measurement","scrap-wafers","split-sublot"]
-  events: ["wafer-classified","wafers-held","wafers-released","sublot-merged","wafer-measured","wafers-scrapped","sublot-split"]
+  events: ["wafer-classified","wafers-held","wafers-released","sublot-merged","wafer-measured","sublot-scrapped","sublot-split"]
 payload:
   {
     "id": "lot",

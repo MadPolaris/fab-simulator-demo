@@ -1,0 +1,27 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: command
+name: InitiateLotSplit
+origin:
+  stage: commandStorming
+  board: extracted
+  seq: 48
+payload:
+  {
+      "type": "command",
+      "name": "InitiateLotSplit",
+      "name_zh": "发起批次拆分事务",
+      "description": "Initiate a lot-split saga.",
+      "description_zh": "发起批次拆分事务。",
+      "info": {
+          "timeline": "fab-pipeline",
+          "extracted_from": "web/app/net/imadz/application/services/transactor/FabSagaProtocol.scala:22",
+          "confidence": "high",
+          "extraction_note": "Emits TransactionInitiated.",
+          "payloadFields": [
+              "lotId"
+          ]
+      }
+  }

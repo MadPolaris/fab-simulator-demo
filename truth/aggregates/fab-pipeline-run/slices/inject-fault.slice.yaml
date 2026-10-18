@@ -2,13 +2,13 @@
 
 kind: slice
 aggregate: "Fab Pipeline Run"
-command: inject-crash
+command: inject-fault
 payload:
   {
-    "id": "inject-crash",
-    "name": "inject-crash",
-    "title": "Inject Crash (M3.5)",
-    "name_zh": "注入宕机（M3.5）",
+    "id": "inject-fault",
+    "name": "inject-fault",
+    "title": "Inject Fault (M3.5)",
+    "name_zh": "注入故障（M3.5）",
     "description": "M3.5 demo control: interrupt the run WITHOUT erasing its progress records, then let recovery continue from the breakpoint. Proves crash-resilience live: finished steps are skipped, the run picks up where it stopped. Injecting a fault into a single piece of equipment is the finer-grained variant — force its next job to fail with a chosen fault type.",
     "description_zh": "M3.5 演示控制：打断运行但不清除进度记录，然后让恢复逻辑从断点继续。 现场证明抗宕机能力：已完成的步骤跳过，从停下的地方接着跑。 往单台设备注入故障是更细的变体——强制它的下一个 job 按指定故障类型失败。",
     "parameters": [
@@ -24,38 +24,19 @@ payload:
       }
     ],
     "produces": [
-      "crash-injected",
-      "run-recovered"
+      "fault-injected"
     ]
   }
 events:
   {
-    "crash-injected": {
-      "name": "crash-injected",
+    "fault-injected": {
+      "name": "fault-injected",
       "description": "The run was interrupted; progress records kept.",
       "payloads": [
         {
           "name": "workOrderId",
           "dataType": "string",
           "description": "Interrupted run"
-        }
-      ],
-      "bindings": [],
-      "foldAssignments": []
-    },
-    "run-recovered": {
-      "name": "run-recovered",
-      "description": "Recovery finished; the run continued from its breakpoint.",
-      "payloads": [
-        {
-          "name": "workOrderId",
-          "dataType": "string",
-          "description": "Recovered run"
-        },
-        {
-          "name": "resumedFromStep",
-          "dataType": "string",
-          "description": "Step the run resumed from"
         }
       ],
       "bindings": [],

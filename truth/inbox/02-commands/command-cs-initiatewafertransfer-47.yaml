@@ -1,0 +1,29 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: command
+name: InitiateWaferTransfer
+origin:
+  stage: commandStorming
+  board: extracted
+  seq: 47
+payload:
+  {
+      "type": "command",
+      "name": "InitiateWaferTransfer",
+      "name_zh": "发起晶圆转移事务",
+      "description": "Initiate a cross-lot wafer transfer saga.",
+      "description_zh": "发起跨批次晶圆转移事务。",
+      "info": {
+          "timeline": "fab-pipeline",
+          "extracted_from": "web/app/net/imadz/application/services/transactor/FabSagaProtocol.scala:14",
+          "confidence": "high",
+          "extraction_note": "Emits TransactionInitiated.",
+          "payloadFields": [
+              "sourceLotId",
+              "targetLotId",
+              "waferIds"
+          ]
+      }
+  }

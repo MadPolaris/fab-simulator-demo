@@ -1,0 +1,27 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: WaferAdditionCanceled
+origin:
+  stage: eventStorming
+  board: extracted
+  seq: 6
+payload:
+  {
+      "type": "event",
+      "name": "WaferAdditionCanceled",
+      "name_zh": "晶圆加入取消",
+      "description": "A wafer-addition reservation is canceled.",
+      "description_zh": "晶圆加入的预留被取消。",
+      "info": {
+          "timeline": "lot",
+          "extracted_from": "web/app/net/imadz/domain/entities/LotEntity.scala:91",
+          "confidence": "high",
+          "extraction_note": "Persisted LotEvent.",
+          "payloadFields": [
+              "transferId: string"
+          ]
+      }
+  }

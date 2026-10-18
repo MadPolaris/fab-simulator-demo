@@ -1,0 +1,27 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: WorkOrderFailed
+origin:
+  stage: eventStorming
+  board: extracted
+  seq: 31
+payload:
+  {
+      "type": "event",
+      "name": "WorkOrderFailed",
+      "name_zh": "工单失败",
+      "description": "The work order fails with an error.",
+      "description_zh": "工单失败，带错误。",
+      "info": {
+          "timeline": "work-order",
+          "extracted_from": "web/app/net/imadz/domain/entities/WorkOrderEntity.scala:49",
+          "confidence": "high",
+          "extraction_note": "Persisted WorkOrderEvent.",
+          "payloadFields": [
+              "error: string"
+          ]
+      }
+  }

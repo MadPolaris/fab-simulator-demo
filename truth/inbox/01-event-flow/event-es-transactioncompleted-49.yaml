@@ -1,0 +1,28 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: TransactionCompleted
+origin:
+  stage: eventStorming
+  board: extracted
+  seq: 49
+payload:
+  {
+      "type": "event",
+      "name": "TransactionCompleted",
+      "name_zh": "事务完成",
+      "description": "The saga transaction completes.",
+      "description_zh": "事务完成。",
+      "info": {
+          "timeline": "fab-pipeline",
+          "extracted_from": "web/app/net/imadz/domain/entities/FabSagaTransactionEntity.scala:38",
+          "confidence": "high",
+          "extraction_note": "Persisted FabSagaTransactionEvent.",
+          "payloadFields": [
+              "id: string",
+              "timestamp: long"
+          ]
+      }
+  }

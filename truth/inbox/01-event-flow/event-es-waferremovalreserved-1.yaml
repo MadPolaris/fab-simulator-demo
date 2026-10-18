@@ -1,0 +1,29 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: WaferRemovalReserved
+origin:
+  stage: eventStorming
+  board: extracted
+  seq: 1
+payload:
+  {
+      "type": "event",
+      "name": "WaferRemovalReserved",
+      "name_zh": "晶圆移出预留",
+      "description": "Wafers are reserved for removal under a transfer id (idempotent on transferId).",
+      "description_zh": "按转移单号预留要移出的晶圆（按单号幂等）。",
+      "info": {
+          "timeline": "lot",
+          "extracted_from": "web/app/net/imadz/domain/entities/LotEntity.scala:86",
+          "confidence": "high",
+          "extraction_note": "Persisted LotEvent; reserve/commit/release three-step transfer protocol.",
+          "payloadFields": [
+              "transferId: string",
+              "waferIds: set",
+              "waferNames: set"
+          ]
+      }
+  }

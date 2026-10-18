@@ -14,19 +14,19 @@ payload:
       {
         "name": "breakpoint",
         "dataType": "string",
-        "source": "eventField:step-completed.completedStepCount",
+        "source": "eventField:StepCompleted.completedStepCount",
         "description": "Step the run was interrupted at / resumed from. [pilot derived_from: last recorded completedStepCount]"
       },
       {
         "name": "recovered",
         "dataType": "boolean",
-        "source": "eventField:run-recovered.workOrderId",
-        "description": "Whether recovery finished. [pilot derived_from: run-recovered event present]"
+        "source": "eventField:StepCompleted.workOrderId",
+        "description": "Whether recovery finished. [pilot derived_from: run-recovered event present — 2026-10-18 adjudicated: run-recovered deleted as workshop-only; source repointed to StepCompleted (steps resuming completion after a fault = recovered)]"
       },
       {
         "name": "faultHistory",
         "dataType": "string[]",
-        "source": "eventField:step-failed.error",
+        "source": "eventField:StepFailed.error",
         "description": "Fault codes seen by this run, in order. [pilot derived_from: step-failed events' error codes]"
       }
     ],

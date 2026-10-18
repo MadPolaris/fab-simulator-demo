@@ -32,13 +32,13 @@ payload:
       }
     ],
     "produces": [
-      "wafers-scrapped"
+      "sublot-scrapped"
     ]
   }
 events:
   {
-    "wafers-scrapped": {
-      "name": "wafers-scrapped",
+    "sublot-scrapped": {
+      "name": "sublot-scrapped",
       "description": "Wafers left the lot as scrap.",
       "payloads": [
         {

@@ -24,7 +24,7 @@ payload:
       "roleId": "process-engineer",
       "can_issue": [
         "create-work-order",
-        "start-pipeline-run",
+        "start-process",
         "merge-sublot"
       ],
       "can_view": [

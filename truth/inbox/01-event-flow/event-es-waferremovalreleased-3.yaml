@@ -1,0 +1,27 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: WaferRemovalReleased
+origin:
+  stage: eventStorming
+  board: extracted
+  seq: 3
+payload:
+  {
+      "type": "event",
+      "name": "WaferRemovalReleased",
+      "name_zh": "晶圆移出预留释放",
+      "description": "A wafer-removal reservation is released without committing.",
+      "description_zh": "晶圆移出的预留被释放，未提交。",
+      "info": {
+          "timeline": "lot",
+          "extracted_from": "web/app/net/imadz/domain/entities/LotEntity.scala:88",
+          "confidence": "high",
+          "extraction_note": "Persisted LotEvent.",
+          "payloadFields": [
+              "transferId: string"
+          ]
+      }
+  }

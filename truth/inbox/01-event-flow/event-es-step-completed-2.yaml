@@ -15,10 +15,11 @@ payload:
     "description": "One queue step finished cleanly. Records which step finished and the full run state at that moment — the resume breakpoint.",
     "description_zh": "队列中某步骤干净完成。记下完成的步骤与当时完整运行状态——这就是断点。",
     "links": [
-      "command:start-pipeline-run"
+      "aggregate:fab-saga-transaction"
     ],
     "info": {
-      "timeline": "fab-pipeline",
+          "adjudication": "2026-10-18 steward: re-attributed from fab-pipeline-run to fab-saga-transaction; code truth is SagaProgressEvent (saga transactor engine progress, carries transactionId), not pipeline-run domain events.",
+      "timeline": "saga",
       "sequence": 3,
       "payloadFields": [
         "stepName: string — 步骤名（断点）",

@@ -2,23 +2,22 @@
 
 kind: note
 type: field
-name: RunStartedFields
+name: FaultInjectedFields
 origin:
   stage: refining
   board: reconstructed
-  seq: 21
+  seq: 17
 payload:
   {
     "type": "field",
-    "name": "RunStartedFields",
-    "name_zh": "流水线启动字段",
-    "description": "Fields of RunStarted.",
-    "description_zh": "RunStarted 的字段。",
+    "name": "FaultInjectedFields",
+    "name_zh": "宕机注入字段",
+    "description": "Fields of FaultInjected.",
+    "description_zh": "FaultInjected 的字段。",
     "info": {
       "pilotType": "messageFields",
       "fields": [
-        "workOrderId: string",
-        "scenarioId: string"
+        "workOrderId: string"
       ]
     }
   }

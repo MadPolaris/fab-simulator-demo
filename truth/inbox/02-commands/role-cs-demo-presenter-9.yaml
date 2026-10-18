@@ -21,7 +21,7 @@ payload:
     "info": {
       "roleId": "demo-presenter",
       "can_issue": [
-        "inject-crash"
+        "inject-fault"
       ],
       "can_view": [
         "equipment-board",

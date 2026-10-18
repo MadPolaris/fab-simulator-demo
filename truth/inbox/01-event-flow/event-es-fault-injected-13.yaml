@@ -2,24 +2,24 @@
 
 kind: note
 type: event
-name: RunCompleted
+name: FaultInjected
 origin:
   stage: eventStorming
   board: reconstructed
-  seq: 12
+  seq: 13
 payload:
   {
     "type": "event",
-    "name": "RunCompleted",
-    "name_zh": "流水线完工",
-    "description": "All queue steps finished; the work order is sealed.",
-    "description_zh": "队列步骤全部完成；工单封单。",
+    "name": "FaultInjected",
+    "name_zh": "故障注入",
+    "description": "M3.5 demo-only: the run was interrupted; progress records were kept.",
+    "description_zh": "M3.5 仅演示用：运行被打断，进度记录保留。",
     "links": [
-      "command:start-pipeline-run"
+      "command:inject-fault"
     ],
     "info": {
       "timeline": "fab-pipeline",
-      "sequence": 13,
+      "sequence": 14,
       "payloadFields": [
         "workOrderId: string"
       ]

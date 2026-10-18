@@ -14,13 +14,13 @@ payload:
       {
         "name": "areas",
         "dataType": "map<string, string>",
-        "source": "eventField:step-failed.error",
+        "source": "eventField:StepFailed.error",
         "description": "AreaId → status (up / down). [pilot derived_from: equipment-state in the run state + area down/reset commands]"
       },
       {
         "name": "machines",
         "dataType": "map<string, equipment-state>",
-        "source": "eventField:step-failed.error",
+        "source": "eventField:StepFailed.error",
         "description": "EquipmentId → status, error count. [pilot derived_from: equipment-state in the run state]"
       }
     ],

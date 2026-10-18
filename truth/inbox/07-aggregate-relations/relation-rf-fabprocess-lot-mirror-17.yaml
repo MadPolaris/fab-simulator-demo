@@ -1,0 +1,22 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: relation
+name: FabProcessLotMirror
+origin:
+  stage: refining
+  board: adjudicated
+  seq: 0
+payload:
+  {
+      "type": "relation",
+      "name": "FabProcessLotMirror",
+      "name_zh": "FabProcess↔Lot 镜像分工",
+      "description": "FabProcess and Lot record the same run from two sides — this is a deliberate mirror, not duplication. FabProcess = 执行记录 (how the pipeline run executed: step-queue progress, equipment jobs, FOUP transports, per-step measurements). Lot = 领域状态 (the wafer lot itself: wafers, sub-lot split/merge, classification, disposition). Code truth: LotEntity persists the lot domain events while FabProcess* events (FabProcessCompleted, FabProcessEquipmentJobStarted, …) record the execution view — 15+15 mirrored events/commands.",
+      "description_zh": "FabProcess 和 Lot 从两侧记录同一场运行——这是有意的镜像，不是重复。FabProcess＝执行记录（流水线怎么跑的：步骤队列进度、设备任务、晶圆盒搬送、每步量测）；Lot＝领域状态（批次本身：晶圆、子批次切分/合并、判等、处置）。代码实证：LotEntity 记批次领域事件，FabProcess* 事件记执行视图——15+15 镜像事件/命令。",
+      "info": {
+          "cardinality": "1:1",
+          "meaning": "同一场运行的两种记录视角，显式镜像",
+          "adjudication": "2026-10-18 steward decision (user: 全按推荐 group 5): keep both, division of labor fixed as above; the mirror is explicit in the tree so future readers don't mistake it for duplication or dead code."
+      }
+  }

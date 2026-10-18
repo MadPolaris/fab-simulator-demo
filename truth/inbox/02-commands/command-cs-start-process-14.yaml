@@ -2,7 +2,7 @@
 
 kind: note
 type: command
-name: StartPipelineRun
+name: StartProcess
 origin:
   stage: commandStorming
   board: reconstructed
@@ -10,16 +10,14 @@ origin:
 payload:
   {
     "type": "command",
-    "name": "StartPipelineRun",
-    "id": "start-pipeline-run",
+    "name": "StartProcess",
+    "id": "start-process",
     "name_zh": "启动流水线运行",
     "description": "Start executing the fab step queue for a work order. One work order, one run — a second start is refused.",
     "description_zh": "为一个工单启动 fab 步骤队列。一个工单一次运行，重复启动被拒绝。",
     "links": [
-      "event:RunStarted",
       "event:StepCompleted",
       "event:StepFailed",
-      "event:RunCompleted",
       "event:run-failed",
       "role:ProcessEngineer"
     ],
@@ -28,7 +26,6 @@ payload:
         "role: 工艺工程师"
       ],
       "produces": [
-        "run-started",
         "step-completed",
         "step-failed",
         "run-completed"

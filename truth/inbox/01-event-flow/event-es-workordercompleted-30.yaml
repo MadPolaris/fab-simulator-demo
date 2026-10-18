@@ -1,0 +1,24 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: WorkOrderCompleted
+origin:
+  stage: eventStorming
+  board: extracted
+  seq: 30
+payload:
+  {
+      "type": "event",
+      "name": "WorkOrderCompleted",
+      "name_zh": "工单完成",
+      "description": "The work order completes.",
+      "description_zh": "工单完成。",
+      "info": {
+          "timeline": "work-order",
+          "extracted_from": "web/app/net/imadz/domain/entities/WorkOrderEntity.scala:44",
+          "confidence": "high",
+          "extraction_note": "Persisted WorkOrderEvent."
+      }
+  }

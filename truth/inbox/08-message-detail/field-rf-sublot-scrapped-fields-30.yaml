@@ -2,22 +2,23 @@
 
 kind: note
 type: field
-name: RunCompletedFields
+name: SubLotScrappedFields
 origin:
   stage: refining
   board: reconstructed
-  seq: 19
+  seq: 30
 payload:
   {
     "type": "field",
-    "name": "RunCompletedFields",
-    "name_zh": "流水线完工字段",
-    "description": "Fields of RunCompleted.",
-    "description_zh": "RunCompleted 的字段。",
+    "name": "SubLotScrappedFields",
+    "name_zh": "晶圆报废字段",
+    "description": "Fields of SubLotScrapped.",
+    "description_zh": "SubLotScrapped 的字段。",
     "info": {
       "pilotType": "messageFields",
       "fields": [
-        "workOrderId: string"
+        "lotId: string",
+        "waferIds: string[]"
       ]
     }
   }

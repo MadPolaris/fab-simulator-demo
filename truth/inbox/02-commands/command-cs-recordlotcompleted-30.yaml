@@ -1,0 +1,27 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: command
+name: RecordLotCompleted
+origin:
+  stage: commandStorming
+  board: extracted
+  seq: 30
+payload:
+  {
+      "type": "command",
+      "name": "RecordLotCompleted",
+      "name_zh": "登记批次完工",
+      "description": "Record a lot completion against the work order.",
+      "description_zh": "登记批次完工到工单。",
+      "info": {
+          "timeline": "work-order",
+          "extracted_from": "web/app/net/imadz/application/aggregates/WorkOrderProtocol.scala:22",
+          "confidence": "high",
+          "extraction_note": "Emits LotCompletionRecorded.",
+          "payloadFields": [
+              "lotId"
+          ]
+      }
+  }

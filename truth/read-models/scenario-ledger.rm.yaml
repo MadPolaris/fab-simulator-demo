@@ -14,13 +14,13 @@ payload:
       {
         "name": "entries",
         "dataType": "map<string, string>",
-        "source": "eventField:run-completed.workOrderId",
+        "source": "eventField:LotCompletionRecorded.workOrderId",
         "description": "WorkOrderId → completed | failed. [pilot derived_from: run-completed / run-failed events]"
       },
       {
         "name": "totals",
         "dataType": "map<string, integer>",
-        "source": "eventField:run-completed.passCount",
+        "source": "eventField:LotCompletionRecorded.passCount",
         "description": "Aggregate pass / scrap counts across the scenario's runs. [pilot derived_from: sum over run states]"
       }
     ],

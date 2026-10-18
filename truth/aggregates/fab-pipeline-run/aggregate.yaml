@@ -3,8 +3,8 @@
 kind: aggregate
 name: "Fab Pipeline Run"
 order:
-  commands: ["start-pipeline-run","inject-crash","handle-ocap"]
-  events: ["run-started","step-completed","step-failed","run-completed","run-failed","crash-injected","run-recovered","ocap-handled"]
+  commands: ["start-process","inject-fault","handle-ocap"]
+  events: ["run-failed","fault-injected","ocap-handled"]
 payload:
   {
     "id": "fab-pipeline-run",
@@ -89,18 +89,16 @@ payload:
       "failed"
     ],
     "statusTransitions": {
-      "run-completed": "completed",
-      "run-failed": "failed",
-      "run-recovered": "running"
+      "run-failed": "failed"
     },
     "stateGates": {
-      "start-pipeline-run": {
+      "start-process": {
         "fromStates": [
           "idle"
         ],
         "toState": "running"
       },
-      "inject-crash": {
+      "inject-fault": {
         "fromStates": [
           "running"
         ],

@@ -1,0 +1,28 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: command
+name: AdminManualFixStep
+origin:
+  stage: commandStorming
+  board: extracted
+  seq: 51
+payload:
+  {
+      "type": "command",
+      "name": "AdminManualFixStep",
+      "name_zh": "人工修复步骤",
+      "description": "Admin manually fixes a stuck saga step.",
+      "description_zh": "人工修复卡住的事务步骤。",
+      "info": {
+          "timeline": "fab-pipeline",
+          "extracted_from": "web/app/net/imadz/application/services/transactor/FabSagaProtocol.scala:46",
+          "confidence": "high",
+          "extraction_note": "The ManualFixRecovery semantic fork (see saga-core history) lives here too — steward note.",
+          "payloadFields": [
+              "transactionId",
+              "stepId"
+          ]
+      }
+  }

@@ -1,0 +1,28 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: WafersSampled
+origin:
+  stage: eventStorming
+  board: extracted
+  seq: 23
+payload:
+  {
+      "type": "event",
+      "name": "WafersSampled",
+      "name_zh": "晶圆抽样",
+      "description": "Wafers are sampled: some measured, the rest skipped.",
+      "description_zh": "晶圆抽样：部分量测，其余跳过。",
+      "info": {
+          "timeline": "lot",
+          "extracted_from": "web/app/net/imadz/domain/entities/LotEntity.scala:109",
+          "confidence": "high",
+          "extraction_note": "Persisted LotEvent.",
+          "payloadFields": [
+              "sampleIds: set",
+              "skipIds: set"
+          ]
+      }
+  }

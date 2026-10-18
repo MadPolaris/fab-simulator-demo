@@ -1,0 +1,27 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: WaferAdditionCommitted
+origin:
+  stage: eventStorming
+  board: extracted
+  seq: 5
+payload:
+  {
+      "type": "event",
+      "name": "WaferAdditionCommitted",
+      "name_zh": "晶圆加入提交",
+      "description": "A reserved wafer addition is committed.",
+      "description_zh": "已预留的晶圆加入按单号提交。",
+      "info": {
+          "timeline": "lot",
+          "extracted_from": "web/app/net/imadz/domain/entities/LotEntity.scala:90",
+          "confidence": "high",
+          "extraction_note": "Persisted LotEvent.",
+          "payloadFields": [
+              "transferId: string"
+          ]
+      }
+  }

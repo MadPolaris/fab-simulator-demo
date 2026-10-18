@@ -15,10 +15,11 @@ payload:
     "description": "A step failed with a classified equipment/process error (HARDWARE_FAULT, COMM_TIMEOUT, SENSOR_ANOMALY, POWER_FLUCTUATION, ABORTED).",
     "description_zh": "某步骤带着已分类的设备/工艺错误失败（HARDWARE_FAULT、COMM_TIMEOUT、SENSOR_ANOMALY、POWER_FLUCTUATION、ABORTED）。",
     "links": [
-      "command:start-pipeline-run"
+      "aggregate:fab-saga-transaction"
     ],
     "info": {
-      "timeline": "fab-pipeline",
+          "adjudication": "2026-10-18 steward: re-attributed from fab-pipeline-run to fab-saga-transaction; code truth is SagaProgressEvent (saga transactor engine progress, carries transactionId), not pipeline-run domain events.",
+      "timeline": "saga",
       "sequence": 11,
       "payloadFields": [
         "stepName: string",

@@ -1,0 +1,24 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: aggregate
+name: FabSagaTransaction
+origin:
+  stage: aggregateDiscovery
+  board: extracted
+  seq: 3
+payload:
+  {
+      "type": "aggregate",
+      "name": "FabSagaTransaction",
+      "name_zh": "跨批事务",
+      "description": "A cross-lot saga transaction (transfer/split/merge). Boundary = transactionId; 3 events.",
+      "description_zh": "跨批次 saga 事务（转移/拆分/合并）。边界 = transactionId；3 个事件。",
+      "info": {
+          "timeline": "fab-pipeline",
+          "extracted_from": "web/app/net/imadz/domain/entities/FabSagaTransactionEntity.scala",
+          "confidence": "high",
+          "extraction_note": "Statuses: New/Initiated/Completed/Failed."
+      }
+  }

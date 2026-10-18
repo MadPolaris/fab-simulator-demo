@@ -1,0 +1,27 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: command
+name: AdminResumeTransaction
+origin:
+  stage: commandStorming
+  board: extracted
+  seq: 52
+payload:
+  {
+      "type": "command",
+      "name": "AdminResumeTransaction",
+      "name_zh": "人工恢复事务",
+      "description": "Admin resumes a saga transaction.",
+      "description_zh": "人工恢复事务。",
+      "info": {
+          "timeline": "fab-pipeline",
+          "extracted_from": "web/app/net/imadz/application/services/transactor/FabSagaProtocol.scala:52",
+          "confidence": "high",
+          "extraction_note": "Admin/ops command.",
+          "payloadFields": [
+              "transactionId"
+          ]
+      }
+  }

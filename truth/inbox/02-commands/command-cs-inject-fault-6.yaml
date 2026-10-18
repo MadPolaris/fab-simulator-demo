@@ -2,7 +2,7 @@
 
 kind: note
 type: command
-name: InjectCrash
+name: InjectFault
 origin:
   stage: commandStorming
   board: reconstructed
@@ -10,14 +10,13 @@ origin:
 payload:
   {
     "type": "command",
-    "name": "InjectCrash",
-    "id": "inject-crash",
-    "name_zh": "注入宕机",
+    "name": "InjectFault",
+    "id": "inject-fault",
+    "name_zh": "注入故障",
     "description": "M3.5 demo-only: interrupt the running pipeline while keeping progress records, to demonstrate crash recovery live.",
     "description_zh": "M3.5 仅演示用：打断运行中的流水线但保留进度记录，现场演示崩溃恢复。",
     "links": [
-      "event:CrashInjected",
-      "event:RunRecovered",
+      "event:FaultInjected",
       "role:DemoPresenter"
     ],
     "info": {
@@ -25,8 +24,7 @@ payload:
         "role: 演示者"
       ],
       "produces": [
-        "crash-injected",
-        "run-recovered"
+        "fault-injected"
       ],
       "parameters": [
         "workOrderId: string"

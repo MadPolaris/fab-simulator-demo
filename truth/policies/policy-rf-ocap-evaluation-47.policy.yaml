@@ -8,7 +8,7 @@ origin:
   board: reconstructed
   seq: 47
 triggers:
-  - event: step-failed
+  - event: StepFailed
     aggregate: Fab Pipeline Run
 invokes:
   - command: handle-ocap
@@ -22,13 +22,13 @@ payload:
     "description": "When a step fails, evaluate the OCAP rules against the current run state in priority order (lower number first). The first matching rule whose per-lot trigger budget is not exhausted wins; its action plan is executed. A missing metric obeys the rule's MissingMetricPolicy: ConservativePass skips the rule, ConservativeReject fires it. With no matching rule, the failure stands.",
     "description_zh": "步骤失败时，按优先级对当前运行状态求值 OCAP 规则（数字越小越先）。 第一条命中且本 Lot 触发预算没用完的规则获胜，执行其处置预案。 缺失的指标按规则的 MissingMetricPolicy 处理：ConservativePass 跳过 该规则，ConservativeReject 则触发。没有命中的规则，失败成立。",
     "links": [
-      "event:step-failed",
+      "event:StepFailed",
       "command:handle-ocap"
     ],
     "info": {
       "triggers": [
         {
-          "event": "step-failed",
+          "event": "StepFailed",
           "aggregate": "Fab Pipeline Run"
         }
       ],

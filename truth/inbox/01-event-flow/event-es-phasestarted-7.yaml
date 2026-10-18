@@ -1,0 +1,27 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: PhaseStarted
+origin:
+  stage: eventStorming
+  board: extracted
+  seq: 7
+payload:
+  {
+      "type": "event",
+      "name": "PhaseStarted",
+      "name_zh": "阶段开始",
+      "description": "A lot processing phase starts.",
+      "description_zh": "批次进入一个加工阶段。",
+      "info": {
+          "timeline": "lot",
+          "extracted_from": "web/app/net/imadz/domain/entities/LotEntity.scala:92",
+          "confidence": "high",
+          "extraction_note": "Persisted LotEvent.",
+          "payloadFields": [
+              "phaseId: string"
+          ]
+      }
+  }

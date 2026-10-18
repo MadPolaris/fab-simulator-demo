@@ -1,0 +1,24 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: LotCompletionRecorded
+origin:
+  stage: eventStorming
+  board: extracted
+  seq: 32
+payload:
+  {
+      "type": "event",
+      "name": "LotCompletionRecorded",
+      "name_zh": "批次完工登记",
+      "description": "A lot's completion is recorded against the work order.",
+      "description_zh": "一个批次的完工登记到工单上。",
+      "info": {
+          "timeline": "work-order",
+          "extracted_from": "web/app/net/imadz/domain/entities/WorkOrderEntity.scala:50",
+          "confidence": "high",
+          "extraction_note": "Persisted WorkOrderEvent."
+      }
+  }

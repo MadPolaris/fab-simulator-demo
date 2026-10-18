@@ -14,7 +14,7 @@ payload:
       {
         "name": "frames",
         "dataType": "string[]",
-        "source": "eventField:run-started.workOrderId",
+        "source": "eventField:WorkOrderCreated.workOrderId",
         "description": "Domain event frames in occurrence order (demo-started, equipment-state-changed, foup-in-transit, processing-started/completed, measurement-result, decision-made, ocap-action-triggered, transaction-operation, lot-updated, …). [pilot derived_from: domain events as recorded]"
       }
     ],

@@ -14,31 +14,31 @@ payload:
       {
         "name": "steps",
         "dataType": "string[]",
-        "source": "eventField:step-completed.stepName",
+        "source": "eventField:StepCompleted.stepName",
         "description": "Step names in completion order. [pilot derived_from: step-completed events, in order]"
       },
       {
         "name": "outcomes",
         "dataType": "map<string, string>",
-        "source": "eventField:step-completed.stepName",
+        "source": "eventField:StepCompleted.stepName",
         "description": "Step name → completed | failed | ocap-recovered. [pilot derived_from: step-completed / step-failed / ocap-handled events]"
       },
       {
         "name": "passCount",
         "dataType": "integer",
-        "source": "eventField:run-completed.passCount",
+        "source": "eventField:LotCompletionRecorded.passCount",
         "description": "Wafers passed so far. [pilot derived_from: latest run state]"
       },
       {
         "name": "scrapCount",
         "dataType": "integer",
-        "source": "eventField:run-completed.scrapCount",
+        "source": "eventField:LotCompletionRecorded.scrapCount",
         "description": "Wafers scrapped so far. [pilot derived_from: latest run state]"
       },
       {
         "name": "currentStep",
         "dataType": "string",
-        "source": "eventField:step-completed.stepName",
+        "source": "eventField:StepCompleted.stepName",
         "description": "Step currently executing. [pilot derived_from: last step-completed + queue position]"
       }
     ],

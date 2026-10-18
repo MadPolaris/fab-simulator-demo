@@ -1,0 +1,30 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: TransactionInitiated
+origin:
+  stage: eventStorming
+  board: extracted
+  seq: 48
+payload:
+  {
+      "type": "event",
+      "name": "TransactionInitiated",
+      "name_zh": "事务发起",
+      "description": "A cross-lot saga transaction is initiated.",
+      "description_zh": "发起一个跨批次 saga 事务。",
+      "info": {
+          "timeline": "fab-pipeline",
+          "extracted_from": "web/app/net/imadz/domain/entities/FabSagaTransactionEntity.scala:37",
+          "confidence": "high",
+          "extraction_note": "Persisted FabSagaTransactionEvent.",
+          "payloadFields": [
+              "sourceLotId: string",
+              "targetLotId: string",
+              "waferIds: set",
+              "timestamp: long"
+          ]
+      }
+  }

@@ -1,0 +1,29 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: WaferAdditionReserved
+origin:
+  stage: eventStorming
+  board: extracted
+  seq: 4
+payload:
+  {
+      "type": "event",
+      "name": "WaferAdditionReserved",
+      "name_zh": "晶圆加入预留",
+      "description": "Wafers are reserved for addition under a transfer id, carrying their states.",
+      "description_zh": "按转移单号预留要加入的晶圆，携带晶圆状态。",
+      "info": {
+          "timeline": "lot",
+          "extracted_from": "web/app/net/imadz/domain/entities/LotEntity.scala:89",
+          "confidence": "high",
+          "extraction_note": "Persisted LotEvent.",
+          "payloadFields": [
+              "transferId: string",
+              "waferIds: set",
+              "carriedWafers: map"
+          ]
+      }
+  }

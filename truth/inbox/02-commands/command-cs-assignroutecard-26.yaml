@@ -1,0 +1,29 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: command
+name: AssignRouteCard
+origin:
+  stage: commandStorming
+  board: extracted
+  seq: 26
+payload:
+  {
+      "type": "command",
+      "name": "AssignRouteCard",
+      "name_zh": "下发工艺卡",
+      "description": "Assign a route card (step list) to the lot.",
+      "description_zh": "给批次下发工艺卡（步骤清单）。",
+      "info": {
+          "timeline": "lot",
+          "extracted_from": "web/app/net/imadz/application/aggregates/LotProtocol.scala:49",
+          "confidence": "high",
+          "extraction_note": "Dynamic POR mechanism — the route card is data, not code.",
+          "payloadFields": [
+              "steps",
+              "sourcedFrom?",
+              "reason"
+          ]
+      }
+  }
