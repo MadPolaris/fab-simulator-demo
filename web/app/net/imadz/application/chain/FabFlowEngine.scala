@@ -136,7 +136,7 @@ object FabFlowEngine {
   private def loadFoup(state: FabDemoState, ctx: FabDemoContext, routing: Por): Future[FabDemoState] = {
     val s = PipelineStages.emitLedger(state, s"PhaseLoad: Load FOUP — ${routing.productId} (${routing.steps.size} steps)", ctx)
     ctx.stageProgress("LOADING", s"Starting ${routing.productId}", "PhaseLoad")
-    ctx.lotRef ! RecordFoupLoaded(ctx.foupId, StockerEquipId, ctx.ignoreLotReply)
+    ctx.notifyLot(RecordFoupLoaded(ctx.foupId, StockerEquipId, _))
     ctx.publish(FoupStateChanged(ctx.foupId, "LOADING", PipelineStages.activeCount(state), 0, "STOCKER", lotId = routing.productId))
     ctx.publish(FoupArrivedAtPort(ctx.foupId, StockerEquipId, "STOCKER-PORT-1"))
     ctx.publish(EquipmentStateChanged(StockerEquipId, "STOCKER", "Idle", None))
@@ -159,14 +159,14 @@ object FabFlowEngine {
       s3 = PipelineStages.emitLedger(s2b, s"Measure: CD-SEM — ${step.recipeId}", ctx)
       _ = {
         ctx.stageProgress("MEASURING", "CD measurement", "PhaseMeasure")
-        ctx.lotRef ! RecordEquipmentJobStarted(CdsemEquipId, "CD-MEASURE-001", ctx.ignoreLotReply)
+        ctx.notifyLot(RecordEquipmentJobStarted(CdsemEquipId, "CD-MEASURE-001", _))
         ctx.publish(EquipmentStateChanged(CdsemEquipId, "MET", "Busy", Some("metrology-job")))
         ctx.publish(ProcessingStarted(CdsemEquipId, "CD-MEASURE-001", scaledMs))
       }
       result <- ctx.adapter.sendCommand(CdsemEquipId, ProcessRecipe("CD-MEASURE-001"))
       s4 <- result match {
         case net.imadz.fab.protocol.JobCompleted(jobId, _, net.imadz.fab.protocol.MetrologyResult(_, waferMeasurements)) =>
-          ctx.lotRef ! RecordEquipmentJobCompleted(CdsemEquipId, jobId, success = true, ctx.ignoreLotReply)
+          ctx.notifyLot(RecordEquipmentJobCompleted(CdsemEquipId, jobId, success = true, _))
           ctx.publish(ProcessingCompleted(CdsemEquipId, jobId, success = true, ""))
           ctx.publish(EquipmentStateChanged(CdsemEquipId, "MET", "Idle", None))
           val cdValues: Map[String, Double] = waferMeasurements.map { case (wid, cd) => wid -> cd.measuredNm }
@@ -201,24 +201,24 @@ object FabFlowEngine {
         val cdValue = info.cdValueHistory.lastOption.getOrElse(32.0)
         val disposition = DynamicFlowAssembler.classifyWafer(cdValue, spec, info.reworkCount)
 
-        ctx.lotRef ! RecordWaferMeasured(ctx.waferUUIDs(wid), cdValue, ctx.ignoreLotReply)
+        ctx.notifyLot(RecordWaferMeasured(ctx.waferUUIDs(wid), cdValue, _))
         ctx.publish(MeasurementResultEvent(wid, cdValue,
           disposition.getClass.getSimpleName.replace("Disposition", "").toUpperCase, spec.upperSpecNm))
 
         disposition match {
           case PassDisposition(_) =>
             updatedWafers += wid -> info.copy(classification = Some("PASS"))
-            ctx.lotRef ! RecordWaferClassified(ctx.waferUUIDs(wid),"PASS", info.reworkCount, cdValue, ctx.ignoreLotReply)
+            ctx.notifyLot(RecordWaferClassified(ctx.waferUUIDs(wid),"PASS", info.reworkCount, cdValue, _))
             ctx.publish(DecisionMade(wid, "PASS → Continue", None))
             dispositions += wid -> disposition
           case d: ReworkDisposition =>
             updatedWafers += wid -> info.copy(reworkCount = d.attempt, classification = Some("FAIL"))
-            ctx.lotRef ! RecordWaferClassified(ctx.waferUUIDs(wid),"FAIL", d.attempt, cdValue, ctx.ignoreLotReply)
+            ctx.notifyLot(RecordWaferClassified(ctx.waferUUIDs(wid),"FAIL", d.attempt, cdValue, _))
             ctx.publish(DecisionMade(wid, s"FAIL → Split for Rework (attempt ${d.attempt}/${d.maxRetries})", None))
             dispositions += wid -> d
           case d: ScrapDisposition =>
             updatedWafers += wid -> info.copy(classification = Some("SCRAP"))
-            ctx.lotRef ! RecordWaferClassified(ctx.waferUUIDs(wid),"SCRAP", info.reworkCount, cdValue, ctx.ignoreLotReply)
+            ctx.notifyLot(RecordWaferClassified(ctx.waferUUIDs(wid),"SCRAP", info.reworkCount, cdValue, _))
             ctx.publish(DecisionMade(wid, s"SCRAP: ${d.reason}", None))
             ctx.publish(ScrapEvent(wid, d.reason))
             dispositions += wid -> d
@@ -270,7 +270,7 @@ object FabFlowEngine {
             s"FAB-REWORK-${ctx.sourceLotId.toString.take(8)}", Map.empty, ref,
             parentLotId = Some(ctx.sourceLotId), splitReason = Some(ReworkSplit)))
 
-        ctx.lotRef ! RecordWafersSplitForRework(reworkWaferIds.toSet, scrapWaferIdsInStep, s.iteration + 1, ctx.ignoreLotReply)
+        ctx.notifyLot(RecordWafersSplitForRework(reworkWaferIds.toSet, scrapWaferIdsInStep, s.iteration + 1, _))
         val sagaId = PipelineStages.cmdId()
         ctx.publish(SagaOperationEvent(sagaId, "SplitLot", "PREPARE",
           ctx.scenario.scenarioId, s"${ctx.scenario.scenarioId}-RWK", reworkWaferIds))
@@ -284,7 +284,7 @@ object FabFlowEngine {
             ctx.publish(OrchestratorCommand(PipelineStages.cmdId(), "DECISION-ENGINE", "SplitCompleted",
               s"TCC Split committed: ${reworkWaferIds.mkString(",")} → Rework Lot", reworkWaferIds))
             // Domain event: source lot records sub-lot creation for dynamic rework
-            ctx.lotRef ! RecordSubLotCreated(ctx.reworkLotId, ReworkSplit, reworkWaferUUIDs, ctx.ignoreLotReply)
+            ctx.notifyLot(RecordSubLotCreated(ctx.reworkLotId, ReworkSplit, reworkWaferUUIDs, _))
             val rwkSet = reworkWaferIds.toSet
             val wafersWithSubLot = updatedWafers.map { case (wid, info) =>
               if (rwkSet.contains(wid)) wid -> info.copy(subLot = Some("rwk"))
@@ -348,11 +348,11 @@ object FabFlowEngine {
     // 封批前必须把主批从 AwaitingSubLot 恢复，否则 SealLot 被拒、批生命周期无法闭合。
     if (state.childLotView.exists { case (_, (st, _)) => st == "Active" }) {
       ctx.childLotIds.foreach { case (_, childId) =>
-        ctx.lotRef ! RecordSubLotMerged(childId, Set.empty, ctx.ignoreLotReply)
+        ctx.notifyLot(RecordSubLotMerged(childId, Set.empty, _))
       }
     }
-    ctx.lotRef ! SealLot(ctx.ignoreLotReply)
-    ctx.lotRef ! CompleteProcess(routing.productId, state.passCount, state.scrapCount, 0, ctx.ignoreLotReply)
+    ctx.notifyLot(SealLot(_))
+    ctx.notifyLot(CompleteProcess(routing.productId, state.passCount, state.scrapCount, 0, _))
     ctx.publish(FoupStateChanged(ctx.foupId, "COMPLETED", 0, 0, "STOCKER", lotId = routing.productId))
     ctx.publish(FoupArrivedAtPort(ctx.foupId, StockerEquipId, "STOCKER-PORT-1"))
     ctx.publish(LotUpdated(routing.productId, ctx.scenario.lotSize, state.scrapCount,

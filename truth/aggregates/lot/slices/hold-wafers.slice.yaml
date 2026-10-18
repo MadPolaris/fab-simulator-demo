@@ -1,0 +1,31 @@
+# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+kind: slice
+id: hold-wafers
+name: Hold Wafers
+name_zh: 暂存晶圆
+description: >
+  Hold wafers out of the flow — e.g. BORDERLINE wafers awaiting human
+  review, or wafers an OCAP Hold plan parked. Held wafers stay in the lot
+  but no step touches them until released.
+description_zh: >
+  把晶圆暂存在流程之外——如等人工评审的 BORDERLINE 晶圆，或被 OCAP
+  Hold 预案暂存的晶圆。暂存的晶圆仍在 Lot 里，但放行前任何步骤不动它们。
+aggregate: lot
+parameters:
+  - { name: waferIds, type: "string[]", description: Wafers to hold }
+  - { name: reason, type: string, description: Why held }
+guards:
+  - description: all waferIds are members of the lot
+produces:
+  - wafers-held
+  - wafers-released
+events:
+  wafers-held:
+    description: Wafers parked out of the flow.
+    payload:
+      - { name: waferIds, type: "string[]", description: Held wafers }
+      - { name: reason, type: string, description: Why held }
+  wafers-released:
+    description: Held wafers released back into the flow.
+    payload:
+      - { name: waferIds, type: string, description: Released wafers }

@@ -1,0 +1,53 @@
+# ═══ truth root — hand-editable ═══
+kind: tree
+id: fab-simulator
+name: Fab Simulator
+name_zh: 晶圆厂仿真
+version: "0.1"
+description: >
+  Domain truth of the fab-simulator-demo: wafer lots driven through equipment
+  areas by a resumable step queue, with OCAP out-of-control-action plans,
+  deterministic transaction numbering for crash recovery, wafer measurement
+  classification, and sub-lot split/merge/scrap.
+description_zh: >
+  晶圆厂仿真演示的领域真源：晶圆 Lot 被可续跑的步骤队列驱动着走过
+  各设备区，带 OCAP 失控处置预案、宕机恢复用的确定性事务编号、
+  晶圆量测分类与子 Lot 切分/合并/报废。
+provenance:
+  extracted_from: MadPolaris/fab-simulator-demo (2026-10-18)
+  method: scenario A — read-only reverse engineering from source code
+  note: "format follows the bank-batch-transactor-demo pilot tree (clean profile: no compiler-owned bookkeeping)"
+index:
+  aggregates:
+    - fab-pipeline-run
+    - lot
+    - work-order
+  pipelines:
+    - fab-pipeline
+  value_objects:
+    - equipment-area
+    - equipment-status
+    - foup
+    - wafer-classification
+    - ocap-action-plan
+    - ocap-rule
+    - equipment-config
+    - decision-config
+    - step-error
+    - transaction-number
+    - fab-run-state
+  policies:
+    - ocap-evaluation
+    - measurement-classification
+    - transaction-number-reuse
+    - wafer-disposition
+    - lot-notification-guarantee
+  read_models:
+    - pipeline-timeline
+    - equipment-board
+    - event-feed
+    - scenario-ledger
+    - recovery-status
+  scenarios:
+    - m35-demo
+    - fab-demo-tour

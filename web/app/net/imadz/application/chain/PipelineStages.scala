@@ -79,7 +79,7 @@ object PipelineStages {
   def loadFoup(state: FabDemoState, ctx: FabDemoContext): Future[FabDemoState] = {
     emitLedger(state, "PhaseLoad: Load FOUP from Stocker", ctx)
     ctx.stageProgress("LOADING", "Loading FOUP", "PhaseLoad")
-    ctx.lotRef ! RecordFoupLoaded(ctx.foupId, ctx.scenario.stocker.equipmentId, ctx.ignoreLotReply)
+    ctx.notifyLot(RecordFoupLoaded(ctx.foupId, ctx.scenario.stocker.equipmentId, _))
     ctx.publish(FoupStateChanged(ctx.foupId, "LOADING", activeCount(state), 0, "STOCKER", lotId = ctx.scenario.scenarioId))
     ctx.publish(FoupArrivedAtPort(ctx.foupId, ctx.scenario.stocker.equipmentId, "STOCKER-PORT-1"))
     Future.successful(state.copy(ledgerSeq = state.ledgerSeq + 1, currentArea = "STOCKER"))
@@ -93,7 +93,7 @@ object PipelineStages {
     ctx.stageProgress("TRANSPORTING", s"$from → $to", "PhaseTransport")
     val routeMs = ctx.scenario.amhs.routes.get((from, to)).map(_.toMillis).getOrElse(2000L)
     val scaledMs = (routeMs / ctx.speedMultiplier).toLong
-    ctx.lotRef ! RecordTransportStarted(ctx.foupId, from, to, scaledMs, ctx.ignoreLotReply)
+    ctx.notifyLot(RecordTransportStarted(ctx.foupId, from, to, scaledMs, _))
     ctx.publish(FoupInTransit(ctx.foupId, from, to, scaledMs / 2))
     ctx.publish(FoupStateChanged(ctx.foupId, "IN_TRANSIT", activeCount(state), 0, "AMHS", lotId = ctx.scenario.scenarioId))
         val areaTransit = s"$from → $to"
@@ -123,7 +123,7 @@ object PipelineStages {
   def atEquipment(state: FabDemoState, ctx: FabDemoContext, area: String, equipId: String): Future[FabDemoState] = {
     val s = emitLedger(state, s"PhaseAt$area: FOUP at $area", ctx)
     ctx.stageProgress("AT_EQP", s"FOUP at $area", s"PhaseAt$area")
-    ctx.lotRef ! RecordTransportCompleted(ctx.foupId, equipId, ctx.ignoreLotReply)
+    ctx.notifyLot(RecordTransportCompleted(ctx.foupId, equipId, _))
     ctx.publish(FoupArrivedAtPort(ctx.foupId, equipId, s"$equipId-PORT-1"))
     ctx.publish(FoupStateChanged(ctx.foupId, "AT_EQUIPMENT", activeCount(state), 0, area, lotId = ctx.scenario.scenarioId))
     val newState = s.copy(ledgerSeq = s.ledgerSeq + 1, currentArea = area)
@@ -137,13 +137,13 @@ object PipelineStages {
     val s = emitLedger(state, s"PhaseProcess: $recipeId on $equipId", ctx)
     ctx.stageProgress("PROCESSING", s"$equipId processing", "PhaseProcess")
     val scaledMs = (ctx.scenario.litho.processingTime.toMillis / ctx.speedMultiplier).toLong
-    ctx.lotRef ! RecordEquipmentJobStarted(equipId, recipeId, ctx.ignoreLotReply)
+    ctx.notifyLot(RecordEquipmentJobStarted(equipId, recipeId, _))
     // 等区域领取任务（LOADED→BUSY）后再宣告开始加工
     askArea(ctx, areaType, replyTo => EquipmentAreaActor.StartProcess(equipId, recipeId, scaledMs, replyTo)).flatMap { _ =>
       ctx.publish(ProcessingStarted(equipId, recipeId, scaledMs))
       ctx.adapter.sendCommand(equipId, ProcessRecipe(recipeId)).flatMap {
         case JobCompleted(jobId, _, _) =>
-          ctx.lotRef ! RecordEquipmentJobCompleted(equipId, jobId, success = true, ctx.ignoreLotReply)
+          ctx.notifyLot(RecordEquipmentJobCompleted(equipId, jobId, success = true, _))
           ctx.publish(ProcessingCompleted(equipId, jobId, success = true, ""))
           askArea(ctx, areaType, replyTo => EquipmentAreaActor.FinishProcess(equipId, replyTo)).map { _ =>
             s.copy(ledgerSeq = s.ledgerSeq + 1)
@@ -181,12 +181,12 @@ object PipelineStages {
     val s = emitLedger(state, "PhaseMeasure: CD-SEM", ctx)
     ctx.stageProgress("MEASURING", "CD measurement", "PhaseMeasure")
     val scaledMs = (ctx.scenario.cdSem.processingTime.toMillis / ctx.speedMultiplier).toLong
-    ctx.lotRef ! RecordEquipmentJobStarted(equipId, "CD-MEASURE-001", ctx.ignoreLotReply)
+    ctx.notifyLot(RecordEquipmentJobStarted(equipId, "CD-MEASURE-001", _))
     askArea(ctx, "MET", replyTo => EquipmentAreaActor.StartProcess(equipId, "CD-MEASURE-001", scaledMs, replyTo)).flatMap { _ =>
       ctx.publish(ProcessingStarted(equipId, "CD-MEASURE-001", scaledMs))
       ctx.adapter.sendCommand(equipId, ProcessRecipe("CD-MEASURE-001")).flatMap {
         case JobCompleted(jobId, _, MetrologyResult(_, waferMeasurements)) =>
-          ctx.lotRef ! RecordEquipmentJobCompleted(equipId, jobId, success = true, ctx.ignoreLotReply)
+          ctx.notifyLot(RecordEquipmentJobCompleted(equipId, jobId, success = true, _))
           ctx.publish(ProcessingCompleted(equipId, jobId, success = true, ""))
           askArea(ctx, "MET", replyTo => EquipmentAreaActor.FinishProcess(equipId, replyTo)).map { _ =>
             val cdValues: Map[String, Double] = waferMeasurements.map { case (wid, cd) => wid -> cd.measuredNm }
@@ -227,10 +227,10 @@ object PipelineStages {
   def sealComplete(state: FabDemoState, ctx: FabDemoContext): Future[FabDemoState] = {
     val s = emitLedger(state, "PhaseComplete: Lot sealed", ctx)
     ctx.stageProgress("COMPLETED", "Demo completed", "PhaseComplete")
-    ctx.lotRef ! RecordTransportCompleted(ctx.foupId, ctx.scenario.stocker.equipmentId, ctx.ignoreLotReply)
-    ctx.lotRef ! SealLot(ctx.ignoreLotReply)
+    ctx.notifyLot(RecordTransportCompleted(ctx.foupId, ctx.scenario.stocker.equipmentId, _))
+    ctx.notifyLot(SealLot(_))
     val totalRework = state.wafers.values.count(_.reworkCount > 0)
-    ctx.lotRef ! CompleteProcess(ctx.scenario.scenarioId, state.passCount, state.scrapCount, totalRework, ctx.ignoreLotReply)
+    ctx.notifyLot(CompleteProcess(ctx.scenario.scenarioId, state.passCount, state.scrapCount, totalRework, _))
     ctx.publish(FoupStateChanged(ctx.foupId, "COMPLETED", 0, 0, "STOCKER", lotId = ctx.scenario.scenarioId))
     ctx.publish(FoupArrivedAtPort(ctx.foupId, ctx.scenario.stocker.equipmentId, "STOCKER-PORT-1"))
     ctx.publish(LotUpdated(ctx.scenario.scenarioId, ctx.scenario.lotSize, state.scrapCount,

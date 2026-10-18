@@ -267,7 +267,7 @@ object FabScenarioPipeline {
     state.wafers.filter { case (_, w) => w.classification.isEmpty }.foreach { case (wid, info) =>
       val cdValue = info.cdValueHistory.lastOption.getOrElse(32.0)
       val cls = PipelineStages.classifyCd(cdValue, ctx.scenario.decision)
-      ctx.lotRef ! RecordWaferMeasured(ctx.waferUUIDs(wid), cdValue, ctx.ignoreLotReply)
+      ctx.notifyLot(RecordWaferMeasured(ctx.waferUUIDs(wid), cdValue, _))
       ctx.publish(MeasurementResultEvent(wid, cdValue, cls, ctx.scenario.decision.upperSpecNm))
 
       scenId match {
@@ -294,7 +294,7 @@ object FabScenarioPipeline {
           updatedWafers += wid -> info.copy(classification = Some(cls))
           if (cls == "SCRAP") scrapWafers :+= wid
       }
-      ctx.lotRef ! RecordWaferClassified(ctx.waferUUIDs(wid),cls, 0, cdValue, ctx.ignoreLotReply)
+      ctx.notifyLot(RecordWaferClassified(ctx.waferUUIDs(wid),cls, 0, cdValue, _))
     }
 
     val totalPass = updatedWafers.values.count(w => !w.classification.contains("SCRAP") && !w.classification.contains("HOLD"))
@@ -340,7 +340,7 @@ object FabScenarioPipeline {
       // Entity records the DECISION (PASS/SCRAP), matching pipeline state; raw
       // BORDERLINE/FAIL stays visible in the MeasurementResultEvent stream
       val effectiveCls = if (cls == "PASS" || cls == "BORDERLINE") "PASS" else "SCRAP"
-      pilotCtx.lotRef ! RecordWaferMeasured(pilotCtx.waferUUIDs(wid), cdValue, pilotCtx.ignoreLotReply)
+      pilotCtx.notifyLot(RecordWaferMeasured(pilotCtx.waferUUIDs(wid), cdValue, _))
       pilotCtx.publish(MeasurementResultEvent(wid, cdValue, cls, pilotCtx.scenario.decision.upperSpecNm))
 
       if (cls == "PASS" || cls == "BORDERLINE") {
@@ -352,7 +352,7 @@ object FabScenarioPipeline {
         pilotPassed = false
         pilotCtx.publish(DecisionMade(wid, "Pilot FAIL → Scrap", None))
       }
-      pilotCtx.lotRef ! RecordWaferClassified(pilotCtx.waferUUIDs(wid), effectiveCls, 0, cdValue, pilotCtx.ignoreLotReply)
+      pilotCtx.notifyLot(RecordWaferClassified(pilotCtx.waferUUIDs(wid), effectiveCls, 0, cdValue, _))
     }
 
     val totalPass = updatedWafers.values.count(w => !w.classification.contains("SCRAP") && !w.classification.contains("HOLD"))
@@ -420,7 +420,7 @@ object FabScenarioPipeline {
       if (confirmation.error.isEmpty) {
         ctx.publish(SagaOperationEvent(sagaId, "SplitLot", "COMMITTED", ctx.scenario.scenarioId, rwkLotName, finalMoveIds.toSeq.map(_.toString)))
         // Domain event: source lot records sub-lot creation
-        ctx.lotRef ! RecordSubLotCreated(childLotId, splitReason, finalMoveIds, ctx.ignoreLotReply)
+        ctx.notifyLot(RecordSubLotCreated(childLotId, splitReason, finalMoveIds, _))
         val updatedWafers = state.wafers.map { case (wid, info) =>
           if (finalMoveIds.contains(ctx.waferUUIDs.getOrElse(wid, UUID.nameUUIDFromBytes("none".getBytes))))
             wid -> info.copy(subLot = Some(lotKey))
@@ -462,7 +462,7 @@ object FabScenarioPipeline {
       if (confirmation.error.isEmpty) {
         ctx.publish(SagaOperationEvent(sagaId, "MergeLot", "COMMITTED", rwkLotName, ctx.scenario.scenarioId, finalMoveIds.toSeq.map(_.toString)))
         // Domain event: source lot records sub-lot merge
-        ctx.lotRef ! RecordSubLotMerged(childLotId, finalMoveIds, ctx.ignoreLotReply)
+        ctx.notifyLot(RecordSubLotMerged(childLotId, finalMoveIds, _))
         val mergedWafers = state.wafers.map { case (wid, info) =>
           if (finalMoveIds.contains(ctx.waferUUIDs.getOrElse(wid, java.util.UUID.nameUUIDFromBytes("none".getBytes))))
             wid -> info.copy(subLot = None, classification = Some("PASS"))
@@ -497,12 +497,12 @@ object FabScenarioPipeline {
 
     // Ghost Lot defense: explicit domain event so WorkOrderCompletionProjection sees it
     import net.imadz.application.aggregates.LotProtocol.{FailLot, SealLot}
-    childLotRef ! FailLot(scrapReason, "OCAP_SCRAP", ctx.ignoreLotReply)
-    childLotRef ! SealLot(ctx.ignoreLotReply)
+    ctx.notifyLot(childLotRef, FailLot(scrapReason, "OCAP_SCRAP", _))
+    ctx.notifyLot(childLotRef, SealLot(_))
 
     // Record SubLotScrapped on the PARENT lot so it transitions from AwaitingSubLot → Active
-    ctx.lotRef ! RecordSubLotScrapped(childLotId, scrapReason,
-      scrappedWafers.flatMap { case (wid, _) => ctx.waferUUIDs.get(wid) }.toSet, ctx.ignoreLotReply)
+    ctx.notifyLot(RecordSubLotScrapped(childLotId, scrapReason,
+      scrappedWafers.flatMap { case (wid, _) => ctx.waferUUIDs.get(wid) }.toSet, _))
 
     val updatedState = state.copy(
       scrapCount = state.scrapCount + scrapCount,
@@ -522,8 +522,8 @@ object FabScenarioPipeline {
     // otherwise Seal is rejected (LOT_020) and the lot never completes
     if (state.wafers.exists { case (_, w) => w.subLot.contains("scrap") }) {
       val scrapLotId = ctx.childLotIds.getOrElse("scrap", ctx.reworkLotId)
-      ctx.lotRef ! RecordSubLotScrapped(scrapLotId, "CD out of spec → SCRAP",
-        scrapIds.flatMap(wid => ctx.waferUUIDs.get(wid)).toSet, ctx.ignoreLotReply)
+      ctx.notifyLot(RecordSubLotScrapped(scrapLotId, "CD out of spec → SCRAP",
+        scrapIds.flatMap(wid => ctx.waferUUIDs.get(wid)).toSet, _))
     }
     Future.successful(s.copy(ledgerSeq = s.ledgerSeq + 1))
   }
@@ -532,7 +532,7 @@ object FabScenarioPipeline {
     val s = PipelineStages.emitLedger(state, "PhaseHold: Hold for engineering review", ctx)
     ctx.stageProgress("HOLDING", "Engineering review", "PhaseHold")
     val holdIds = state.wafers.filter(_._2.subLot.contains("hold")).keys.toSet
-    ctx.lotRef ! RecordWafersHeld(holdIds, "Borderline CD", ctx.ignoreLotReply)
+    ctx.notifyLot(RecordWafersHeld(holdIds, "Borderline CD", _))
     ctx.publish(FoupStateChanged(ctx.foupId, "HELD", PipelineStages.activeCount(state), holdIds.size, "CDSEM",
       lotId = ctx.scenario.scenarioId, reworkLotId = s"${ctx.scenario.scenarioId}-HLD"))
     Future.successful(s.copy(ledgerSeq = s.ledgerSeq + 1))
@@ -542,7 +542,7 @@ object FabScenarioPipeline {
     val s = PipelineStages.emitLedger(state, "PhaseRelease: Release held wafers", ctx)
     ctx.stageProgress("RELEASING", "Review passed, releasing", "PhaseRelease")
     val holdIds = state.wafers.filter(_._2.subLot.contains("hold")).keys.toSet
-    ctx.lotRef ! RecordWafersReleased(holdIds, ctx.ignoreLotReply)
+    ctx.notifyLot(RecordWafersReleased(holdIds, _))
     Future.successful(s.copy(ledgerSeq = s.ledgerSeq + 1, reviewApproved = true))
   }
 
@@ -554,7 +554,7 @@ object FabScenarioPipeline {
     }.foreach { case (wid, info) =>
       ctx.waferUUIDs.get(wid).foreach { uuid =>
         val cdValue = info.cdValueHistory.lastOption.getOrElse(32.0)
-        ctx.lotRef ! RecordWaferClassified(uuid, "PASS", info.reworkCount, cdValue, ctx.ignoreLotReply)
+        ctx.notifyLot(RecordWaferClassified(uuid, "PASS", info.reworkCount, cdValue, _))
       }
     }
     Future.successful(s.copy(ledgerSeq = s.ledgerSeq + 1))
@@ -620,7 +620,7 @@ object FabScenarioPipeline {
   ): Future[FabDemoState] = {
     val rules = ctx.ocapRules
     if (rules.isEmpty) {
-      ctx.lotRef ! FailLot(err.detail, err.stageName, ctx.ignoreLotReply)
+      ctx.notifyLot(FailLot(err.detail, err.stageName, _))
       Future.successful(state) // no rules — Phase 1 behavior
     } else {
       OcapEngine.matchRules(state, rules).headOption match {
@@ -634,7 +634,7 @@ object FabScenarioPipeline {
             affectedWafers = Seq.empty))
           executeOcapAction(s, ctx, rule.actionPlan)
         case None =>
-          ctx.lotRef ! FailLot(err.detail, err.stageName, ctx.ignoreLotReply)
+          ctx.notifyLot(FailLot(err.detail, err.stageName, _))
           Future.successful(state) // no rules triggered
       }
     }
@@ -653,7 +653,7 @@ object FabScenarioPipeline {
 
       case s: OcapScrap =>
         ctx.stageProgress("SCRAPPING", "OCAP Scrap action", "PhaseOCAP")
-        ctx.lotRef ! FailLot(s.reason, "OCAP_SCRAP", ctx.ignoreLotReply)
+        ctx.notifyLot(FailLot(s.reason, "OCAP_SCRAP", _))
         runSequence(Seq(ScrapWafers, SealComplete), state, ctx)
 
       case h: OcapHold =>

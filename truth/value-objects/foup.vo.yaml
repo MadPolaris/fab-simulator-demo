@@ -1,0 +1,17 @@
+# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+kind: value-object
+id: foup
+name: FOUP
+name_zh: 晶圆传送盒
+description: >
+  Front-Opening Unified Pod — the sealed container a lot travels in.
+  Equipment tracks port occupancy (portId → foupId); AMHS moves FOUPs
+  between ports/areas (FoupArrived / FoupDeparted events).
+description_zh: >
+  前开式晶圆传送盒——Lot 在 fab 里移动时坐的密封盒子。设备跟踪端口占用
+  （portId → foupId）；AMHS 在端口/区间搬送 FOUP
+  (FoupArrived / FoupDeparted 事件).
+fields:
+  - { name: foupId, type: string, description: FOUP identity }
+  - { name: slotMap, type: map<integer, string>, description: Slot → waferId }
+  - { name: location, type: string, description: Current port or area }

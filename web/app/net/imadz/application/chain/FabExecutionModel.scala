@@ -86,7 +86,9 @@ object FabExecutionModel {
     adapter: ActorEquipmentAdapter,
     /** Target for Phase 2-3 removal: UI events should flow via Projection, not direct push. */
     publisher: FabSimulationEvent => Unit,
-    ignoreLotReply: ActorRef[LotConfirmation],
+    /** Fallback reply target for lot notifications on the direct-invocation path.
+      * The actor pipeline replaces [[lotAckGate]] per step with a tracking gate. */
+    lotReplyTo: ActorRef[LotConfirmation],
     sagaTx: (Id, Id, Set[Id], Set[String], Option[Id]) => Future[FabSagaConfirmation],
     speedMultiplier: Double,
     scrapLotRef: Option[akka.cluster.sharding.typed.scaladsl.EntityRef[LotCommand]] = None,
@@ -107,6 +109,24 @@ object FabExecutionModel {
 
     /** Guarded publish: drops events from superseded pipeline runs. */
     def publish(event: FabSimulationEvent): Unit = if (runToken()) publisher(event)
+
+    /**
+     * Per-step lot acknowledgment gate. The actor pipeline installs a fresh
+     * tracking gate before each step and drains it afterwards, so a lot that
+     * never confirms its notification fails the step instead of diverging
+     * silently. Default is fire-and-forget for direct invocation.
+     * (2026-10-18 arbitration: lot notifications are now acknowledged.)
+     */
+    var lotAckGate: LotAckGate = LotAckGate.fireAndForget(lotReplyTo)
+
+    /** Notify the lot, tracking the confirmation in the current step's ack gate. */
+    def notifyLot(cmd: ActorRef[LotConfirmation] => LotCommand): Unit =
+      lotAckGate.tell(lotRef, cmd)
+
+    /** Notify a specific lot (e.g. a child lot), tracked in the current step's ack gate. */
+    def notifyLot(ref: akka.cluster.sharding.typed.scaladsl.EntityRef[LotCommand],
+                  cmd: ActorRef[LotConfirmation] => LotCommand): Unit =
+      lotAckGate.tell(ref, cmd)
 
     /** True when this run has been superseded by a newer generation. */
     def stale: Boolean = !runToken()

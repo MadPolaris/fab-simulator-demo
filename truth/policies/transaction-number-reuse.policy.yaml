@@ -1,0 +1,26 @@
+# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+kind: policy
+id: transaction-number-reuse
+name: Transaction Number Reuse
+name_zh: 事务编号沿用
+description: >
+  Transactions that span multiple lots (split / merge) are numbered by a
+  fixed rule: work order number + step name + execution index. When a run
+  recovers from an interruption, split and merge pick up their ORIGINAL
+  numbers instead of opening new transactions — so recovery never creates
+  a duplicate transaction for work that already has one.
+description_zh: >
+  跨多个 Lot 的事务（切分 / 合并）按固定规则编号：工单号+步骤名+
+  执行序号。运行从中断恢复后，切分和合并沿用原编号，不另开新事务——
+  恢复永不为已有事务再建一个重复。
+triggers:
+  - event: run-recovered
+invokes:
+  - slice: split-sublot
+  - slice: merge-sublot
+rules:
+  - when: the run resumes after an interruption
+    then: split-sublot and merge-sublot reuse the transaction number from before the interruption
+    note: number = workOrderId + step name + execution index (unchanged inputs → unchanged number)
+  - when: a step executes for the first time
+    then: its execution index is 0, minting a fresh number

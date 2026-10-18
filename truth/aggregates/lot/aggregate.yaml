@@ -1,0 +1,74 @@
+# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+kind: aggregate
+id: lot
+name: Wafer Lot
+name_zh: 晶圆 Lot
+description: >
+  A batch of wafers traveling together in a FOUP through the fab. Tracks
+  wafer membership, per-wafer classification, the route card (ordered area
+  steps), completed steps, and child lots created by splits (rework / pilot /
+  scrap). Wafer transfers between lots go in two moves — reserve, then
+  confirm — so an interruption never loses or duplicates a wafer: it
+  resolves to either fully-transferred or not-transferred, never half.
+description_zh: >
+  装在 FOUP 里一起走 fab 的一批晶圆。跟踪晶圆成员、每片晶圆的分类、
+  route card（有序的设备区步骤）、已完成步骤，以及切分产生的子 Lot
+  （返工 / 先导 / 报废）。Lot 之间的晶圆转移分两步——先预留、再确认，
+  中断时要么全转要么没转，不丢片也不重片。
+  2026-10-18 已仲裁：Lot 是恢复时的权威——Lot 在工艺路线上的位置就是状态
+  （如真实晶圆厂的 MES）。流水线恢复时应以 Lot 上报的状态为准来对账；
+  目前实现上靠"通知确认 + 幂等重放"收敛，显式对账是已知缺口（见 EXTRACTION-NOTES #7）。
+identity:
+  fields: [lotId]
+  description: >
+    Entity id == lotId. Child lots get their own ids; the parent records the
+    split (RecordSubLotCreated) so lineage is queryable.
+state_slots:
+  - name: lotId
+    type: string
+    description: Lot identity.
+  - name: productId
+    type: string
+    description: Product being manufactured.
+  - name: wafers
+    type: map<string, wafer-state>
+    description: WaferId → state (status, classification, rework count, measurements).
+  - name: status
+    type: string
+    description: Lifecycle status (created, in-process, held, sealed, …).
+  - name: currentArea
+    type: string
+    description: Equipment area the lot is currently in (or at).
+  - name: routeCard
+    type: "string[]"
+    description: Ordered area-id steps assigned to this lot.
+  - name: completedSteps
+    type: "string[]"
+    description: Route-card steps already executed.
+  - name: childLots
+    type: map<string, string>
+    description: Child lot id → split reason (rework / pilot / scrap).
+  - name: parentLotId
+    type: string
+    description: Set on child lots; empty on root lots.
+lifecycle:
+  - { from: created,    via: create-lot,        to: in-process }
+  - { from: in-process, via: split-sublot,      to: in-process }
+  - { from: in-process, via: merge-sublot,      to: in-process }
+  - { from: in-process, via: hold-wafers,       to: held }
+  - { from: held,       via: release-wafers,    to: in-process }
+  - { from: in-process, via: seal-lot,          to: sealed }
+invariants:
+  - id: no-lost-wafers
+    description: >
+      Wafer transfers go reserve-then-confirm; an interruption between the
+      two resolves to either fully-transferred or not-transferred, never half.
+    description_zh: 晶圆转移先预留后确认；两步之间被打断时，要么全转要么没转，绝不转一半。
+  - id: reentry-tracked
+    description: >
+      A lot may visit the same area multiple times; reentryIndex counts the
+      visit (0, 1, 2, …) so step identity stays unambiguous.
+    description_zh: Lot 可多次重入同一设备区；reentryIndex 记录第几次，保证步骤身份不混淆。
+change_recording:
+  rule: Every change to a lot (creation, transfers, measurements, classifications, splits, merges, scraps) is recorded as it happens.
+  rule_zh: Lot 的每次变更（创建、转移、量测、分类、切分、合并、报废）发生时即被记录。

@@ -1,0 +1,24 @@
+# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+kind: slice
+id: record-measurement
+name: Record Measurement
+name_zh: 记录量测
+description: >
+  Record a wafer's CD measurement from the metrology equipment. The
+  measurement itself carries no judgment — classification is a separate step.
+description_zh: >
+  记录量测设备报出的一片晶圆的 CD 值。量测值本身不带判断——分类是另一步。
+aggregate: lot
+parameters:
+  - { name: waferId, type: string, description: Measured wafer }
+  - { name: cdNm, type: number, description: Measured critical dimension (nm) }
+guards:
+  - description: wafer is a member of the lot
+produces:
+  - wafer-measured
+events:
+  wafer-measured:
+    description: A CD measurement was recorded, awaiting classification.
+    payload:
+      - { name: waferId, type: string, description: Wafer }
+      - { name: cdNm, type: number, description: Measured CD (nm) }

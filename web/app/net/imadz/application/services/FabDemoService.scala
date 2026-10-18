@@ -105,7 +105,7 @@ class FabDemoService @Inject()(
 
     val adapter = new ActorEquipmentAdapter()
 
-    val ignoreLotReply = system.ignoreRef[LotConfirmation]
+    val lotReplyTo = system.ignoreRef[LotConfirmation]
 
     val ctx = FabDemoContext(
       scenario = syntheticScenario,
@@ -117,7 +117,7 @@ class FabDemoService @Inject()(
       reworkLotId = reworkLotId,
       adapter = adapter,
       publisher = publisher,
-      ignoreLotReply = ignoreLotReply,
+      lotReplyTo = lotReplyTo,
       sagaTx = sagaTxFn,
       speedMultiplier = 1.0,
       scrapLotRef = Some(scrapLotRef),
@@ -190,7 +190,7 @@ class FabDemoService @Inject()(
       (srcId, tgtId, wids, names, existingTxId) => fabSagaService.transferWafers(srcId, tgtId, wids, names, existingTxId)
 
     val adapter = new ActorEquipmentAdapter()
-    val ignoreLotReply = system.ignoreRef[LotConfirmation]
+    val lotReplyTo = system.ignoreRef[LotConfirmation]
 
     val ctx = FabDemoContext(
       scenario = syntheticScenario,
@@ -202,7 +202,7 @@ class FabDemoService @Inject()(
       reworkLotId = reworkLotId,
       adapter = adapter,
       publisher = publisher,
-      ignoreLotReply = ignoreLotReply,
+      lotReplyTo = lotReplyTo,
       sagaTx = sagaTxFn,
       speedMultiplier = 1.0,
       scrapLotRef = Some(scrapLotRef),
@@ -311,7 +311,7 @@ class FabDemoService @Inject()(
 
     val adapter = new ActorEquipmentAdapter()
 
-    val ignoreLotReply = system.ignoreRef[LotConfirmation]
+    val lotReplyTo = system.ignoreRef[LotConfirmation]
 
     val ctx = FabDemoContext(
       scenario = scenario,
@@ -323,7 +323,7 @@ class FabDemoService @Inject()(
       reworkLotId = reworkLotId,
       adapter = adapter,
       publisher = publisher,
-      ignoreLotReply = ignoreLotReply,
+      lotReplyTo = lotReplyTo,
       sagaTx = sagaTxFn,
       speedMultiplier = 1.0,
       scrapLotRef = Some(scrapLotRef),
@@ -1300,7 +1300,7 @@ class FabDemoService @Inject()(
 
     // Reuse shared adapter so simulator refs survive pipeline crashes
     val adapter = m35Adapter.getOrElse(new ActorEquipmentAdapter())
-    val ignoreLotReply = system.ignoreRef[LotConfirmation]
+    val lotReplyTo = system.ignoreRef[LotConfirmation]
     val pub = systemWidePublisher.getOrElse(publisherRegistry.getOrDefault(workOrderId, _ => ()).asInstanceOf[FabSimulationEvent => Unit])
 
     FabDemoContext(
@@ -1313,7 +1313,7 @@ class FabDemoService @Inject()(
       reworkLotId = reworkLotId,
       adapter = adapter,
       publisher = pub,
-      ignoreLotReply = ignoreLotReply,
+      lotReplyTo = lotReplyTo,
       sagaTx = sagaTxFn,
       speedMultiplier = 1.0,
       scrapLotRef = Some(scrapLotRef),

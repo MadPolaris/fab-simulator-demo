@@ -1,0 +1,26 @@
+# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+kind: scenario
+id: fab-demo-tour
+name: Fab Demo Tour
+name_zh: Fab 演示巡览
+description: >
+  The standard walkthrough: pick a scenario, start it, watch the lot move
+  through areas on the designer view, follow measurements and classifications
+  on the timeline, and inspect the scenario ledger at the end. No faults
+  injected — the happy path that shows what the fab does when nothing breaks.
+description_zh: >
+  标准巡览：选个场景、启动，在 designer 视图看 Lot 走过各区，在时间线
+  跟量测和分类，最后看场景台账。不注入故障——展示一切正常时 fab
+  是什么样。
+scale:
+  lots: 1
+  wafers_per_lot: 25
+  equipment: fab equipment simulators (litho, cd-sem, amhs, stocker)
+chains:
+  - fab-pipeline
+outcome_rules:
+  - { rule: start scenario, expect: run-started recorded, steps execute in queue order }
+  - { rule: wafers measured, expect: every wafer classified exactly once }
+  - { rule: run seals, expect: passCount + scrapCount == wafers started }
+# 2026-10-18 ARBITRATED (true chaos): spontaneous equipment faults are unseeded —
+# the happy path above assumes faultProbability = 0. With faults on, "结果不保证重复".

@@ -1,0 +1,27 @@
+# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+kind: slice
+id: create-work-order
+name: Create Work Order
+name_zh: 创建工单
+description: >
+  Open a work order for a product: allocate the lot(s) that will run for it
+  and hand the work order id to the pipeline run as its entity id.
+description_zh: >
+  为一个产品开工单：分配要跑的 Lot，把工单 id 交给 pipeline run
+  作为它的实体 id。
+aggregate: work-order
+parameters:
+  - { name: workOrderId, type: string, description: New work order id }
+  - { name: productId, type: string, description: Product to build }
+  - { name: lotIds, type: "string[]", description: Lots allocated to this order }
+guards:
+  - description: workOrderId is unused
+produces:
+  - work-order-created
+events:
+  work-order-created:
+    description: A work order opened.
+    payload:
+      - { name: workOrderId, type: string, description: Work order }
+      - { name: productId, type: string, description: Product }
+      - { name: lotIds, type: "string[]", description: Allocated lots }

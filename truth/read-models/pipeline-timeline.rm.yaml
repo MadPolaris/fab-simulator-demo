@@ -1,0 +1,38 @@
+# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+kind: read-model
+id: pipeline-timeline
+name: Pipeline Timeline
+name_zh: 流水线时间线
+description: >
+  Step-by-step timeline of one work order's run: which steps finished, in
+  what order, with what outcome (completed / failed / OCAP-rescued), and
+  the live counts. This is what the fab timeline page renders.
+description_zh: >
+  一个工单运行的分步时间线：哪些步骤完成了、什么顺序、什么结果
+  （完成 / 失败 / OCAP 救回），以及实时计数。fab 时间线页面渲染的就是它。
+  2026-10-18 已仲裁（CQRS 读写分工）：时间线是读侧投影，只管展示——
+  恢复只认写侧的运行记录（journal），时间线说完成了、记录里没有，以记录为准。
+served_by: fab timeline page
+sources:
+  - fab-pipeline-run
+fields:
+  - name: steps
+    type: "string[]"
+    description: Step names in completion order.
+    derived_from: step-completed events, in order
+  - name: outcomes
+    type: map<string, string>
+    description: Step name → completed | failed | ocap-recovered.
+    derived_from: step-completed / step-failed / ocap-handled events
+  - name: passCount
+    type: integer
+    description: Wafers passed so far.
+    derived_from: latest run state
+  - name: scrapCount
+    type: integer
+    description: Wafers scrapped so far.
+    derived_from: latest run state
+  - name: currentStep
+    type: string
+    description: Step currently executing.
+    derived_from: last step-completed + queue position

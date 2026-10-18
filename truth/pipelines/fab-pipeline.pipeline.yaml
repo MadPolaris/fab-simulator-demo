@@ -1,0 +1,287 @@
+# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+kind: pipeline
+id: fab-pipeline
+name: Fab Step Queue
+name_zh: Fab 步骤队列
+description: >
+  The vocabulary of steps the step queue runs to move a wafer lot through
+  the fab. Listed in canonical flow order: FOUP logistics → equipment
+  processing → measurement → classification → disposition branching
+  (rework / scrap / hold / release / OCAP) → review → seal. Control steps
+  (Branch, OcapEvaluate, DynamicPorExecution, …) rewire the queue at
+  runtime. The step names below are the shared language for "where did we
+  stop" — the resume breakpoint.
+description_zh: >
+  步骤队列的步骤词汇，驱动晶圆 Lot 走过 fab。按 canonical
+  流程顺序：FOUP 物流 → 设备加工 → 量测 → 分类 → 处置分支
+  （返工 / 报废 / 暂存 / 放行 / OCAP）→ 评审 → 封单。
+  控制步骤（Branch、OcapEvaluate、DynamicPorExecution……）在运行时
+  重排队列。下面的步骤名是"停在哪了"的共同语言——续跑的断点。
+steps:
+  - id: load-foup
+    name: Load FOUP
+    name_zh: 装载 FOUP
+    description: Load the lot's FOUP onto an equipment port (tracks port occupancy).
+    reads: [lot, foup]
+    writes: [port-occupancy]
+    failure_codes: []
+    metadata: [foupId, portId]
+
+  - id: transport
+    name: Transport FOUP
+    name_zh: 搬送 FOUP
+    description: AMHS moves the FOUP between areas along a configured route (from → to).
+    reads: [foup]
+    writes: [foup-location]
+    failure_codes: []
+    metadata: [fromArea, toArea, etaMs]
+
+  - id: at-equipment
+    name: Arrive At Equipment
+    name_zh: 到达设备
+    description: Logical arrival marker — the lot is now at this equipment in this area.
+    reads: [lot]
+    writes: [current-area]
+    failure_codes: []
+    metadata: [area, equipId]
+
+  - id: track-in
+    name: Track In
+    name_zh: 进站
+    description: Equipment takes ownership of the lot (validated by the per-area EquipmentAreaActor state machine).
+    reads: [lot, equipment-state]
+    writes: [equipment-state]
+    failure_codes: []
+    metadata: [equipId, portId]
+
+  - id: run-recipe
+    name: Run Recipe
+    name_zh: 跑配方
+    description: >
+      Execute the process recipe on the equipment: processing takes
+      processingTime (scaled by speedMultiplier), then the equipment reports
+      completion — or failure, if a fault was injected or arose spontaneously
+      (faultProbability). A reported failure throws the step into OCAP's hands.
+    reads: [lot, equipment-state]
+    writes: [equipment-result]
+    failure_codes:
+      - { code: HARDWARE_FAULT,  meaning: Injected or spontaneous hardware fault }
+      - { code: COMM_TIMEOUT,    meaning: Equipment communication timed out }
+      - { code: SENSOR_ANOMALY,  meaning: Sensor reading out of plausible range }
+      - { code: POWER_FLUCTUATION, meaning: Power fluctuation during processing }
+      - { code: ABORTED,         meaning: Job aborted by operator command }
+    metadata: [jobId, equipId, recipeId]
+
+  - id: track-out
+    name: Track Out
+    name_zh: 出站
+    description: Equipment releases the lot (validated by the per-area state machine).
+    reads: [lot, equipment-state]
+    writes: [equipment-state]
+    failure_codes: []
+    metadata: [equipId, portId]
+
+  - id: measure
+    name: Measure
+    name_zh: 量测
+    description: CD-SEM measures per-wafer critical dimensions.
+    reads: [lot]
+    writes: [wafer-measurements]
+    failure_codes: []
+    metadata: [equipId, waferCount]
+
+  - id: classify
+    name: Classify Wafers
+    name_zh: 晶圆分类
+    description: Map each wafer's CD to PASS / BORDERLINE / FAIL / SCRAP via DecisionConfig.
+    reads: [wafer-measurements]
+    writes: [wafer-classifications]
+    failure_codes: []
+    metadata: [passCount, borderlineCount, failCount, scrapCount]
+
+  - id: tx-split
+    name: Transactional Split
+    name_zh: 事务切分
+    description: >
+      Split wafers into a child lot inside a cross-lot transaction. The
+      transaction number follows a fixed rule (work order number + step name
+      + execution index), so recovery picks up the original number instead
+      of opening a duplicate.
+    reads: [lot]
+    writes: [child-lot]
+    failure_codes: []
+    metadata: [lotKey, transactionId]
+
+  - id: tx-merge
+    name: Transactional Merge
+    name_zh: 事务合并
+    description: Merge the child lot back inside the same cross-lot transaction (original number reused).
+    reads: [child-lot]
+    writes: [lot]
+    failure_codes: []
+    metadata: [lotKey, transactionId]
+
+  - id: scrap-wafers
+    name: Scrap Wafers
+    name_zh: 报废晶圆
+    description: Scrap wafers classified SCRAP (or rework-exhausted); they leave the lot permanently.
+    reads: [wafer-classifications]
+    writes: [scrap-count]
+    failure_codes: []
+    metadata: [waferIds, reason]
+
+  - id: hold-wafers
+    name: Hold Wafers
+    name_zh: 暂 Hold 晶圆
+    description: Hold wafers (e.g. BORDERLINE awaiting review or OCAP Hold action).
+    reads: [wafer-classifications]
+    writes: [lot-status]
+    failure_codes: []
+    metadata: [waferIds, reason]
+
+  - id: release-wafers
+    name: Release Wafers
+    name_zh: 放行晶圆
+    description: Release held wafers back into the flow.
+    reads: [lot-status]
+    writes: [lot-status]
+    failure_codes: []
+    metadata: [waferIds]
+
+  - id: post-release-classify
+    name: Post-Release Classify
+    name_zh: 放行后复分类
+    description: Re-classify wafers after release (their state may have changed while held).
+    reads: [wafer-measurements]
+    writes: [wafer-classifications]
+    failure_codes: []
+    metadata: [passCount, failCount, scrapCount]
+
+  - id: ocap-evaluate
+    name: OCAP Evaluate
+    name_zh: OCAP 求值
+    description: >
+      Evaluate OCAP rules against the current state in priority order
+      (lower number = higher priority, maxTriggersPerLot cap each). Matching
+      rules append (ruleId, actionPlan) to ocapActions. Missing metrics obey
+      the rule's MissingMetricPolicy (ConservativePass = skip, ConservativeReject = trigger).
+    reads: [fab-demo-state, ocap-rules]
+    writes: [ocap-actions]
+    failure_codes: []
+    metadata: [matchedRuleIds]
+
+  - id: m35-classify-with-ocap
+    name: M3.5 Classify With OCAP
+    name_zh: M3.5 分类带 OCAP
+    description: >
+      M3.5 variant of classify: classification and OCAP evaluation fused into
+      one step, so a measurement excursion triggers its action plan in the
+      same step.
+    reads: [wafer-measurements, ocap-rules]
+    writes: [wafer-classifications, ocap-actions]
+    failure_codes: []
+    metadata: [passCount, failCount, scrapCount, matchedRuleIds]
+
+  - id: ocap-action-router
+    name: OCAP Action Router
+    name_zh: OCAP 动作路由
+    description: Execute the pending ocapActions in priority order (hold / rework / scrap / notify / adjust-recipe, or composites).
+    reads: [ocap-actions]
+    writes: [lot, equipment-state]
+    failure_codes: []
+    metadata: [executedRuleIds]
+
+  - id: wait-for-review
+    name: Wait For Review
+    name_zh: 等待人工评审
+    description: Pause for human review (e.g. BORDERLINE lots); the reviewer approves or escalates.
+    reads: [lot]
+    writes: [review-approved]
+    failure_codes: []
+    metadata: [durationMs, approved]
+
+  - id: pilot-subflow
+    name: Pilot Sub-Flow
+    name_zh: 先导子流程
+    description: Send a few wafers ahead as a pilot lot; the main lot waits (AwaitSubLotResult) for the pilot outcome before proceeding.
+    reads: [lot]
+    writes: [child-lot]
+    failure_codes: []
+    metadata: [lotKey, pilotWaferIds]
+
+  - id: await-sublot-result
+    name: Await Sub-Lot Result
+    name_zh: 等待子 Lot 结果
+    description: Suspend until the sub-lot (pilot/rework) resolves — "merged" or "scrapped" — then continue with the returned state.
+    reads: [child-lot]
+    writes: [fab-demo-state]
+    failure_codes: []
+    metadata: [lotKey, outcome]
+
+  - id: photocell-rework-pipeline
+    name: Photocell Rework Pipeline
+    name_zh: 光刻返工子流水线
+    description: Fixed rework sub-pipeline for the lithography cell (re-clean → re-expose → re-measure).
+    reads: [child-lot]
+    writes: [child-lot]
+    failure_codes: []
+    metadata: [reworkCount]
+
+  - id: seal-complete
+    name: Seal Complete
+    name_zh: 封单完成
+    description: Terminal step — the run is done, lot sealed, counts final.
+    reads: [fab-demo-state]
+    writes: []
+    failure_codes: []
+    metadata: [passCount, scrapCount]
+
+  - id: branch
+    name: Branch
+    name_zh: 分支
+    description: Runtime conditional — evaluate a predicate on the state and splice the ifTrue / ifFalse step list into the queue.
+    reads: [fab-demo-state]
+    writes: []
+    failure_codes: []
+    metadata: [taken]
+
+  - id: execute-subprocess
+    name: Execute Sub-Process
+    name_zh: 执行子流程
+    description: Splice a named, pre-compiled sub-process (SubProcessRef) into the queue.
+    reads: [fab-demo-state]
+    writes: []
+    failure_codes: []
+    metadata: [ref]
+
+  - id: dynamic-por-execution
+    name: Dynamic POR Execution
+    name_zh: 动态 POR 执行
+    description: >
+      Execute a dynamically assembled POR (process of record): the
+      DynamicFlowAssembler compiles routing + DecisionConfig into a step
+      list at runtime, instead of using the static FabScenarioPipeline list.
+      2026-10-18 ARBITRATED: dynamic POR is the canonical way to define NEW
+      scenarios — the static step list is frozen legacy (existing demos keep
+      running on it, but no new scenario should be built on it).
+    reads: [por, decision-config]
+    writes: []
+    failure_codes: []
+    metadata: [stepCount]
+
+failure_semantics: >
+  When a step fails, OCAP gets the first chance — before the failure is
+  treated as final. If an OCAP plan saves the step, its progress is recorded
+  normally and the queue moves on; the save itself is recorded as a separate
+  fact (ocap-handled), because a rescued step is not a clean completion.
+  With no matching OCAP plan, the failure stands and the run fails.
+  Business reason OCAP lives inside the step (not as an afterthought): a
+  saved step must still count as "done" for the breakpoint, otherwise
+  recovery would replay it and double its effect.
+failure_semantics_zh: >
+  步骤失败时，OCAP 先接手——在失败被判为终局之前。若 OCAP 预案救回了
+  步骤，进度照常记录、队列继续往下走；救回本身记为一条独立事实
+  （ocap-handled），因为被救回的步骤不算"干净完成"。
+  没有命中的 OCAP 预案，失败成立，运行失败。
+  OCAP 之所以长在步骤里面（而不是事后补救）：被救回的步骤必须算
+  "已做完"，断点才能往前走，否则恢复时会重跑它、效果翻倍。

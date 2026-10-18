@@ -5,13 +5,12 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import net.imadz.application.aggregates.LotAggregate.LotEntityTypeKey
-import net.imadz.application.aggregates.repository.{CreditBalanceRepository, LotRepository}
+import net.imadz.application.aggregates.repository.LotRepository
 import net.imadz.application.chain.FabExecutionModel.{FabDemoContext, FabDemoState}
 import net.imadz.application.chain.{FabPipelineExecutionActor, FabScenarioPipeline}
-import net.imadz.application.projection.repository.MonthlyIncomeAndExpenseSummaryRepository
 import net.imadz.application.scenario.StandardScenarios
-import net.imadz.application.services.{FabSagaService, MoneyTransferService}
-import net.imadz.application.services.transactor.{AppSagaContext, FabSagaDefinition, FabSagaProtocol, MoneyTransferSagaDefinition}
+import net.imadz.application.services.FabSagaService
+import net.imadz.application.services.transactor.{AppSagaContext, FabSagaDefinition, FabSagaProtocol}
 import net.imadz.common.CommonTypes.Id
 import net.imadz.fab.protocol.ActorEquipmentAdapter
 
@@ -29,15 +28,11 @@ class ApplicationBootstrap @Inject()(
                                       classicSystem: akka.actor.ActorSystem,
                                       sharding: ClusterSharding,
                                       // 注入各个 Bootstrap 所需的 Repository
-                                      creditBalanceRepository: CreditBalanceRepository,
-                                      monthlyRepository: MonthlyIncomeAndExpenseSummaryRepository,
                                       lotRepository: LotRepository,
                                       fabSagaService: FabSagaService,
                                       fabDemoService: net.imadz.application.services.FabDemoService,
                                       ocapRuleStore: net.imadz.infrastructure.repositories.routing.OcapRuleStore
-                                    ) extends CreditBalanceBootstrap
-  with SagaEngineBootstrap
-  with MonthlyIncomeAndExpenseBootstrap
+                                    ) extends SagaEngineBootstrap
   with FabBootstrap {
 
   // 转换为 Typed ActorSystem
@@ -45,15 +40,11 @@ class ApplicationBootstrap @Inject()(
   private implicit val exec: ExecutionContext = system.executionContext
   private implicit val scheduler: akka.actor.typed.Scheduler = system.scheduler
 
-  // --- 1. 初始化标准聚合根 (CreditBalance) ---
-  initCreditBalanceAggregate(sharding)
-
   // --- 2. 注册 Saga 定义并初始化 v3 引擎（所有定义共享一个 Coordinator 分片池）---
-  MoneyTransferSagaDefinition.register
   FabSagaDefinition.register
   initSagaEngine[AppSagaContext](
     sharding = sharding,
-    context = AppSagaContext(creditBalanceRepository, lotRepository),
+    context = AppSagaContext(lotRepository),
     system = system)
 
   // --- 4. 初始化 Fab Lot + WorkOrder 聚合根 ---
@@ -67,11 +58,10 @@ class ApplicationBootstrap @Inject()(
   initFabSagaTransactor(
     coordinatorEntityKey = FabSagaService.fabSagaCoordinatorKey,
     sharding = sharding,
-    sagaContext = AppSagaContext(creditBalanceRepository, lotRepository)
+    sagaContext = AppSagaContext(lotRepository)
   )
 
   // --- 6. 初始化投影 (Projection) ---
-  initMonthlySummaryProjection(system, sharding, monthlyRepository)
   initWorkOrderProjection(system)
   initFabLotProjection(system)
   initWorkOrderCompletionProjection(system)
@@ -132,7 +122,7 @@ class ApplicationBootstrap @Inject()(
       reworkLotId = reworkLotId,
       adapter = adapter,
       publisher = net.imadz.application.services.FabDemoPublisher.systemPublisher,
-      ignoreLotReply = system.ignoreRef,
+      lotReplyTo = system.ignoreRef,
       sagaTx = sagaTxFn,
       speedMultiplier = 1.0,
       scrapLotRef = Some(scrapLotRef),

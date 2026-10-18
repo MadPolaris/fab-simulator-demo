@@ -47,8 +47,10 @@ trait ExecutionContext {
   /** OCAP rules active for this execution */
   def ocapRules: List[OcapRuleDefinition]
 
-  /** Dead letter receiver for fire-and-forget Lot commands */
-  def ignoreLotReply: ActorRef[LotConfirmation]
+  /** Fallback reply target for fire-and-forget lot notifications on the
+    * direct-invocation path. The actor pipeline tracks confirmations instead —
+    * see [[net.imadz.application.chain.LotAckGate]]. */
+  def lotReplyTo: ActorRef[LotConfirmation]
 
   /** Runtime-only Promise storage for AwaitSubLotResult suspension.
    *  Keyed by lotKey ("rwk", "pilot", etc.). NOT serialized — re-populated on recovery. */

@@ -1,0 +1,17 @@
+# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+kind: value-object
+id: equipment-config
+name: Equipment Config
+name_zh: 设备配置
+description: >
+  How one piece of equipment behaves in the demo: how long a job takes,
+  and how likely it is to fail (fault injection knob for the M3.5 demo).
+description_zh: >
+  一台设备在演示里的行为：一个 job 跑多久、多大概率出故障
+  （M3.5 演示的故障注入旋钮）。
+fields:
+  - { name: equipmentId, type: string, description: Equipment identity }
+  - { name: areaId, type: string, description: Equipment area it belongs to }
+  - { name: processingTime, type: duration, description: How long one job takes }
+  - { name: faultProbability, type: number, description: Chance a job fails — 0.0 never, 1.0 always (M3.5) }
+  - { name: speedMultiplier, type: number, description: Demo clock speed — 1.0 real-time, 5.0 five times faster }

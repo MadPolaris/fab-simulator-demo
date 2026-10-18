@@ -1,0 +1,55 @@
+# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+kind: slice
+id: start-pipeline-run
+name: Start Pipeline Run
+name_zh: 启动流水线运行
+description: >
+  Start executing the fab step queue for a work order: record the run's
+  start with its initial state, then work through the steps in order. A
+  second start for an already running or finished work order is refused.
+description_zh: >
+  为一个工单启动 fab 步骤队列：记下运行开始（含初始状态），然后按顺序
+  执行各步骤。对已在跑或已完工的工单再次启动会被拒绝。
+aggregate: fab-pipeline-run
+parameters:
+  - { name: scenarioId, type: string, description: Demo scenario driving the run }
+  - { name: workOrderId, type: string, description: Work order under execution }
+  - { name: steps, type: "step[]", description: Ordered step queue for this run }
+  - { name: initialState, type: fab-run-state, description: Initial run state }
+guards:
+  - description: no running or finished run exists for this workOrderId
+produces:
+  - run-started
+  - step-completed
+  - step-failed
+  - run-completed
+  - run-failed
+events:
+  run-started:
+    description: The run began; its initial state was recorded.
+    payload:
+      - { name: workOrderId, type: string, description: Work order under execution }
+      - { name: scenarioId, type: string, description: Driving scenario }
+  step-completed:
+    description: A step finished cleanly; the breakpoint moved forward.
+    payload:
+      - { name: stepName, type: string, description: Business step name }
+      - { name: completedStepCount, type: integer, description: Steps finished so far }
+      - { name: metadata, type: map<string, string>, description: Step-emitted metadata }
+  step-failed:
+    description: A step failed before OCAP got its chance (recorded for ordering; OCAP may still save it).
+    payload:
+      - { name: stepName, type: string, description: Failing step }
+      - { name: error, type: step-error, description: Structured step error }
+  run-completed:
+    description: All steps done; the run reached its terminal state.
+    payload:
+      - { name: workOrderId, type: string, description: Work order }
+      - { name: passCount, type: integer, description: Wafers passed }
+      - { name: scrapCount, type: integer, description: Wafers scrapped }
+  run-failed:
+    description: A step failed and no OCAP plan saved it.
+    payload:
+      - { name: workOrderId, type: string, description: Work order }
+      - { name: stepName, type: string, description: Failing step }
+      - { name: error, type: step-error, description: Structured step error }

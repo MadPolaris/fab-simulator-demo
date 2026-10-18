@@ -1,0 +1,30 @@
+# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+kind: scenario
+id: m35-demo
+name: M3.5 Crash & OCAP Demo
+name_zh: M3.5 宕机与 OCAP 演示
+description: >
+  The resilience showpiece. A lot runs the fab queue with fault injection
+  turned up; the operator hits the crash button mid-run, watches recovery
+  pick up from the breakpoint, and sees OCAP plans fire on excursions —
+  all on the 3D fab view. What "correct" looks like: finished steps are
+  never repeated, OCAP-rescued steps count as done, and the final counts
+  add up.
+description_zh: >
+  韧性展示。Lot 跑 fab 队列，故障注入开大；操作员中途点 crash 按钮，
+  看恢复从断点接上，看 OCAP 预案在 excursion 时触发——都在 3D
+  fab 视图上。"正确"长什么样：已完成的步骤永不重跑、OCAP 救回的步骤
+  算做完、最终计数对得上。
+scale:
+  lots: 1
+  wafers_per_lot: 25
+  equipment: fab equipment simulators (litho, cd-sem, amhs, stocker)
+chains:
+  - fab-pipeline
+outcome_rules:
+  - { rule: crash mid-run, expect: run recovers from the breakpoint; completedStepCount only moves forward }
+  - { rule: inject equipment fault, expect: step-failed recorded, matching OCAP plan executes, queue moves on }
+  - { rule: full run, expect: passCount + scrapCount == wafers started }
+# 2026-10-18 ARBITRATED (true chaos): spontaneous equipment faults use unseeded
+# randomness — two runs of this scenario may fail different wafers. "结果不保证重复".
+# Only the injected-fault script above is deterministic; the background chaos is not.

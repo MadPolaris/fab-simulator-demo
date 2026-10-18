@@ -1,0 +1,24 @@
+# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+kind: read-model
+id: equipment-board
+name: Equipment Board
+name_zh: 设备看板
+description: >
+  Live status of every equipment area: which are up, which are down, what
+  each machine is doing. Operators can take an area down or reset it from
+  here (M3.5 chaos controls).
+description_zh: >
+  每个设备区的实时状态：哪些开着、哪些停了、每台机器在干什么。
+  操作员可在这里停掉或重置一个区（M3.5 混沌控制）。
+served_by: fab demo page equipment panel
+sources:
+  - fab-pipeline-run
+fields:
+  - name: areas
+    type: map<string, string>
+    description: AreaId → status (up / down).
+    derived_from: equipment-state in the run state + area down/reset commands
+  - name: machines
+    type: map<string, equipment-state>
+    description: EquipmentId → status, error count.
+    derived_from: equipment-state in the run state

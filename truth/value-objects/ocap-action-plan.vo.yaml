@@ -1,0 +1,37 @@
+# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+kind: value-object
+id: ocap-action-plan
+name: OCAP Action Plan
+name_zh: OCAP 处置预案
+description: >
+  Out-of-Control Action Plan — what to do when a process goes out of
+  control. Plans compose: OcapComposite runs a list in order. Stored in
+  the run state (ocapActions) in rule-priority order, executed by the
+  OcapActionRouter step.
+description_zh: >
+  失控处置预案——工艺失控时做什么。预案可组合：OcapComposite 按顺序
+  执行一个列表。存在运行状态的 ocapActions 里，按规则优先级排序，
+  由 OcapActionRouter 步骤执行。
+variants:
+  - name: OcapHold
+    fields:
+      - { name: durationMs, type: integer, description: How long to hold }
+      - { name: reason, type: string, description: Why held }
+  - name: OcapRework
+    fields:
+      - { name: recipeId, type: string, description: Rework recipe to run }
+      - { name: maxCount, type: integer, description: Max rework attempts under this plan }
+  - name: OcapScrap
+    fields:
+      - { name: reason, type: string, description: Why scrapped }
+  - name: OcapNotify
+    fields:
+      - { name: reason, type: string, description: What happened }
+      - { name: escalationPath, type: string, description: Who to notify }
+  - name: OcapAdjustRecipe
+    fields:
+      - { name: recipeId, type: string, description: Recipe to adjust }
+      - { name: offsetNm, type: number, description: CD offset to apply (nm) }
+  - name: OcapComposite
+    fields:
+      - { name: actions, type: "ocap-action-plan[]", description: Sub-plans, executed in order }

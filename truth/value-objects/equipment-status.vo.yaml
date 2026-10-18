@@ -1,0 +1,19 @@
+# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+kind: value-object
+id: equipment-status
+name: Equipment Status
+name_zh: 设备状态
+description: >
+  The equipment state machine: idle → busy → idle. Error and Maintenance
+  are terminal-ish states reported by the area actor; the simulator itself
+  only models idle/busy (a failed job returns the simulator to idle and
+  counts totalFailed).
+description_zh: >
+  设备状态机：idle → busy → idle。Error 和 Maintenance 是区 actor
+  上报的准终态；仿真器自身只建模 idle/busy（失败的 job 让仿真器回 idle
+  并计 totalFailed）。
+variants:
+  - { name: Idle,        fields: [] }
+  - { name: Busy,        fields: [{ name: currentJob, type: string, description: Running job id }] }
+  - { name: Error,       fields: [{ name: errorCode, type: string, description: Fault code }] }
+  - { name: Maintenance, fields: [] }

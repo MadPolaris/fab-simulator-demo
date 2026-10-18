@@ -1,0 +1,68 @@
+# ═══ truth type vocabulary — hand-editable ═══
+# The small stable set of record kinds used by this tree.
+# One file = one typed record. The validator (tools/validate-tree.py)
+# enforces kind + required fields; humans own everything else.
+kind: types
+id: fab-truth-types
+name: Fab Truth Type Vocabulary
+description: >
+  The seven record kinds this tree uses. Borrowed from the metarch-truthsrc
+  family (aggregate / slice / policy / read-model / value-object) and extended
+  with pipeline + scenario, because this demo's heart is a step queue driving
+  wafer lots through equipment areas plus deterministic demo scripts — neither
+  fits the workshop sticky-note vocabulary.
+description_zh: >
+  本树使用的七种记录类型。沿用 metarch-truthsrc 家族的
+  aggregate / slice / policy / read-model / value-object，
+  另加 pipeline + scenario——因为这个 demo 的核心是驱动晶圆 Lot
+  走设备区的步骤队列，外加确定性演示脚本，两者都不适合工作坊便签词汇。
+types:
+  - kind: aggregate
+    file_suffix: aggregate.yaml
+    description: >
+      A consistency boundary with an identity, state slots, a lifecycle, and
+      invariants. Slices that mutate it live in its slices/ directory.
+    required: [kind, id, name, description, identity, state_slots]
+
+  - kind: slice
+    file_suffix: .slice.yaml
+    description: >
+      One behavior unit: a command with typed parameters, guards, and the
+      events it produces (each event carries its payload schema).
+    required: [kind, id, name, description, aggregate, parameters, produces, events]
+
+  - kind: pipeline
+    file_suffix: .pipeline.yaml
+    description: >
+      An ordered step queue. Each step declares what it reads, what it
+      writes, its failure codes, and the metadata it emits. The array order
+      IS the execution order.
+    required: [kind, id, name, description, steps]
+
+  - kind: value-object
+    file_suffix: .vo.yaml
+    description: >
+      A shared immutable domain type: either a flat field list or a variant
+      (ADT) list. No identity, no lifecycle.
+    required: [kind, id, name, description]
+
+  - kind: policy
+    file_suffix: .policy.yaml
+    description: >
+      A reactive domain rule: when trigger events fire, invoke these slices,
+      decided by an ordered rule table (first match wins).
+    required: [kind, id, name, description, triggers, invokes, rules]
+
+  - kind: read-model
+    file_suffix: .rm.yaml
+    description: >
+      A queryable projection served by the web UI: where it's served, what it
+      derives from, and each field's derivation.
+    required: [kind, id, name, description, served_by, fields]
+
+  - kind: scenario
+    file_suffix: .scenario.yaml
+    description: >
+      A deterministic demo script: scale, the equipment involved, and the
+      outcome rules that make the demo reproducible.
+    required: [kind, id, name, description, scale, chains, outcome_rules]

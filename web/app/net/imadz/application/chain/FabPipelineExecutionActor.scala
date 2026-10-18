@@ -1,7 +1,7 @@
 package net.imadz.application.chain
 
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ActorRef, Behavior}
+import akka.actor.typed.{ActorRef, Behavior, Scheduler}
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, Entity, EntityTypeKey}
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior, Recovery}
 import akka.persistence.typed.{PersistenceId, RecoveryCompleted => AkkaRecoveryCompleted}
@@ -77,6 +77,14 @@ object FabPipelineExecutionActor {
 
   /** Journal tag for [[eventsByTag]] Projection subscriptions. */
   val Tag = "fab-pipeline"
+
+  /**
+   * How long the step interpreter waits for lot notifications to be confirmed
+   * before failing the step (2026-10-18 arbitration: lot notifications are
+   * acknowledged). Local lot actors confirm in milliseconds; 5s is generous.
+   */
+  val LotAckTimeout: akka.util.Timeout =
+    akka.util.Timeout(5, java.util.concurrent.TimeUnit.SECONDS)
 
   /** PersistenceId type for the PersistentMonarch child (one per parent entity). */
   private val ChildPersistenceId = "FabPipelineExecutionRun"
@@ -241,7 +249,7 @@ object FabPipelineExecutionActor {
       contextFactory: (String, String) => FabDemoContext,
       parentSelf: ActorRef[Command],
       publisher: FabSimulationEvent => Unit
-  )(implicit ec: ExecutionContext) {
+  )(implicit ec: ExecutionContext, scheduler: Scheduler) {
 
     @volatile private var cachedCtx: FabDemoContext = _
 
@@ -298,6 +306,13 @@ object FabPipelineExecutionActor {
       val cursor = s"${FabPipelineProcessor.stageName(stage)}#${runState.completedCount}"
       if (fctx.runToken()) parentSelf ! EngineStageStarted(cursor)
 
+      // 2026-10-18 (arbitrated): lot notifications are acknowledged. Install a
+      // fresh tracking gate for this step; the step only counts as done once
+      // every lot notification it sent is confirmed. A lot that never confirms
+      // fails the step (LOT_ACK_TIMEOUT) instead of diverging silently.
+      val ackGate = LotAckGate.tracking(LotAckTimeout)
+      fctx.lotAckGate = ackGate
+
       FabScenarioPipeline.runStage(stage, runState.state, fctx)
         .recoverWith {
           // Preserve business classification: stage bodies throw the FAB exception
@@ -305,6 +320,15 @@ object FabPipelineExecutionActor {
           case FabStageFailedException(err) =>
             Future.failed(MonarchStageFailedException(
               MonarchStageError(err.stageName, err.equipId, err.errorCode, err.detail)))
+        }
+        .flatMap { next =>
+          // Drain the ack gate before the step counts as complete.
+          ackGate.seal().map(_ => next).recoverWith {
+            case ex =>
+              Future.failed(FabStageFailedException(
+                FabStageError(cursor, None, "LOT_ACK_TIMEOUT",
+                  s"lot notification not confirmed within ${LotAckTimeout.duration.toSeconds}s: ${ex.getMessage}")))
+          }
         }
         .map { next =>
           runState.copy(state = next, completedCount = runState.completedCount + 1, lastOutcome = None)
@@ -387,7 +411,8 @@ object FabPipelineExecutionActor {
           stages: Seq[PipelineStage],
           freshCtx: Option[FabDemoContext]
       ): ActorRef[PersistentMonarch.Command[FabRunState]] = {
-        val host = new ChildRunHost(workOrderId, freshCtx, contextFactory, ctx.self, publisher)
+        val host = new ChildRunHost(workOrderId, freshCtx, contextFactory, ctx.self, publisher)(
+          ctx.executionContext, ctx.system.scheduler)
         ctx.spawn(host.childBehavior(entityId, stages), ChildActorName)
       }
 

@@ -1,0 +1,19 @@
+# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+kind: value-object
+id: decision-config
+name: Decision Config
+name_zh: 判定配置
+description: >
+  The process spec limits: the CD thresholds that separate PASS from
+  BORDERLINE from FAIL, and how many rework attempts a wafer gets before
+  it is scrapped. Measurements are pure data; these thresholds are where
+  the fab's judgment lives.
+description_zh: >
+  工艺 spec 上下限：区分 PASS / BORDERLINE / FAIL 的 CD 阈值，
+  以及一片晶圆在报废前允许返工几次。量测值是纯数据；fab 的判断力
+  住在这组阈值里。
+fields:
+  - { name: lowerSpecNm, type: number, description: Lower spec limit (nm) }
+  - { name: upperSpecNm, type: number, description: Upper spec limit (nm) }
+  - { name: borderlineWindowNm, type: number, description: Margin above upperSpec that is still BORDERLINE, not FAIL }
+  - { name: maxReworkCount, type: integer, description: Rework attempts allowed before forced scrap (default 2) }
