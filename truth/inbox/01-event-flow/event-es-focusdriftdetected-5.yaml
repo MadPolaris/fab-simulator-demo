@@ -1,0 +1,28 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: FocusDriftDetected
+origin:
+  stage: eventStorming
+  board: proposed
+  seq: 5
+payload:
+  {
+      "type": "event",
+      "name": "FocusDriftDetected",
+      "name_zh": "焦距漂移检出",
+      "description": "Focus error drift detected beyond tolerance on a lithography tool.",
+      "description_zh": "检出光刻设备焦距误差漂移超差。",
+      "info": {
+          "timeline": "equipment",
+          "grounded_in": "public lithography domain knowledge; no code counterpart",
+          "confidence": "medium",
+          "payloadFields": [
+              "equipmentId: string",
+              "waferId: string",
+              "driftNm: double"
+          ]
+      }
+  }

@@ -1,0 +1,28 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: MeasurementCompleted
+origin:
+  stage: eventStorming
+  board: proposed
+  seq: 6
+payload:
+  {
+      "type": "event",
+      "name": "MeasurementCompleted",
+      "name_zh": "量测完成",
+      "description": "A CD-SEM metrology job completes, carrying per-wafer critical dimension measurements (measured vs target). The simulator reports values only; judgment happens downstream.",
+      "description_zh": "CD-SEM 量测任务完成，带每片晶圆的关键尺寸（实测 vs 目标）。仿真器只上报数值，判等在下游。",
+      "info": {
+          "timeline": "equipment",
+          "grounded_in": "core/src/main/scala/net/imadz/fab/simulation/CdSemSimulator.scala generateResult -> MetrologyResult(wafers: Map[waferId, CriticalDimension])",
+          "confidence": "high",
+          "payloadFields": [
+              "jobId: string",
+              "equipmentId: string",
+              "wafers: map"
+          ]
+      }
+  }

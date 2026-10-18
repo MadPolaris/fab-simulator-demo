@@ -1,0 +1,29 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: ExposureCompleted
+origin:
+  stage: eventStorming
+  board: proposed
+  seq: 3
+payload:
+  {
+      "type": "event",
+      "name": "ExposureCompleted",
+      "name_zh": "曝光完成",
+      "description": "A lithography exposure job completes, carrying per-wafer process measurements (alignment error, resist thickness, focus error). The data half exists in code (LithoExposureResult); the dedicated event does not.",
+      "description_zh": "光刻曝光任务完成，带每片晶圆的工艺量测（对位误差、光刻胶厚度、焦距误差）。数据在代码里有一半（LithoExposureResult），专用事件没有。",
+      "info": {
+          "timeline": "equipment",
+          "grounded_in": "core/src/main/scala/net/imadz/fab/simulation/LithographySimulator.scala generateResult -> LithoExposureResult(wafers: Map[waferId, LithoMeasurement])",
+          "confidence": "high",
+          "payloadFields": [
+              "jobId: string",
+              "equipmentId: string",
+              "recipeId: string",
+              "wafers: map"
+          ]
+      }
+  }

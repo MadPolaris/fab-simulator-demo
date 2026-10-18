@@ -1,0 +1,27 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: AlarmCleared
+origin:
+  stage: eventStorming
+  board: proposed
+  seq: 2
+payload:
+  {
+      "type": "event",
+      "name": "AlarmCleared",
+      "name_zh": "报警清除",
+      "description": "A previously raised equipment alarm is cleared.",
+      "description_zh": "此前触发的设备报警被清除。",
+      "info": {
+          "timeline": "equipment",
+          "grounded_in": "SEMI E30 section 5.4 Alarm Management (public standard)",
+          "confidence": "high",
+          "payloadFields": [
+              "equipmentId: string",
+              "alarmId: string"
+          ]
+      }
+  }

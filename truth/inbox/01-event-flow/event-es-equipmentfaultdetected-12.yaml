@@ -1,0 +1,28 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: EquipmentFaultDetected
+origin:
+  stage: eventStorming
+  board: proposed
+  seq: 12
+payload:
+  {
+      "type": "event",
+      "name": "EquipmentFaultDetected",
+      "name_zh": "设备故障检出",
+      "description": "Statistical analysis of real-time equipment data judges a fault (something is wrong). Proposed: not in code.",
+      "description_zh": "对设备实时上报数据的统计分析判定出故障（出问题了）。提案：代码里没有。",
+      "info": {
+          "timeline": "equipment",
+          "grounded_in": "user-stated domain chain 2026-10-18 (realtime report -> statistical analysis -> judge -> MES reschedule) + public FDC (fault detection and classification) knowledge",
+          "confidence": "medium",
+          "payloadFields": [
+              "equipmentId: string",
+              "faultType: string",
+              "severity: string"
+          ]
+      }
+  }

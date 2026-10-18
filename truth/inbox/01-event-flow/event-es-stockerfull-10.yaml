@@ -1,0 +1,26 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: StockerFull
+origin:
+  stage: eventStorming
+  board: proposed
+  seq: 10
+payload:
+  {
+      "type": "event",
+      "name": "StockerFull",
+      "name_zh": "暂存库满",
+      "description": "A stocker has no available port for the incoming FOUP. Code currently answers with a generic Error status report; promoted to a dedicated event.",
+      "description_zh": "暂存库无空闲端口接收晶圆盒。代码里目前只回通用错误状态，升为专用事件。",
+      "info": {
+          "timeline": "equipment",
+          "grounded_in": "core/src/main/scala/net/imadz/fab/simulation/StockerSimulator.scala running -> StatusReport(Error) when all ports occupied",
+          "confidence": "high",
+          "payloadFields": [
+              "equipmentId: string"
+          ]
+      }
+  }

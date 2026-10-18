@@ -1,0 +1,28 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: PortOccupancyChanged
+origin:
+  stage: eventStorming
+  board: proposed
+  seq: 11
+payload:
+  {
+      "type": "event",
+      "name": "PortOccupancyChanged",
+      "name_zh": "端口占用变化",
+      "description": "A stocker port's occupancy changes (FOUP loaded or unloaded).",
+      "description_zh": "暂存库端口占用变化（晶圆盒装载或卸载）。",
+      "info": {
+          "timeline": "equipment",
+          "grounded_in": "core/src/main/scala/net/imadz/fab/simulation/StockerSimulator.scala port assignment on LoadFoup/UnloadFoup",
+          "confidence": "medium",
+          "payloadFields": [
+              "equipmentId: string",
+              "portId: string",
+              "foupId: string (optional)"
+          ]
+      }
+  }

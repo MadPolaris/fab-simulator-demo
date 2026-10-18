@@ -1,0 +1,29 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: TransportFailed
+origin:
+  stage: eventStorming
+  board: proposed
+  seq: 9
+payload:
+  {
+      "type": "event",
+      "name": "TransportFailed",
+      "name_zh": "搬送失败",
+      "description": "AMHS cannot transport: no route exists between the requested ports.",
+      "description_zh": "AMHS 无法搬送：请求的两端口之间无路线。",
+      "info": {
+          "timeline": "equipment",
+          "grounded_in": "core/src/main/scala/net/imadz/fab/simulation/AmhsSimulator.scala idle -> JobFailed(NO_ROUTE)",
+          "confidence": "high",
+          "payloadFields": [
+              "foupId: string",
+              "fromPort: string",
+              "toPort: string",
+              "reason: string"
+          ]
+      }
+  }

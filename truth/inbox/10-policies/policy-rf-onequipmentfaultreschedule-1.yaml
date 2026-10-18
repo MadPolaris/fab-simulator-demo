@@ -1,0 +1,23 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: policy
+name: OnEquipmentFaultReschedule
+origin:
+  stage: refining
+  board: proposed
+  seq: 1
+payload:
+  {
+      "type": "policy",
+      "name": "OnEquipmentFaultReschedule",
+      "name_zh": "设备故障重调度策略",
+      "description": "When EquipmentFaultDetected or EquipmentHealthDegraded is reported, MES must reschedule the affected lots to healthy equipment. Mechanism proposed; intent awaits the steward's adjudication.",
+      "description_zh": "当上报设备故障检出或健康劣化时，MES 必须把受影响批次重调度到健康设备。机制是提案，意图待 steward 裁决。",
+      "info": {
+          "timeline": "equipment",
+          "grounded_in": "user-stated domain chain 2026-10-18",
+          "confidence": "low"
+      }
+  }

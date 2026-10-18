@@ -1,0 +1,28 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: WaferClassified
+origin:
+  stage: eventStorming
+  board: proposed
+  seq: 7
+payload:
+  {
+      "type": "event",
+      "name": "WaferClassified",
+      "name_zh": "晶圆判等",
+      "description": "A measured wafer is judged PASS / BORDERLINE / FAIL / SCRAP. FAIL routes to rework back to the lithography area, SCRAP is scrapped, BORDERLINE goes to re-measurement. This is the judgment point of the report-analyze-judge chain.",
+      "description_zh": "量测后的晶圆被判等：通过 / 边缘 / 不合格 / 报废。不合格返工回光刻区，报废片报废，边缘片复测。这是上报-分析-判定链的判定点。",
+      "info": {
+          "timeline": "equipment",
+          "grounded_in": "web/app/net/imadz/application/component/FabMeasurementClassifier.scala classify -> PASS/BORDERLINE/FAIL/SCRAP with NextStep routing (rework to LITHO / scrap / reconfirm)",
+          "confidence": "high",
+          "payloadFields": [
+              "waferId: string",
+              "disposition: string",
+              "reason: string"
+          ]
+      }
+  }

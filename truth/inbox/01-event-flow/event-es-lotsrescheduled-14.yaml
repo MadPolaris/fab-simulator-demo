@@ -1,0 +1,28 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: LotsRescheduled
+origin:
+  stage: eventStorming
+  board: proposed
+  seq: 14
+payload:
+  {
+      "type": "event",
+      "name": "LotsRescheduled",
+      "name_zh": "批次重调度",
+      "description": "MES reschedules affected lots onto healthy equipment in response to equipment events.",
+      "description_zh": "MES 响应设备事件，把受影响的批次重调度到健康设备。",
+      "info": {
+          "timeline": "equipment",
+          "grounded_in": "user-stated domain chain 2026-10-18 (MES reschedules on equipment events)",
+          "confidence": "medium",
+          "payloadFields": [
+              "reason: string",
+              "equipmentId: string",
+              "lotIds: list"
+          ]
+      }
+  }

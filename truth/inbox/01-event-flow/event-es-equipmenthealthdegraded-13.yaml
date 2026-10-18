@@ -1,0 +1,27 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: EquipmentHealthDegraded
+origin:
+  stage: eventStorming
+  board: proposed
+  seq: 13
+payload:
+  {
+      "type": "event",
+      "name": "EquipmentHealthDegraded",
+      "name_zh": "设备健康劣化",
+      "description": "Early warning: equipment health metrics degrade before a hard fault - the precursor of an emergency.",
+      "description_zh": "早期预警：设备健康指标在硬故障前劣化——紧急情况的前兆。",
+      "info": {
+          "timeline": "equipment",
+          "grounded_in": "user-stated domain chain 2026-10-18 + public FDC knowledge",
+          "confidence": "medium",
+          "payloadFields": [
+              "equipmentId: string",
+              "metrics: map"
+          ]
+      }
+  }

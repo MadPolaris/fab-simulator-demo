@@ -1,0 +1,28 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: OverlayShiftDetected
+origin:
+  stage: eventStorming
+  board: proposed
+  seq: 4
+payload:
+  {
+      "type": "event",
+      "name": "OverlayShiftDetected",
+      "name_zh": "对位偏移检出",
+      "description": "Measured wafer overlay shift exceeds the allowed threshold during or after exposure. Overlay is the most critical lithography metric; real-time overlay monitoring is standard practice.",
+      "description_zh": "曝光中或曝光后量测到晶圆对位偏移超阈值。对位是光刻最关键的指标，实时对位监控是行业标配。",
+      "info": {
+          "timeline": "equipment",
+          "grounded_in": "public lithography domain knowledge; no code counterpart (code only simulates alignmentErrorNm values)",
+          "confidence": "medium",
+          "payloadFields": [
+              "equipmentId: string",
+              "waferId: string",
+              "shiftNm: double"
+          ]
+      }
+  }

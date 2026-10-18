@@ -1,0 +1,27 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: TransportCompleted
+origin:
+  stage: eventStorming
+  board: proposed
+  seq: 8
+payload:
+  {
+      "type": "event",
+      "name": "TransportCompleted",
+      "name_zh": "搬送完成",
+      "description": "AMHS completes a FOUP transport between ports. Single-rail model: one transport active at a time.",
+      "description_zh": "AMHS 完成晶圆盒在端口间的搬送。单轨模型：一次只运一盒。",
+      "info": {
+          "timeline": "equipment",
+          "grounded_in": "core/src/main/scala/net/imadz/fab/simulation/AmhsSimulator.scala inTransit -> FoupArrived(foupId, toPort)",
+          "confidence": "high",
+          "payloadFields": [
+              "foupId: string",
+              "toPort: string"
+          ]
+      }
+  }

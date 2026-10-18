@@ -1,0 +1,28 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+
+kind: note
+type: event
+name: AlarmDetected
+origin:
+  stage: eventStorming
+  board: proposed
+  seq: 1
+payload:
+  {
+      "type": "event",
+      "name": "AlarmDetected",
+      "name_zh": "报警触发",
+      "description": "Equipment raises an alarm: an abnormal condition that may endanger people, equipment, or material. Carries AlarmID and associated variable data; closed by AlarmCleared.",
+      "description_zh": "设备触发报警：可能危及人员、设备或在制品的异常状况。带报警编号与关联变量；由报警清除终结。",
+      "info": {
+          "timeline": "equipment",
+          "grounded_in": "SEMI E30 section 5.4 Alarm Management - collection events AlarmDetected/AlarmCleared (public standard)",
+          "confidence": "high",
+          "payloadFields": [
+              "equipmentId: string",
+              "alarmId: string",
+              "associatedData: map"
+          ]
+      }
+  }
