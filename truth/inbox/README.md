@@ -81,3 +81,20 @@ produces: [...]        # 命令：产生什么事件
 
 `python3 truth/tools/validate-tree.py`（仓根执行）：I1/I2 检查 inbox 便签
 能解析、头字段齐全、事件带 `sequence`。不做跨文件连续性检查。
+
+## 角色—权限矩阵（02 × 13，不另起产物）
+
+`02-commands/` 与 `13-read-models/` 使用**同一套角色词汇**（相同 id）；
+对应关系显式写出，即一张完整权限矩阵：
+
+| 角色 id | 名称 | 可签发命令 `can_issue` | 可查看读模型 `can_view` |
+|---|---|---|---|
+| `process-engineer` | 工艺工程师 | create-work-order、start-pipeline-run、merge-sublot | equipment-board、event-feed、pipeline-timeline、recovery-status、scenario-ledger |
+| `demo-presenter` | 演示者 | inject-crash | equipment-board、event-feed、pipeline-timeline、recovery-status、scenario-ledger |
+| `system` | 系统 | handle-ocap、record-measurement、classify-wafer、split-sublot、scrap-wafers、hold-wafers | （无——系统不看界面） |
+
+- 角色便签（`02-commands/role-*.yaml`）同时列出 `can_issue` 与 `can_view` 两面；
+  读模型便签带 `visible_to: [role ids]`。
+- **诚实声明**：本演示代码里没有显式 RBAC，以上是重建时的最小假设——
+  工艺工程师（建工单、启动）、演示者（点宕机按钮）与自动执行的系统。
+  演示 UI 无登录，读模型谁打开谁看；矩阵按"签发"区分，不虚构"查看"限制。

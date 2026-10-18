@@ -1,6 +1,7 @@
 # ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
 kind: note
 type: command
+id: scrap-wafers
 name: ScrapWafers
 name_zh: 报废晶圆
 description: Scrap wafers out of the lot — terminal, no rework.

@@ -1,6 +1,7 @@
 # ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
 kind: note
 type: command
+id: handle-ocap
 name: HandleOcap
 name_zh: 执行 OCAP 处置
 description: 'A step failed and an OCAP rule matched: carry out its action plan in priority order. The

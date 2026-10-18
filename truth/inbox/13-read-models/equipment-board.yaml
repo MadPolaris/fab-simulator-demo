@@ -1,6 +1,7 @@
 # ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
 kind: note
 type: readModel
+id: equipment-board
 name: EquipmentBoard
 name_zh: 设备看板
 description: 'Per-area, per-equipment status board: which equipment is running, faulted, or idle, with
@@ -13,3 +14,6 @@ fields:
 - 'area.status: map ← 各区设备状态汇总'
 - 'equipment.errorCount: map ← 单台错误计数 → OCAP 设备条件'
 - 'equipment.state: map ← 运行/故障/空闲'
+visible_to:
+- process-engineer
+- demo-presenter

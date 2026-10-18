@@ -1,6 +1,7 @@
 # ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
 kind: note
 type: command
+id: merge-sublot
 name: MergeSubLot
 name_zh: 合并子 Lot
 description: Return a child lot's wafers to the parent lot.

@@ -1,6 +1,7 @@
 # ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
 kind: note
 type: command
+id: create-work-order
 name: CreateWorkOrder
 name_zh: 创建工单
 description: Open a work order for a lot to be processed through the fab step queue.

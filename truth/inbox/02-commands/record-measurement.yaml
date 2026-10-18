@@ -1,6 +1,7 @@
 # ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
 kind: note
 type: command
+id: record-measurement
 name: RecordMeasurement
 name_zh: 记录量测
 description: Record a wafer's CD measurement from the metrology equipment. Pure data, no judgment.

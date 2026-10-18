@@ -1,8 +1,17 @@
 # ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
 kind: note
 type: role
+id: system
 name: System
 name_zh: 系统
 description: 'The automatic role: executes queue steps, evaluates OCAP rules, classifies wafers, routes
   dispositions without human involvement.'
-description_zh: 自动角色：执行队列步骤、求值 OCAP 规则、分类晶圆、自动路由处置，无需人工介入。
+description_zh: 自动角色：执行队列步骤、求值 OCAP 规则、分类晶圆、自动路由处置，无需人工介入。不查看读模型。
+can_issue:
+- handle-ocap
+- record-measurement
+- classify-wafer
+- split-sublot
+- scrap-wafers
+- hold-wafers
+can_view: []

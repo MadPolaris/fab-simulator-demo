@@ -1,6 +1,7 @@
 # ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
 kind: note
 type: command
+id: split-sublot
 name: SplitSubLot
 name_zh: 切分子 Lot
 description: Carve wafers out of a lot into a child lot (rework / pilot / scrap). Reserve-then-confirm

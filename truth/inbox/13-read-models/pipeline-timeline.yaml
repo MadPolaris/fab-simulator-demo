@@ -1,6 +1,7 @@
 # ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
 kind: note
 type: readModel
+id: pipeline-timeline
 name: PipelineTimeline
 name_zh: 流水线时间线
 description: 'Step-by-step timeline of a run: which steps finished, which were OCAP-recovered, where the
@@ -13,3 +14,6 @@ fields:
 - steps[].name ← 步骤名
 - steps[].outcome ← completed|ocap-recovered|failed
 - breakpoint ← completedStepCount
+visible_to:
+- process-engineer
+- demo-presenter

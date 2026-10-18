@@ -1,6 +1,7 @@
 # ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
 kind: note
 type: command
+id: start-pipeline-run
 name: StartPipelineRun
 name_zh: 启动流水线运行
 description: Start executing the fab step queue for a work order. One work order, one run — a second start

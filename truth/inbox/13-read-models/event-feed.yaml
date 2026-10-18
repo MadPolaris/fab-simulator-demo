@@ -1,6 +1,7 @@
 # ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
 kind: note
 type: readModel
+id: event-feed
 name: EventFeed
 name_zh: 事件流
 description: 'The live event stream the demo pages render: every run/lot lifecycle transition publishes
@@ -13,3 +14,6 @@ sources:
 fields:
 - 'frame: {type, data} ← 领域事件的实时投影'
 - frame types ← run/lot 生命周期帧词汇
+visible_to:
+- process-engineer
+- demo-presenter

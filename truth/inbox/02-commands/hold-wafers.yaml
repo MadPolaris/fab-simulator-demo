@@ -1,6 +1,7 @@
 # ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
 kind: note
 type: command
+id: hold-wafers
 name: HoldWafers
 name_zh: 暂存晶圆
 description: Park wafers out of the flow pending review; release returns them.

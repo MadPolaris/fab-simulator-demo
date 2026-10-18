@@ -1,6 +1,7 @@
 # ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
 kind: note
 type: readModel
+id: scenario-ledger
 name: ScenarioLedger
 name_zh: 场景台账
 description: 'Per-scenario ledger: lots launched, wafers by verdict, scrap count — the demo''s scoreboard.'
@@ -13,3 +14,6 @@ fields:
 - 'lotsLaunched: integer'
 - 'wafersByVerdict: map ← PASS/BORDERLINE/FAIL/SCRAP 计数'
 - 'scrapCount: integer'
+visible_to:
+- process-engineer
+- demo-presenter
