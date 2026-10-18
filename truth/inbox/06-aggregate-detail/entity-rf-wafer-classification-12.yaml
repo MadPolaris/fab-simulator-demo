@@ -1,0 +1,20 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: entity
+name: WaferClassification
+origin:
+  stage: refining
+  board: reconstructed
+  seq: 12
+payload:
+  {
+    "type": "entity",
+    "name": "WaferClassification",
+    "name_zh": "晶圆分类",
+    "description": "Disposition verdicts: PASS (continue), BORDERLINE (wait for review), FAIL (rework until budget out), SCRAP (terminal).",
+    "description_zh": "去向判定：PASS（继续）、BORDERLINE（等复核）、FAIL（返工，预算用完为止）、SCRAP（终态）。",
+    "info": {
+      "pilotType": "valueObject"
+    }
+  }

@@ -1,0 +1,25 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: field
+name: OcapHandledFields
+origin:
+  stage: refining
+  board: reconstructed
+  seq: 18
+payload:
+  {
+    "type": "field",
+    "name": "OcapHandledFields",
+    "name_zh": "OCAP 处置字段",
+    "description": "Fields of OcapHandled.",
+    "description_zh": "OcapHandled 的字段。",
+    "info": {
+      "pilotType": "messageFields",
+      "fields": [
+        "stepName: string",
+        "ruleId: string",
+        "action: string"
+      ]
+    }
+  }

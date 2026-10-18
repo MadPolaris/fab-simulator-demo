@@ -1,0 +1,34 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: command
+name: MergeSubLot
+origin:
+  stage: commandStorming
+  board: reconstructed
+  seq: 7
+payload:
+  {
+    "type": "command",
+    "name": "MergeSubLot",
+    "id": "merge-sublot",
+    "name_zh": "合并子 Lot",
+    "description": "Return a child lot's wafers to the parent lot.",
+    "description_zh": "子 Lot 的晶圆回归母 Lot。",
+    "links": [
+      "event:SubLotMerged",
+      "role:ProcessEngineer"
+    ],
+    "info": {
+      "triggers": [
+        "role: 工艺工程师"
+      ],
+      "produces": [
+        "sublot-merged"
+      ],
+      "parameters": [
+        "parentLotId: string",
+        "childLotId: string"
+      ]
+    }
+  }

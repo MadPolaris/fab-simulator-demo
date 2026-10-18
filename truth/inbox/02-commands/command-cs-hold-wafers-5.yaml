@@ -1,0 +1,36 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: command
+name: HoldWafers
+origin:
+  stage: commandStorming
+  board: reconstructed
+  seq: 5
+payload:
+  {
+    "type": "command",
+    "name": "HoldWafers",
+    "id": "hold-wafers",
+    "name_zh": "暂存晶圆",
+    "description": "Park wafers out of the flow pending review; release returns them.",
+    "description_zh": "晶圆暂存脱离流程等待复核；放行则回归。",
+    "links": [
+      "event:WafersHeld",
+      "event:WafersReleased"
+    ],
+    "info": {
+      "triggers": [
+        "policy: 晶圆处置"
+      ],
+      "produces": [
+        "wafers-held",
+        "wafers-released"
+      ],
+      "parameters": [
+        "lotId: string",
+        "waferIds: string[]",
+        "reason: string"
+      ]
+    }
+  }

@@ -21,7 +21,7 @@
 | `07-aggregate-relations/` | 聚合间关系 | **聚合级别**的引用：哪个聚合引用哪个、基数、业务含义（问题空间语言，不写 foreignKey） |
 | `08-message-detail/` | 消息字段细化 | 事件/命令的字段定义 |
 | `09-lineage/` | 字段血缘 | CD 量测→分类→处置、晶圆子 Lot 血缘、事务编号、工艺路线位置 |
-| `10-policies/` | 策略定义 | OCAP 求值、量测分类、晶圆处置、事务编号沿用、Lot 通知确认保障 |
+| `10-policies/` | 策略定义 | **本 demo 无独立便签**：5 张策略卡片已是其结构化 policy atom（`policies/*.policy.yaml`）的浓缩复述，内容被 atom 完全覆盖；且工具链无法 roundtrip `kind: note + type: policy` 的便签（decompose 会把它强制转成 policy atom）。卡片原文逐字保留在对应 atom 的 `payload.workshopCard` 里 |
 | `11-stories/` | 用户故事 | 从 M3.5 / fab-demo-tour 场景反推的用户故事 |
 | `12-use-cases/` | 用例 | 前置条件、步骤、扩展 |
 | `13-read-models/` | 读模型 | 定义含字段 + 字段来源（血缘） |
@@ -58,29 +58,48 @@
 - 目录序号（01–13）即规范顺序；**不做跨文件连续重编号**——那是编译器的事，
   不进树。
 
-## 便签格式
+## 便签格式（truthsrc v0.4，2026-10-18 迁移）
 
 ```yaml
-# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
 kind: note
-type: event            # event | command | role | policy | aggregate | readModel | ...
-name: <Name>
-name_zh: <中文名>
-description: >
-  <problem-space description>
-description_zh: >
-  <中文描述>
-sequence: 3            # 仅事件：业务流中的位置（问题空间，非机器计数器）
-triggers: [...]        # 命令/策略：什么触发它
-produces: [...]        # 命令：产生什么事件
+type: event            # event | command | role | externalSystem | aggregate | entity | relation | field | story | readModel
+name: RunStarted
+origin:                # 便签在工作坊板上的位置（冻结，不手工重编号）
+  stage: eventStorming
+  board: reconstructed
+  seq: 1
+payload:               # 工作坊自己的 JSON，verbatim，字节级保留
+  {
+    "type": "event",
+    "name": "RunStarted",
+    "name_zh": "流水线启动",
+    "description": "<业务描述>",
+    "info": {"timeline": "fab-pipeline", "sequence": 2}
+  }
 ```
 
-文件名用 `<slug>.yaml` 简单命名，不做 board/seq 元组——用户明确要求简化阶段机制。
+文件名由工具链的 decompose 规则决定：`<type>-<阶段码>-<slug(name)>-<seq>.yaml`
+（如 `event-es-run-started-1.yaml`）；`origin.seq` 在 `(stage, board)` 内唯一，
+0..n-1 连续由编译器 densify，手工只保证唯一不保证连续。
+
+类型映射（pilot 方言 → truthsrc NOTE_TYPES，原文写进 `payload.info.pilotType`）：
+`valueObject`/`aggregateState` → `entity`，`aggregateRelation`/`lineage` → `relation`，
+`messageFields` → `field`，`useCase` → `story`。
 
 ## 校验
 
-`python3 truth/tools/validate-tree.py`（仓根执行）：I1/I2 检查 inbox 便签
-能解析、头字段齐全、事件带 `sequence`。不做跨文件连续性检查。
+truthsrc 工具链（`zhongdj/metarch-truthsrc` 的 checkout 里执行）：
+
+```bash
+node bin/truthsrc.js validate --tree <truthDir>    # 0 hard 错误；notice 仅作标注
+node bin/truthsrc.js roundtrip --tree <truthDir>   # compile∘decompose∘compile 字节恒等
+```
+
+事件便签要求：`payload.description` 非空（ES1）、`payload.info.timeline` 存在（ES2）；
+`01-event-flow/` 每条事件的 `info.sequence` 即它在业务叙事中的位置（问题空间，
+用户裁定：去机械留语义）。
 
 ## 角色—权限矩阵（02 × 13，不另起产物）
 

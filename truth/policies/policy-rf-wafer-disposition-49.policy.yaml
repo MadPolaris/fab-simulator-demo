@@ -1,0 +1,84 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: policy
+type: policy
+name: "Wafer Disposition"
+origin:
+  stage: refining
+  board: reconstructed
+  seq: 49
+triggers:
+  - event: wafer-classified
+    aggregate: Wafer Lot
+invokes:
+  - command: split-sublot
+    aggregate: Wafer Lot
+  - command: scrap-wafers
+    aggregate: Wafer Lot
+  - command: hold-wafers
+    aggregate: Wafer Lot
+payload:
+  {
+    "id": "wafer-disposition",
+    "type": "policy",
+    "name": "Wafer Disposition",
+    "name_zh": "晶圆处置",
+    "description": "Every classified wafer is routed exactly once: PASS continues, BORDERLINE waits for review, FAIL goes to rework (until its rework budget runs out), SCRAP leaves the lot. Disposition is driven by classification, never by raw measurements.",
+    "description_zh": "每个分好类的晶圆恰好被路由一次：PASS 继续走，BORDERLINE 等评审， FAIL 去返工（返工次数用完为止），SCRAP 离开 Lot。处置只看分类， 不看原始量测值。",
+    "links": [
+      "event:wafer-classified",
+      "command:split-sublot",
+      "command:scrap-wafers",
+      "command:hold-wafers"
+    ],
+    "info": {
+      "triggers": [
+        {
+          "event": "wafer-classified",
+          "aggregate": "Wafer Lot"
+        }
+      ],
+      "invokes": [
+        {
+          "command": "split-sublot",
+          "aggregate": "Wafer Lot"
+        },
+        {
+          "command": "scrap-wafers",
+          "aggregate": "Wafer Lot"
+        },
+        {
+          "command": "hold-wafers",
+          "aggregate": "Wafer Lot"
+        }
+      ]
+    },
+    "rules": [
+      {
+        "when": "classification is PASS",
+        "then": "wafer continues the flow (no slice invoked)"
+      },
+      {
+        "when": "classification is BORDERLINE",
+        "then": "hold-wafers — park until human review"
+      },
+      {
+        "when": "classification is FAIL and reworkCount < maxReworkCount",
+        "then": "split-sublot with reason rework"
+      },
+      {
+        "when": "classification is FAIL and reworkCount >= maxReworkCount",
+        "then": "scrap-wafers — budget exhausted"
+      },
+      {
+        "when": "classification is SCRAP",
+        "then": "scrap-wafers"
+      }
+    ],
+    "workshopCard": {
+      "name": "WaferDisposition",
+      "name_zh": "晶圆处置",
+      "description": "Every classified wafer is routed exactly once: PASS continues, BORDERLINE waits for review, FAIL goes to rework (until its rework budget runs out), SCRAP is terminal.",
+      "description_zh": "每片已分类晶圆有且仅被路由一次：PASS 继续、BORDERLINE 等复核、FAIL 返工（预算用完为止）、SCRAP 终态。"
+    }
+  }

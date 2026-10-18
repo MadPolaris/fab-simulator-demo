@@ -20,37 +20,47 @@
 
 | 目录 | 内容 |
 |---|---|
-| `tree.yaml` | 根清单：名称、版本、来源、完整索引 |
-| `types.yaml` | **类型词汇表**——本树使用的 7 种记录类型 |
-| `aggregates/` | 三个一致性边界：`fab-pipeline-run`、`lot`、`work-order` |
+| `workshop.yaml` | 树根：schema 版本＋工作坊 session 顺序 |
+| `inbox/` | 13 个工作坊产物，一产物一目录（事件流、命令、聚合……） |
+| `aggregates/` | 三个一致性边界：`fab-pipeline-run`、`lot`、`work-order`（每命令一切片） |
 | `pipelines/` | fab 步骤词汇（步骤顺序、槽位、失败码） |
 | `value-objects/` | 共享不可变领域类型（设备区、OCAP 预案、配置……） |
 | `policies/` | 响应式领域规则（OCAP、分类、事务编号沿用、处置） |
 | `read-models/` | Web UI 提供的查询（时间线、设备看板、事件流……） |
 | `scenarios/` | 演示脚本（M3.5 宕机/OCAP 演示、标准巡览） |
-| `tools/` | `validate-tree.py`——机器门禁（见下） |
+
+格式：**truthsrc v0.4**（从 pilot 方言迁移而来，见 `MIGRATION-NOTES.md`）。
+原子词汇（`kind`）与机器门禁在 truthsrc 工具链（`zhongdj/metarch-truthsrc`），
+不在本树里。
 
 每个目录有自己的 `README.md`。每个原子文件以
-`kind` / `id` / `name` / `description` 开头——读这四行就知道它是什么。
+`# ═══ truthsrc atom ═══` 横幅开头，接着是标量头行（`kind`、`name`……），
+然后是 verbatim JSON 块（`payload`、`events`、`steps`、`script`）——
+读头行就知道它是什么；JSON 是工作坊自己的内容，字节级原样保留。
 
 ## 约定
 
 - **稳定 ID，绝不复制文本。** 交叉引用用 `id`（如 `aggregate: lot`、
   `event: step-completed`）。名字变了，id 不变。
-- **一文件一类型化记录。** `kind` 来自 `types.yaml`；校验器强制每种 kind 的必填字段。
+- **一文件一类型化记录。** `kind` 来自 truthsrc v0.4 词汇（见工具链的 `SCHEMA.md`）；
+  校验器强制每种 kind 的必填字段。
 - **领域重的概念中英双语**（fab / OCAP 词汇），沿用本仓 `README-zh.md` 的先例。
 - **零机器味。** 只为字节恒等或编译器记账存在的字段（排序键、序号、代码生成提示）
   不属于这里——那是编译器的事。
 
 ## 机器门禁
 
+在 `zhongdj/metarch-truthsrc` 的 checkout 里执行（工具链不再 vendored 于
+`truth/tools/`）：
+
 ```bash
-python3 truth/tools/validate-tree.py truth/
+node bin/truthsrc.js validate --tree <truthDir>    # V*/ES*/CS*/AG* 结构＋阶段规则（要求 0 hard）
+node bin/truthsrc.js roundtrip --tree <truthDir>   # compile∘decompose∘compile 字节恒等
 ```
 
-检查：每个文件可解析、kind/id 合法、id 全局唯一、所有交叉引用可解析、
-每个聚合至少一个 slice、每个 policy 的触发事件都有 slice 产出。
-领域真理由人定；工具只报告结构损坏。
+检查：每个文件可解析、kind 合法、`order.commands`/`order.events` 与
+slice/事件池双向闭合、每个 policy 的触发/调用可解析、读模型字段带 `source`
+推导。领域真理由人定；工具只报告结构损坏。
 
 ## 这棵树不是什么
 

@@ -1,0 +1,29 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: event
+name: WafersHeld
+origin:
+  stage: eventStorming
+  board: reconstructed
+  seq: 7
+payload:
+  {
+    "type": "event",
+    "name": "WafersHeld",
+    "name_zh": "晶圆暂存",
+    "description": "Wafers were parked out of the flow pending review or disposition.",
+    "description_zh": "晶圆暂存，脱离流程等待复核或处置。",
+    "links": [
+      "command:hold-wafers"
+    ],
+    "info": {
+      "timeline": "fab-pipeline",
+      "sequence": 8,
+      "payloadFields": [
+        "lotId: string",
+        "waferIds: string[]",
+        "reason: string"
+      ]
+    }
+  }

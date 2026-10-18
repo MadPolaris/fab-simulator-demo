@@ -1,33 +1,73 @@
-# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
 kind: slice
-id: split-sublot
-name: Split Sub-Lot
-name_zh: 切分子 Lot
-description: >
-  Carve wafers out of a lot into a child lot for rework, pilot runs, or
-  scrap. The transfer goes in two moves — first reserve the wafers on both
-  sides, then confirm — so an interruption never loses or duplicates a
-  wafer. The child lot view (suffix → status, waferCount) is set at split
-  and transitioned at merge.
-description_zh: >
-  从一个 Lot 切出晶圆组成子 Lot，用于返工、先导或报废。转移分两步——
-  先在两边预留晶圆，再确认，中断时不丢片不重片。子 Lot 视图
-  （后缀 → 状态、片数）在切分时建立，在合并时迁移。
-aggregate: lot
-parameters:
-  - { name: lotId, type: string, description: Source lot }
-  - { name: waferIds, type: "string[]", description: Wafers to carve out }
-  - { name: splitReason, type: string, description: rework | pilot | scrap }
-guards:
-  - description: all waferIds are members of the source lot
-  - { description: splitReason is one of rework, pilot, scrap }
-produces:
-  - sublot-split
+aggregate: "Wafer Lot"
+command: split-sublot
+payload:
+  {
+    "id": "split-sublot",
+    "name": "split-sublot",
+    "title": "Split Sub-Lot",
+    "name_zh": "切分子 Lot",
+    "description": "Carve wafers out of a lot into a child lot for rework, pilot runs, or scrap. The transfer goes in two moves — first reserve the wafers on both sides, then confirm — so an interruption never loses or duplicates a wafer. The child lot view (suffix → status, waferCount) is set at split and transitioned at merge.",
+    "description_zh": "从一个 Lot 切出晶圆组成子 Lot，用于返工、先导或报废。转移分两步—— 先在两边预留晶圆，再确认，中断时不丢片不重片。子 Lot 视图 （后缀 → 状态、片数）在切分时建立，在合并时迁移。",
+    "parameters": [
+      {
+        "name": "lotId",
+        "dataType": "string",
+        "description": "Source lot"
+      },
+      {
+        "name": "waferIds",
+        "dataType": "string[]",
+        "description": "Wafers to carve out"
+      },
+      {
+        "name": "splitReason",
+        "dataType": "string",
+        "description": "rework | pilot | scrap"
+      }
+    ],
+    "guards": [
+      {
+        "description": "all waferIds are members of the source lot"
+      },
+      {
+        "description": "splitReason is one of rework"
+      }
+    ],
+    "produces": [
+      "sublot-split"
+    ]
+  }
 events:
-  sublot-split:
-    description: A child lot was created carrying the carved-out wafers.
-    payload:
-      - { name: parentLotId, type: string, description: Source lot }
-      - { name: childLotId, type: string, description: New child lot }
-      - { name: splitReason, type: string, description: rework | pilot | scrap }
-      - { name: waferIds, type: "string[]", description: Transferred wafers }
+  {
+    "sublot-split": {
+      "name": "sublot-split",
+      "description": "A child lot was created carrying the carved-out wafers.",
+      "payloads": [
+        {
+          "name": "parentLotId",
+          "dataType": "string",
+          "description": "Source lot"
+        },
+        {
+          "name": "childLotId",
+          "dataType": "string",
+          "description": "New child lot"
+        },
+        {
+          "name": "splitReason",
+          "dataType": "string",
+          "description": "rework | pilot | scrap"
+        },
+        {
+          "name": "waferIds",
+          "dataType": "string[]",
+          "description": "Transferred wafers"
+        }
+      ],
+      "bindings": [],
+      "foldAssignments": []
+    }
+  }

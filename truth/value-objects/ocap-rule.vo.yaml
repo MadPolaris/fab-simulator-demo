@@ -1,22 +1,49 @@
-# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
 kind: value-object
-id: ocap-rule
-name: OCAP Rule
-name_zh: OCAP 规则
-description: >
-  One OCAP rule: a trigger condition over the run state plus the action plan
-  to execute when it fires. Rules are evaluated in priority order (lower
-  number = higher priority); each rule fires at most maxTriggersPerLot times
-  per lot. Missing metrics obey onMissingMetric.
-description_zh: >
-  一条 OCAP 规则：对运行状态的触发条件加触发时执行的处置预案。
-  规则按优先级求值（数字越小优先级越高）；每条规则每 Lot 最多触发
-  maxTriggersPerLot 次。缺失的指标按 onMissingMetric 处理。
-fields:
-  - { name: ruleId, type: string, description: Rule identity }
-  - { name: name, type: string, description: Human-readable rule name }
-  - { name: triggerCondition, type: string, description: Condition expression over FabDemoState }
-  - { name: actionPlan, type: ocap-action-plan, description: Plan to execute when the rule fires }
-  - { name: priority, type: integer, description: Lower = higher priority }
-  - { name: maxTriggersPerLot, type: integer, description: Cap per lot (default 3) }
-  - { name: onMissingMetric, type: string, description: ConservativePass (skip rule) | ConservativeReject (trigger rule) }
+name: "OCAP Rule"
+payload:
+  {
+    "id": "ocap-rule",
+    "name": "OCAP Rule",
+    "name_zh": "OCAP 规则",
+    "description": "One OCAP rule: a trigger condition over the run state plus the action plan to execute when it fires. Rules are evaluated in priority order (lower number = higher priority); each rule fires at most maxTriggersPerLot times per lot. Missing metrics obey onMissingMetric.",
+    "description_zh": "一条 OCAP 规则：对运行状态的触发条件加触发时执行的处置预案。 规则按优先级求值（数字越小优先级越高）；每条规则每 Lot 最多触发 maxTriggersPerLot 次。缺失的指标按 onMissingMetric 处理。",
+    "fields": [
+      {
+        "name": "ruleId",
+        "dataType": "string",
+        "description": "Rule identity"
+      },
+      {
+        "name": "name",
+        "dataType": "string",
+        "description": "Human-readable rule name"
+      },
+      {
+        "name": "triggerCondition",
+        "dataType": "string",
+        "description": "Condition expression over FabDemoState"
+      },
+      {
+        "name": "actionPlan",
+        "dataType": "ocap-action-plan",
+        "description": "Plan to execute when the rule fires"
+      },
+      {
+        "name": "priority",
+        "dataType": "integer",
+        "description": "Lower = higher priority"
+      },
+      {
+        "name": "maxTriggersPerLot",
+        "dataType": "integer",
+        "description": "Cap per lot (default 3)"
+      },
+      {
+        "name": "onMissingMetric",
+        "dataType": "string",
+        "description": "ConservativePass (skip rule) | ConservativeReject (trigger rule)"
+      }
+    ]
+  }

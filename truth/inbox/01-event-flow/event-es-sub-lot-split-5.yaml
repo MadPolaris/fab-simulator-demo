@@ -1,0 +1,27 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: event
+name: SubLotSplit
+origin:
+  stage: eventStorming
+  board: reconstructed
+  seq: 5
+payload:
+  {
+    "type": "event",
+    "name": "SubLotSplit",
+    "name_zh": "切分子 Lot",
+    "description": "Wafers were carved out of a lot into a child lot (rework / pilot / scrap). Transfer goes reserve-then-confirm, so an interruption never loses or duplicates a wafer.",
+    "description_zh": "从 Lot 切出晶圆组成子 Lot（返工/先导/报废）。转移先预留后确认，中断不丢片不重片。",
+    "info": {
+      "timeline": "fab-pipeline",
+      "sequence": 6,
+      "payloadFields": [
+        "parentLotId: string",
+        "childLotId: string",
+        "waferIds: string[]",
+        "purpose: string — rework|pilot|scrap"
+      ]
+    }
+  }

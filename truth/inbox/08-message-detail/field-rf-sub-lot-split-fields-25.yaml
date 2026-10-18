@@ -1,0 +1,26 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: field
+name: SubLotSplitFields
+origin:
+  stage: refining
+  board: reconstructed
+  seq: 25
+payload:
+  {
+    "type": "field",
+    "name": "SubLotSplitFields",
+    "name_zh": "切分子 Lot 字段",
+    "description": "Fields of SubLotSplit.",
+    "description_zh": "SubLotSplit 的字段。",
+    "info": {
+      "pilotType": "messageFields",
+      "fields": [
+        "parentLotId: string",
+        "childLotId: string",
+        "waferIds: string[]",
+        "purpose: string"
+      ]
+    }
+  }

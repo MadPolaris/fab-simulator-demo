@@ -1,0 +1,26 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: event
+name: SubLotMerged
+origin:
+  stage: eventStorming
+  board: reconstructed
+  seq: 6
+payload:
+  {
+    "type": "event",
+    "name": "SubLotMerged",
+    "name_zh": "合并子 Lot",
+    "description": "The child lot's wafers returned to the parent lot; the child-lot view transitions.",
+    "description_zh": "子 Lot 的晶圆回归母 Lot；子 Lot 视图迁移。",
+    "info": {
+      "timeline": "fab-pipeline",
+      "sequence": 7,
+      "payloadFields": [
+        "parentLotId: string",
+        "childLotId: string",
+        "waferIds: string[]"
+      ]
+    }
+  }

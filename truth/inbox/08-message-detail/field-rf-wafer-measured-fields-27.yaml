@@ -1,0 +1,25 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: field
+name: WaferMeasuredFields
+origin:
+  stage: refining
+  board: reconstructed
+  seq: 27
+payload:
+  {
+    "type": "field",
+    "name": "WaferMeasuredFields",
+    "name_zh": "晶圆量测字段",
+    "description": "Fields of WaferMeasured.",
+    "description_zh": "WaferMeasured 的字段。",
+    "info": {
+      "pilotType": "messageFields",
+      "fields": [
+        "waferId: string",
+        "cdNm: number",
+        "equipmentId: string"
+      ]
+    }
+  }

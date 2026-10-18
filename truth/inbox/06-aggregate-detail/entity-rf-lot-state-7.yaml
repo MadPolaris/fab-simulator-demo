@@ -1,0 +1,20 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: entity
+name: LotState
+origin:
+  stage: refining
+  board: reconstructed
+  seq: 7
+payload:
+  {
+    "type": "entity",
+    "name": "LotState",
+    "name_zh": "Lot 状态",
+    "description": "State slots: lotId, productId, wafers (membership), per-wafer classification, route card (ordered area steps), completed steps, child lots from splits. Transfers are reserve-then-confirm.",
+    "description_zh": "状态槽位：lotId、productId、wafers（成员）、逐片分类、route card（有序设备区步骤）、已完成步骤、切分产生的子 Lot。转移先预留后确认。",
+    "info": {
+      "pilotType": "aggregateState"
+    }
+  }

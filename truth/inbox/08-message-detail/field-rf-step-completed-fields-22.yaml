@@ -1,0 +1,24 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: field
+name: StepCompletedFields
+origin:
+  stage: refining
+  board: reconstructed
+  seq: 22
+payload:
+  {
+    "type": "field",
+    "name": "StepCompletedFields",
+    "name_zh": "步骤完成字段",
+    "description": "Fields of StepCompleted.",
+    "description_zh": "StepCompleted 的字段。",
+    "info": {
+      "pilotType": "messageFields",
+      "fields": [
+        "stepName: string — 步骤名（断点）",
+        "outputInfo: map — 步骤产出信息"
+      ]
+    }
+  }

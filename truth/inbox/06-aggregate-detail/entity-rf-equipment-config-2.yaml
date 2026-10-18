@@ -1,0 +1,20 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: entity
+name: EquipmentConfig
+origin:
+  stage: refining
+  board: reconstructed
+  seq: 2
+payload:
+  {
+    "type": "entity",
+    "name": "EquipmentConfig",
+    "name_zh": "设备配置",
+    "description": "Per-equipment configuration: area, capabilities, fault probabilities for the demo.",
+    "description_zh": "单台设备配置：所属区、能力、演示用的故障概率。",
+    "info": {
+      "pilotType": "valueObject"
+    }
+  }

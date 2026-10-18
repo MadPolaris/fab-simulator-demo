@@ -1,0 +1,35 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: command
+name: CreateWorkOrder
+origin:
+  stage: commandStorming
+  board: reconstructed
+  seq: 1
+payload:
+  {
+    "type": "command",
+    "name": "CreateWorkOrder",
+    "id": "create-work-order",
+    "name_zh": "创建工单",
+    "description": "Open a work order for a lot to be processed through the fab step queue.",
+    "description_zh": "为一批 Lot 创建工单，走 fab 步骤队列加工。",
+    "links": [
+      "event:WorkOrderCreated",
+      "role:ProcessEngineer"
+    ],
+    "info": {
+      "triggers": [
+        "role: 工艺工程师"
+      ],
+      "produces": [
+        "work-order-created"
+      ],
+      "parameters": [
+        "workOrderId: string — 工单号",
+        "lotId: string — 首批 Lot",
+        "scenarioId: string — 演示场景"
+      ]
+    }
+  }

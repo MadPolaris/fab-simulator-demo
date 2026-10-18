@@ -1,0 +1,38 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: role
+name: ProcessEngineer
+origin:
+  stage: commandStorming
+  board: reconstructed
+  seq: 10
+payload:
+  {
+    "type": "role",
+    "name": "ProcessEngineer",
+    "id": "process-engineer",
+    "name_zh": "工艺工程师",
+    "description": "The human role: creates work orders, watches the equipment board and pipeline timeline, handles holds and reviews.",
+    "description_zh": "人的角色：创建工单、看设备看板与流水线时间线、处理暂存与复核。",
+    "links": [
+      "command:CreateWorkOrder",
+      "command:StartPipelineRun",
+      "command:MergeSubLot"
+    ],
+    "info": {
+      "roleId": "process-engineer",
+      "can_issue": [
+        "create-work-order",
+        "start-pipeline-run",
+        "merge-sublot"
+      ],
+      "can_view": [
+        "equipment-board",
+        "event-feed",
+        "pipeline-timeline",
+        "recovery-status",
+        "scenario-ledger"
+      ]
+    }
+  }

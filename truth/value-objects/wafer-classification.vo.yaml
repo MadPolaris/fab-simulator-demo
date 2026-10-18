@@ -1,28 +1,51 @@
-# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
 kind: value-object
-id: wafer-classification
-name: Wafer Classification
-name_zh: 晶圆分类
-description: >
-  Disposition of one wafer from its CD measurement, decided by
-  FabMeasurementClassifier against DecisionConfig thresholds.
-description_zh: >
-  一片晶圆按 CD 量测的处置，由 FabMeasurementClassifier
-  对照 DecisionConfig 阈值判定。
-variants:
-  - name: PASS
-    fields: []
-    description: Within spec — continue the flow.
-    description_zh: spec 内——继续走流程。
-  - name: BORDERLINE
-    fields: []
-    description: Slightly over upper spec but inside the borderline window — hold for review / reconfirm.
-    description_zh: 略超上 spec 但在 borderline 窗口内——暂存 等评审/复核。
-  - name: FAIL
-    fields: [{ name: reworkTarget, type: string, description: Area to rework in (e.g. LITHO) }]
-    description: Out of spec but reworkable — route to rework (reworkCount++).
-    description_zh: 超 spec 但可返工——路由去返工（reworkCount++）。
-  - name: SCRAP
-    fields: [{ name: reason, type: string, description: Why scrapped }]
-    description: Far over spec, or rework count exhausted — leaves the lot permanently.
-    description_zh: 远超 spec，或返工次数用完——永久离开 Lot。
+name: "Wafer Classification"
+payload:
+  {
+    "id": "wafer-classification",
+    "name": "Wafer Classification",
+    "name_zh": "晶圆分类",
+    "description": "Disposition of one wafer from its CD measurement, decided by FabMeasurementClassifier against DecisionConfig thresholds.",
+    "description_zh": "一片晶圆按 CD 量测的处置，由 FabMeasurementClassifier 对照 DecisionConfig 阈值判定。",
+    "fields": [],
+    "variants": [
+      {
+        "name": "PASS",
+        "fields": [],
+        "description": "Within spec — continue the flow.",
+        "description_zh": "spec 内——继续走流程。"
+      },
+      {
+        "name": "BORDERLINE",
+        "fields": [],
+        "description": "Slightly over upper spec but inside the borderline window — hold for review / reconfirm.",
+        "description_zh": "略超上 spec 但在 borderline 窗口内——暂存 等评审/复核。"
+      },
+      {
+        "name": "FAIL",
+        "fields": [
+          {
+            "name": "reworkTarget",
+            "type": "string",
+            "description": "Area to rework in (e.g. LITHO)"
+          }
+        ],
+        "description": "Out of spec but reworkable — route to rework (reworkCount++).",
+        "description_zh": "超 spec 但可返工——路由去返工（reworkCount++）。"
+      },
+      {
+        "name": "SCRAP",
+        "fields": [
+          {
+            "name": "reason",
+            "type": "string",
+            "description": "Why scrapped"
+          }
+        ],
+        "description": "Far over spec, or rework count exhausted — leaves the lot permanently.",
+        "description_zh": "远超 spec，或返工次数用完——永久离开 Lot。"
+      }
+    ]
+  }

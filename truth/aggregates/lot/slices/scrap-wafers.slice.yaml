@@ -1,26 +1,58 @@
-# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
 kind: slice
-id: scrap-wafers
-name: Scrap Wafers
-name_zh: 报废晶圆
-description: >
-  Scrap wafers classified SCRAP (or whose rework budget is exhausted).
-  Scrapped wafers leave the lot permanently and count toward scrapCount.
-description_zh: >
-  报废判为 SCRAP 的晶圆（或返工次数用完的）。报废的晶圆永久离开
-  Lot，计入 scrapCount。
-aggregate: lot
-parameters:
-  - { name: waferIds, type: "string[]", description: Wafers to scrap }
-  - { name: reason, type: string, description: Why scrapped }
-guards:
-  - description: all waferIds are members of the lot
-  - description: each wafer is classified SCRAP or rework-exhausted
-produces:
-  - wafers-scrapped
+aggregate: "Wafer Lot"
+command: scrap-wafers
+payload:
+  {
+    "id": "scrap-wafers",
+    "name": "scrap-wafers",
+    "title": "Scrap Wafers",
+    "name_zh": "报废晶圆",
+    "description": "Scrap wafers classified SCRAP (or whose rework budget is exhausted). Scrapped wafers leave the lot permanently and count toward scrapCount.",
+    "description_zh": "报废判为 SCRAP 的晶圆（或返工次数用完的）。报废的晶圆永久离开 Lot，计入 scrapCount。",
+    "parameters": [
+      {
+        "name": "waferIds",
+        "dataType": "string[]",
+        "description": "Wafers to scrap"
+      },
+      {
+        "name": "reason",
+        "dataType": "string",
+        "description": "Why scrapped"
+      }
+    ],
+    "guards": [
+      {
+        "description": "all waferIds are members of the lot"
+      },
+      {
+        "description": "each wafer is classified SCRAP or rework-exhausted"
+      }
+    ],
+    "produces": [
+      "wafers-scrapped"
+    ]
+  }
 events:
-  wafers-scrapped:
-    description: Wafers left the lot as scrap.
-    payload:
-      - { name: waferIds, type: "string[]", description: Scrapped wafers }
-      - { name: reason, type: string, description: Why scrapped }
+  {
+    "wafers-scrapped": {
+      "name": "wafers-scrapped",
+      "description": "Wafers left the lot as scrap.",
+      "payloads": [
+        {
+          "name": "waferIds",
+          "dataType": "string[]",
+          "description": "Scrapped wafers"
+        },
+        {
+          "name": "reason",
+          "dataType": "string",
+          "description": "Why scrapped"
+        }
+      ],
+      "bindings": [],
+      "foldAssignments": []
+    }
+  }

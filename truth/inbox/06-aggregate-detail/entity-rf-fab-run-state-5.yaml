@@ -1,0 +1,20 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: entity
+name: FabRunState
+origin:
+  stage: refining
+  board: reconstructed
+  seq: 5
+payload:
+  {
+    "type": "entity",
+    "name": "FabRunState",
+    "name_zh": "运行快照",
+    "description": "The full run state recorded with each step's progress: the resume payload.",
+    "description_zh": "每步进度记录里含的完整运行状态：续跑载荷。",
+    "info": {
+      "pilotType": "valueObject"
+    }
+  }

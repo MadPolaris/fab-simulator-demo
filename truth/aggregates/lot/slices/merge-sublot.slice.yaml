@@ -1,30 +1,60 @@
-# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
 kind: slice
-id: merge-sublot
-name: Merge Sub-Lot
-name_zh: 合并子 Lot
-description: >
-  Merge a reworked (or piloted) child lot back into its parent. Wafers
-  return via the reserve-then-confirm transfer; the child lot view
-  transitions to "merged" and the parent's wafer states pick up the rework
-  history (reworkCount++). A scrapped child lot is never merged — it goes
-  through scrap-sublot.
-description_zh: >
-  把返工（或先导）完的子 Lot 合并回父 Lot。晶圆经预留-确认两步转移返回；
-  子 Lot 视图迁移为"已合并"，父 Lot 的晶圆状态带上返工历史
-  （reworkCount++）。报废的子 Lot 永不合并——走 scrap-sublot。
-aggregate: lot
-parameters:
-  - { name: parentLotId, type: string, description: Parent lot }
-  - { name: childLotId, type: string, description: Child lot to merge back }
-guards:
-  - description: childLotId was split from parentLotId for rework or pilot (not scrap)
-produces:
-  - sublot-merged
+aggregate: "Wafer Lot"
+command: merge-sublot
+payload:
+  {
+    "id": "merge-sublot",
+    "name": "merge-sublot",
+    "title": "Merge Sub-Lot",
+    "name_zh": "合并子 Lot",
+    "description": "Merge a reworked (or piloted) child lot back into its parent. Wafers return via the reserve-then-confirm transfer; the child lot view transitions to \"merged\" and the parent's wafer states pick up the rework history (reworkCount++). A scrapped child lot is never merged — it goes through scrap-sublot.",
+    "description_zh": "把返工（或先导）完的子 Lot 合并回父 Lot。晶圆经预留-确认两步转移返回； 子 Lot 视图迁移为\"已合并\"，父 Lot 的晶圆状态带上返工历史 （reworkCount++）。报废的子 Lot 永不合并——走 scrap-sublot。",
+    "parameters": [
+      {
+        "name": "parentLotId",
+        "dataType": "string",
+        "description": "Parent lot"
+      },
+      {
+        "name": "childLotId",
+        "dataType": "string",
+        "description": "Child lot to merge back"
+      }
+    ],
+    "guards": [
+      {
+        "description": "childLotId was split from parentLotId for rework or pilot (not scrap)"
+      }
+    ],
+    "produces": [
+      "sublot-merged"
+    ]
+  }
 events:
-  sublot-merged:
-    description: The child lot's wafers returned to the parent.
-    payload:
-      - { name: parentLotId, type: string, description: Parent lot }
-      - { name: childLotId, type: string, description: Merged child lot }
-      - { name: waferIds, type: "string[]", description: Returned wafers }
+  {
+    "sublot-merged": {
+      "name": "sublot-merged",
+      "description": "The child lot's wafers returned to the parent.",
+      "payloads": [
+        {
+          "name": "parentLotId",
+          "dataType": "string",
+          "description": "Parent lot"
+        },
+        {
+          "name": "childLotId",
+          "dataType": "string",
+          "description": "Merged child lot"
+        },
+        {
+          "name": "waferIds",
+          "dataType": "string[]",
+          "description": "Returned wafers"
+        }
+      ],
+      "bindings": [],
+      "foldAssignments": []
+    }
+  }

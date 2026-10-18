@@ -1,8 +1,0 @@
-# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
-kind: note
-type: valueObject
-name: TransactionNumber
-name_zh: 事务编号
-description: Cross-lot transaction numbers follow workOrderId + step name + execution index, so recovery
-  reuses the original number.
-description_zh: 跨 Lot 事务编号=工单号+步骤名+执行序号，恢复后沿用原编号。

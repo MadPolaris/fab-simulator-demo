@@ -1,45 +1,83 @@
-# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
 kind: aggregate
-id: work-order
-name: Work Order
-name_zh: 工单
-description: >
-  The customer-facing order: a product to build, the lots running for it,
-  and its completion accounting (lots completed / failed). The pipeline run
-  executes against a work order; the work order aggregates the outcome.
-description_zh: >
-  面向客户的订单：要做的产品、为它跑的 Lot、完工核算（完成的 Lot /
-  失败的 Lot）。pipeline run 针对工单执行；工单汇总结果。
-identity:
-  fields: [workOrderId]
-  description: Entity id == workOrderId; also the pipeline run's entity id.
-state_slots:
-  - name: workOrderId
-    type: string
-    description: Work order identity.
-  - name: productId
-    type: string
-    description: Product being manufactured.
-  - name: lotIds
-    type: "string[]"
-    description: Lots running for this order.
-  - name: completedLots
-    type: integer
-    description: Lots finished successfully.
-  - name: failedLots
-    type: integer
-    description: Lots failed.
-  - name: phase
-    type: string
-    description: Order phase (created, in-progress, completed, failed).
-lifecycle:
-  - { from: created,     via: create-work-order,  to: in-progress }
-  - { from: in-progress, via: record-lot-completed, to: in-progress }
-  - { from: in-progress, via: complete-work-order,  to: completed }
-  - { from: in-progress, via: record-lot-failed,    to: failed }
-invariants:
-  - id: lots-accounted
-    description: completedLots + failedLots never exceeds the lots started for the order.
-change_recording:
-  rule: Every change to a work order (creation, lot outcomes) is recorded as it happens.
-  rule_zh: 工单的每次变更（创建、Lot 结果）发生时即被记录。
+name: "Work Order"
+order:
+  commands: ["create-work-order"]
+  events: ["work-order-created"]
+payload:
+  {
+    "id": "work-order",
+    "name": "Work Order",
+    "name_zh": "工单",
+    "description": "The customer-facing order: a product to build, the lots running for it, and its completion accounting (lots completed / failed). The pipeline run executes against a work order; the work order aggregates the outcome.",
+    "description_zh": "面向客户的订单：要做的产品、为它跑的 Lot、完工核算（完成的 Lot / 失败的 Lot）。pipeline run 针对工单执行；工单汇总结果。",
+    "entity": "WorkOrder",
+    "identifier": {
+      "name": "workOrderId",
+      "dataType": "string",
+      "origin": "Entity id == workOrderId; also the pipeline run's entity id."
+    },
+    "stateFields": [
+      {
+        "name": "workOrderId",
+        "dataType": "string",
+        "description": "Work order identity."
+      },
+      {
+        "name": "productId",
+        "dataType": "string",
+        "description": "Product being manufactured."
+      },
+      {
+        "name": "lotIds",
+        "dataType": "string[]",
+        "description": "Lots running for this order."
+      },
+      {
+        "name": "completedLots",
+        "dataType": "integer",
+        "description": "Lots finished successfully."
+      },
+      {
+        "name": "failedLots",
+        "dataType": "integer",
+        "description": "Lots failed."
+      },
+      {
+        "name": "phase",
+        "dataType": "string",
+        "description": "Order phase (created, in-progress, completed, failed)."
+      }
+    ],
+    "statusEnum": [
+      "created",
+      "in-progress",
+      "completed",
+      "failed"
+    ],
+    "statusTransitions": {},
+    "stateGates": {
+      "create-work-order": {
+        "fromStates": [
+          "created"
+        ],
+        "toState": "in-progress"
+      }
+    },
+    "aggregateRuleRefs": [
+      {
+        "ruleId": "lots-accounted",
+        "desc": "completedLots + failedLots never exceeds the lots started for the order."
+      },
+      {
+        "ruleId": "change-recording",
+        "desc": "Every change to a work order (creation, lot outcomes) is recorded as it happens.",
+        "desc_zh": "工单的每次变更（创建、Lot 结果）发生时即被记录。"
+      },
+      {
+        "ruleId": "lifecycle-unmodeled-commands",
+        "desc": "The full lifecycle also uses record-lot-completed (in-progress -> in-progress), complete-work-order (in-progress -> completed) and record-lot-failed (in-progress -> failed); these commands are not modeled as slices in this tree."
+      }
+    ]
+  }

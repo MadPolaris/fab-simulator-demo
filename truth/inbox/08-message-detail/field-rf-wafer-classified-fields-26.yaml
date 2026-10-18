@@ -1,0 +1,24 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: field
+name: WaferClassifiedFields
+origin:
+  stage: refining
+  board: reconstructed
+  seq: 26
+payload:
+  {
+    "type": "field",
+    "name": "WaferClassifiedFields",
+    "name_zh": "晶圆分类字段",
+    "description": "Fields of WaferClassified.",
+    "description_zh": "WaferClassified 的字段。",
+    "info": {
+      "pilotType": "messageFields",
+      "fields": [
+        "waferId: string",
+        "verdict: string — PASS|BORDERLINE|FAIL|SCRAP"
+      ]
+    }
+  }

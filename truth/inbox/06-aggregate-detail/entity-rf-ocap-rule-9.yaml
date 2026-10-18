@@ -1,0 +1,20 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: entity
+name: OcapRule
+origin:
+  stage: refining
+  board: reconstructed
+  seq: 9
+payload:
+  {
+    "type": "entity",
+    "name": "OcapRule",
+    "name_zh": "OCAP 规则",
+    "description": "Trigger condition + action plan + priority + maxTriggersPerLot. First matching rule in priority order wins.",
+    "description_zh": "触发条件+处置预案+优先级+单 Lot 最大触发次数。按优先级首条命中生效。",
+    "info": {
+      "pilotType": "valueObject"
+    }
+  }

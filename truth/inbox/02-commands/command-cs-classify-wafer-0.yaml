@@ -1,0 +1,33 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: command
+name: ClassifyWafer
+origin:
+  stage: commandStorming
+  board: reconstructed
+  seq: 0
+payload:
+  {
+    "type": "command",
+    "name": "ClassifyWafer",
+    "id": "classify-wafer",
+    "name_zh": "晶圆分类",
+    "description": "Classify a measured wafer against DecisionConfig thresholds into PASS / BORDERLINE / FAIL / SCRAP.",
+    "description_zh": "按 DecisionConfig 阈值把已量测晶圆分成 PASS / BORDERLINE / FAIL / SCRAP。",
+    "links": [
+      "event:WaferClassified"
+    ],
+    "info": {
+      "triggers": [
+        "policy: 量测分类"
+      ],
+      "produces": [
+        "wafer-classified"
+      ],
+      "parameters": [
+        "waferId: string",
+        "cdNm: number"
+      ]
+    }
+  }

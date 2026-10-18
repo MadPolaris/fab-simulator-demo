@@ -1,0 +1,34 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: command
+name: ScrapWafers
+origin:
+  stage: commandStorming
+  board: reconstructed
+  seq: 12
+payload:
+  {
+    "type": "command",
+    "name": "ScrapWafers",
+    "id": "scrap-wafers",
+    "name_zh": "报废晶圆",
+    "description": "Scrap wafers out of the lot — terminal, no rework.",
+    "description_zh": "把晶圆报废出 Lot——终态，不再返工。",
+    "links": [
+      "event:WafersScrapped"
+    ],
+    "info": {
+      "triggers": [
+        "policy: 晶圆处置"
+      ],
+      "produces": [
+        "wafers-scrapped"
+      ],
+      "parameters": [
+        "lotId: string",
+        "waferIds: string[]",
+        "reason: string"
+      ]
+    }
+  }

@@ -1,7 +1,0 @@
-# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
-kind: note
-type: relation
-name: FabToEquipment
-name_zh: Fab 制造执行上下文↔设备上下文
-description: 限界上下文级协作：Fab 制造执行上下文向设备上下文下发工艺指令（配方、track-in），设备上下文上报量测值、track-out 与故障。通知必须得到确认（Lot 通知确认保障）——这是两个上下文之间不丢消息的契约。
-description_zh: 限界上下文级协作：Fab 制造执行上下文向设备上下文下发工艺指令（配方、track-in），设备上下文上报量测值、track-out 与故障。通知必须得到确认（Lot 通知确认保障）——这是两个上下文之间不丢消息的契约。

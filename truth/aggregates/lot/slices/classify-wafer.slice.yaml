@@ -1,32 +1,65 @@
-# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
 kind: slice
-id: classify-wafer
-name: Classify Wafer
-name_zh: 晶圆分类
-description: >
-  Map a wafer's CD measurement to a disposition via DecisionConfig
-  thresholds: PASS (within spec), BORDERLINE (slightly over upper spec,
-  within the borderline window), FAIL (out of spec, reworkable), SCRAP
-  (far over spec, or rework count exhausted). The classification drives
-  wafer-disposition routing.
-description_zh: >
-  按 DecisionConfig 阈值把晶圆的 CD 量测映射为处置：
-  PASS（spec 内）、BORDERLINE（略超上 spec、在 borderline 窗口内）、
-  FAIL（超 spec、可返工）、SCRAP（远超 spec，或返工次数用完）。
-  分类结果驱动 wafer-disposition 路由。
-aggregate: lot
-parameters:
-  - { name: waferId, type: string, description: Measured wafer }
-  - { name: cdNm, type: number, description: Measured critical dimension (nm) }
-guards:
-  - description: wafer is a member of the lot
-produces:
-  - wafer-classified
+aggregate: "Wafer Lot"
+command: classify-wafer
+payload:
+  {
+    "id": "classify-wafer",
+    "name": "classify-wafer",
+    "title": "Classify Wafer",
+    "name_zh": "晶圆分类",
+    "description": "Map a wafer's CD measurement to a disposition via DecisionConfig thresholds: PASS (within spec), BORDERLINE (slightly over upper spec, within the borderline window), FAIL (out of spec, reworkable), SCRAP (far over spec, or rework count exhausted). The classification drives wafer-disposition routing.",
+    "description_zh": "按 DecisionConfig 阈值把晶圆的 CD 量测映射为处置： PASS（spec 内）、BORDERLINE（略超上 spec、在 borderline 窗口内）、 FAIL（超 spec、可返工）、SCRAP（远超 spec，或返工次数用完）。 分类结果驱动 wafer-disposition 路由。",
+    "parameters": [
+      {
+        "name": "waferId",
+        "dataType": "string",
+        "description": "Measured wafer"
+      },
+      {
+        "name": "cdNm",
+        "dataType": "number",
+        "description": "Measured critical dimension (nm)"
+      }
+    ],
+    "guards": [
+      {
+        "description": "wafer is a member of the lot"
+      }
+    ],
+    "produces": [
+      "wafer-classified"
+    ]
+  }
 events:
-  wafer-classified:
-    description: A wafer got its disposition classification.
-    payload:
-      - { name: waferId, type: string, description: Wafer }
-      - { name: classification, type: wafer-classification, description: PASS | BORDERLINE | FAIL | SCRAP }
-      - { name: cdNm, type: number, description: Measured CD (nm) }
-      - { name: reworkCount, type: integer, description: Rework attempts so far }
+  {
+    "wafer-classified": {
+      "name": "wafer-classified",
+      "description": "A wafer got its disposition classification.",
+      "payloads": [
+        {
+          "name": "waferId",
+          "dataType": "string",
+          "description": "Wafer"
+        },
+        {
+          "name": "classification",
+          "dataType": "wafer-classification",
+          "description": "PASS | BORDERLINE | FAIL | SCRAP"
+        },
+        {
+          "name": "cdNm",
+          "dataType": "number",
+          "description": "Measured CD (nm)"
+        },
+        {
+          "name": "reworkCount",
+          "dataType": "integer",
+          "description": "Rework attempts so far"
+        }
+      ],
+      "bindings": [],
+      "foldAssignments": []
+    }
+  }

@@ -1,0 +1,22 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: story
+name: FabDemoTour
+origin:
+  stage: storyMapping
+  board: reconstructed
+  seq: 0
+payload:
+  {
+    "type": "story",
+    "name": "FabDemoTour",
+    "name_zh": "Fab 参观",
+    "description": "As 参观者: 跟着演示 tour 了解晶圆在 fab 里的旅程 — 直观理解晶圆制造流程.",
+    "description_zh": "参观者跟着演示 tour 了解晶圆在 fab 里的旅程，直观理解晶圆制造流程。",
+    "info": {
+      "role": "参观者",
+      "goal": "跟着演示 tour 了解晶圆在 fab 里的旅程",
+      "benefit": "直观理解晶圆制造流程"
+    }
+  }

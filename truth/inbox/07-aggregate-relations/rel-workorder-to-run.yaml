@@ -1,9 +1,0 @@
-# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
-kind: note
-type: aggregateRelation
-name: WorkOrderToRunReference
-name_zh: 工单→流水线运行（引用）
-description: 一个工单对应一次流水线运行。基数：一对一。业务含义：工单是生产的'委托单'，运行是'执行单'；委托单封单以执行单完工为准。
-description_zh: 一个工单对应一次流水线运行。基数：一对一。业务含义：工单是生产的“委托单”，运行是“执行单”；委托单封单以执行单完工为准。
-cardinality: '1:1'
-meaning: 一单对一次运行

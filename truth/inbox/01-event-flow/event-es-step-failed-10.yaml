@@ -1,0 +1,30 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: event
+name: StepFailed
+origin:
+  stage: eventStorming
+  board: reconstructed
+  seq: 10
+payload:
+  {
+    "type": "event",
+    "name": "StepFailed",
+    "name_zh": "步骤失败",
+    "description": "A step failed with a classified equipment/process error (HARDWARE_FAULT, COMM_TIMEOUT, SENSOR_ANOMALY, POWER_FLUCTUATION, ABORTED).",
+    "description_zh": "某步骤带着已分类的设备/工艺错误失败（HARDWARE_FAULT、COMM_TIMEOUT、SENSOR_ANOMALY、POWER_FLUCTUATION、ABORTED）。",
+    "links": [
+      "command:start-pipeline-run"
+    ],
+    "info": {
+      "timeline": "fab-pipeline",
+      "sequence": 11,
+      "payloadFields": [
+        "stepName: string",
+        "equipmentId: string",
+        "errorCode: string",
+        "detail: string"
+      ]
+    }
+  }

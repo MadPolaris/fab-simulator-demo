@@ -1,0 +1,39 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: value-object
+name: "Run State Record"
+payload:
+  {
+    "id": "fab-run-state",
+    "name": "Run State Record",
+    "name_zh": "运行状态记录",
+    "description": "What gets written down every time a step finishes: whose run it is, the full run state at that moment, how many steps are done (the resume breakpoint), and how the last step ended. Recovery rebuilds the run from the latest record.",
+    "description_zh": "每完成一步记下的东西：谁的运行、当时的完整运行状态、已完成几步 （续跑断点）、上一步怎么结束的。恢复时从最新一条记录重建运行。",
+    "fields": [
+      {
+        "name": "scenarioId",
+        "dataType": "string",
+        "description": "Driving scenario"
+      },
+      {
+        "name": "workOrderId",
+        "dataType": "string",
+        "description": "Work order under execution"
+      },
+      {
+        "name": "state",
+        "dataType": "string",
+        "description": "Full run state (wafers"
+      },
+      {
+        "name": "completedStepCount",
+        "dataType": "integer",
+        "description": "Steps finished — the breakpoint"
+      },
+      {
+        "name": "lastOutcome",
+        "dataType": "string",
+        "description": "completed | ocap-recovered"
+      }
+    ]
+  }

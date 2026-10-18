@@ -1,8 +1,0 @@
-# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
-kind: note
-type: externalSystem
-name: MetrologyEquipment
-name_zh: 量测设备
-description: 'External equipment: reports CD measurements per wafer. The fab never measures itself — it
-  records what the equipment reports.'
-description_zh: 外部设备：逐片上报 CD 量测值。fab 自己不量测，只记录设备上报的值。

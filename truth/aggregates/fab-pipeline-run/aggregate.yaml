@@ -1,104 +1,137 @@
-# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
 kind: aggregate
-id: fab-pipeline-run
-name: Fab Pipeline Run
-name_zh: Fab 流水线运行
-description: >
-  One execution of the fab step queue for a single work order: from start
-  to seal, the lot moves through process steps in order. Every completed
-  step records its progress; if the run is interrupted (equipment crash,
-  system restart), it resumes from the breakpoint — finished steps are not
-  repeated. A failed step may be recovered by an OCAP plan, in which case
-  the queue moves on as if the step completed (the recovery itself is
-  recorded as its own fact). Cross-lot transactions reuse their original
-  numbers after recovery instead of creating duplicates.
-description_zh: >
-  一个工单的 fab 步骤队列的一次执行：从启动到封单，Lot 按顺序走过
-  各个工艺步骤。每完成一步就记下进度；运行中途被打断（设备宕机、
-  系统重启）后，从断点继续——已完成的步骤不重复。失败的步骤可能被
-  OCAP 预案救回来，这时队列照常往下走（救回本身记为一条独立事实）。
-  跨 Lot 的事务在恢复后沿用原编号，不产生重复事务。
-identity:
-  fields: [workOrderId]
-  description: >
-    One work order, one run. A second start for an already running or
-    finished work order is refused.
-  description_zh: 一个工单，一次运行。对已在跑或已完工的工单再次启动会被拒绝。
-state_slots:
-  - name: scenarioId
-    type: string
-    description: Which demo scenario drives this run (e.g. "m35").
-  - name: workOrderId
-    type: string
-    description: The work order under execution.
-  - name: wafers
-    type: map<string, wafer>
-    description: WaferId → per-wafer info (rework count, CD history, classification, sub-lot).
-  - name: passCount
-    type: integer
-    description: Wafers passed so far.
-  - name: scrapCount
-    type: integer
-    description: Wafers scrapped so far.
-  - name: currentRoutingStep
-    type: integer
-    description: Index into the POR (process of record) steps, 0-based.
-  - name: areaVisitHistory
-    type: "string[]"
-    description: Ordered area IDs visited (drives reentry-index calculation).
-  - name: equipmentState
-    type: map<string, equipment-state>
-    description: Per-equipment status/error counts feeding OCAP equipment conditions.
-  - name: ocapActions
-    type: list<(string, ocap-action-plan)>
-    description: Pending OCAP actions, (ruleId, plan) in priority order.
-  - name: childLotView
-    type: map<string, (string, integer)>
-    description: Child-lot view descriptor set at split, transitioned at merge (suffix → status, waferCount).
-  - name: completedStepCount
-    type: integer
-    description: How many steps have finished; the resume breakpoint.
-  - name: lastStepOutcome
-    type: string
-    description: >
-      How the most recent step finished: "completed", or "ocap-recovered"
-      (the step failed but an OCAP plan saved it — the queue moved on,
-      but no clean completion is claimed).
-lifecycle:
-  - { from: idle,      via: start-pipeline-run, to: running }
-  - { from: running,   via: run-completed,      to: completed }
-  - { from: running,   via: run-failed,         to: failed }
-  - { from: running,   via: inject-crash,       to: recovering }
-  - { from: recovering, via: run-recovered,     to: running }
-invariants:
-  - id: steps-in-order
-    description: Steps finish in queue order; after an interruption the run skips already-finished steps.
-    description_zh: 步骤按队列顺序完成；中断后续跑跳过已完成的步骤。
-  - id: no-repeat-of-finished
-    description: >
-      A step confirmed finished never runs again. A step interrupted
-      mid-execution may run once more — each step must tolerate being
-      executed twice without double effect.
-    description_zh: >
-      已确认完成的步骤永不重跑。中断时正在执行的步骤可能再跑一次——
-      每个步骤都要能承受"跑两次"而不产生双重效果。
-  - id: single-effective-run
-    description: >
-      One work order has at most one effective run at a time; instructions
-      from a superseded run are void and cause no side effects.
-    description_zh: 一个工单同时最多一次有效运行；被取代的运行发出的指令自动作废，不产生副作用。
-  - id: transaction-number-reuse
-    description: >
-      Cross-lot transaction numbers follow a fixed rule
-      (workOrderId + step name + execution index), so recovery reuses the
-      original number instead of opening a duplicate transaction.
-    description_zh: >
-      跨 Lot 事务编号遵循固定规则（工单号+步骤名+执行序号），恢复后沿用
-      原编号，不另开重复事务。
-progress_recording:
-  rule: Every finished step records its progress, including the full run state at that moment.
-  rule_zh: 每完成一步就记录进度，包含当时的完整运行状态。
-  recovery: After an interruption the run continues from the last recorded breakpoint.
-  recovery_zh: 中断后从最后记录的断点继续。
-  retention: Progress records are kept independently of the running process; rebuilding the process loses nothing.
-  retention_zh: 进度记录独立于运行进程保存；进程重建不丢失记录。
+name: "Fab Pipeline Run"
+order:
+  commands: ["start-pipeline-run","inject-crash","handle-ocap"]
+  events: ["run-started","step-completed","step-failed","run-completed","run-failed","crash-injected","run-recovered","ocap-handled"]
+payload:
+  {
+    "id": "fab-pipeline-run",
+    "name": "Fab Pipeline Run",
+    "name_zh": "Fab 流水线运行",
+    "description": "One execution of the fab step queue for a single work order: from start to seal, the lot moves through process steps in order. Every completed step records its progress; if the run is interrupted (equipment crash, system restart), it resumes from the breakpoint — finished steps are not repeated. A failed step may be recovered by an OCAP plan, in which case the queue moves on as if the step completed (the recovery itself is recorded as its own fact). Cross-lot transactions reuse their original numbers after recovery instead of creating duplicates.",
+    "description_zh": "一个工单的 fab 步骤队列的一次执行：从启动到封单，Lot 按顺序走过 各个工艺步骤。每完成一步就记下进度；运行中途被打断（设备宕机、 系统重启）后，从断点继续——已完成的步骤不重复。失败的步骤可能被 OCAP 预案救回来，这时队列照常往下走（救回本身记为一条独立事实）。 跨 Lot 的事务在恢复后沿用原编号，不产生重复事务。",
+    "entity": "FabPipelineRun",
+    "identifier": {
+      "name": "workOrderId",
+      "dataType": "string",
+      "origin": "One work order, one run. A second start for an already running or finished work order is refused.",
+      "origin_zh": "一个工单，一次运行。对已在跑或已完工的工单再次启动会被拒绝。"
+    },
+    "stateFields": [
+      {
+        "name": "scenarioId",
+        "dataType": "string",
+        "description": "Which demo scenario drives this run (e.g. \"m35\")."
+      },
+      {
+        "name": "workOrderId",
+        "dataType": "string",
+        "description": "The work order under execution."
+      },
+      {
+        "name": "wafers",
+        "dataType": "map<string, wafer>",
+        "description": "WaferId → per-wafer info (rework count, CD history, classification, sub-lot)."
+      },
+      {
+        "name": "passCount",
+        "dataType": "integer",
+        "description": "Wafers passed so far."
+      },
+      {
+        "name": "scrapCount",
+        "dataType": "integer",
+        "description": "Wafers scrapped so far."
+      },
+      {
+        "name": "currentRoutingStep",
+        "dataType": "integer",
+        "description": "Index into the POR (process of record) steps, 0-based."
+      },
+      {
+        "name": "areaVisitHistory",
+        "dataType": "string[]",
+        "description": "Ordered area IDs visited (drives reentry-index calculation)."
+      },
+      {
+        "name": "equipmentState",
+        "dataType": "map<string, equipment-state>",
+        "description": "Per-equipment status/error counts feeding OCAP equipment conditions."
+      },
+      {
+        "name": "ocapActions",
+        "dataType": "list<(string, ocap-action-plan)>",
+        "description": "Pending OCAP actions, (ruleId, plan) in priority order."
+      },
+      {
+        "name": "childLotView",
+        "dataType": "map<string, (string, integer)>",
+        "description": "Child-lot view descriptor set at split, transitioned at merge (suffix → status, waferCount)."
+      },
+      {
+        "name": "completedStepCount",
+        "dataType": "integer",
+        "description": "How many steps have finished; the resume breakpoint."
+      },
+      {
+        "name": "lastStepOutcome",
+        "dataType": "string",
+        "description": "How the most recent step finished: \"completed\", or \"ocap-recovered\" (the step failed but an OCAP plan saved it — the queue moved on, but no clean completion is claimed)."
+      }
+    ],
+    "statusEnum": [
+      "idle",
+      "running",
+      "recovering",
+      "completed",
+      "failed"
+    ],
+    "statusTransitions": {
+      "run-completed": "completed",
+      "run-failed": "failed",
+      "run-recovered": "running"
+    },
+    "stateGates": {
+      "start-pipeline-run": {
+        "fromStates": [
+          "idle"
+        ],
+        "toState": "running"
+      },
+      "inject-crash": {
+        "fromStates": [
+          "running"
+        ],
+        "toState": "recovering"
+      }
+    },
+    "aggregateRuleRefs": [
+      {
+        "ruleId": "steps-in-order",
+        "desc": "Steps finish in queue order; after an interruption the run skips already-finished steps.",
+        "desc_zh": "步骤按队列顺序完成；中断后续跑跳过已完成的步骤。"
+      },
+      {
+        "ruleId": "no-repeat-of-finished",
+        "desc": "A step confirmed finished never runs again. A step interrupted mid-execution may run once more — each step must tolerate being executed twice without double effect.",
+        "desc_zh": "已确认完成的步骤永不重跑。中断时正在执行的步骤可能再跑一次—— 每个步骤都要能承受\"跑两次\"而不产生双重效果。"
+      },
+      {
+        "ruleId": "single-effective-run",
+        "desc": "One work order has at most one effective run at a time; instructions from a superseded run are void and cause no side effects.",
+        "desc_zh": "一个工单同时最多一次有效运行；被取代的运行发出的指令自动作废，不产生副作用。"
+      },
+      {
+        "ruleId": "transaction-number-reuse",
+        "desc": "Cross-lot transaction numbers follow a fixed rule (workOrderId + step name + execution index), so recovery reuses the original number instead of opening a duplicate transaction.",
+        "desc_zh": "跨 Lot 事务编号遵循固定规则（工单号+步骤名+执行序号），恢复后沿用 原编号，不另开重复事务。"
+      },
+      {
+        "ruleId": "progress-recording",
+        "desc": "Every finished step records its progress, including the full run state at that moment. After an interruption the run continues from the last recorded breakpoint. Progress records are kept independently of the running process; rebuilding the process loses nothing.",
+        "desc_zh": "每完成一步就记录进度，包含当时的完整运行状态。 中断后从最后记录的断点继续。 进度记录独立于运行进程保存；进程重建不丢失记录。"
+      }
+    ]
+  }

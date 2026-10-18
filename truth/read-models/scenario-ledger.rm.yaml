@@ -1,23 +1,33 @@
-# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
 kind: read-model
-id: scenario-ledger
-name: Scenario Ledger
-name_zh: 场景台账
-description: >
-  Per-scenario accounting: which work orders ran under this scenario and
-  how each ended. The demo's "what happened" summary.
-description_zh: >
-  按场景的台账：这个场景下跑了哪些工单、每个什么结局。演示的"发生了什么"汇总。
-served_by: fab demo page scenario panel
-sources:
-  - fab-pipeline-run
-  - work-order
-fields:
-  - name: entries
-    type: map<string, string>
-    description: WorkOrderId → completed | failed.
-    derived_from: run-completed / run-failed events
-  - name: totals
-    type: map<string, integer>
-    description: Aggregate pass / scrap counts across the scenario's runs.
-    derived_from: sum over run states
+name: "Scenario Ledger"
+payload:
+  {
+    "id": "scenario-ledger",
+    "name": "Scenario Ledger",
+    "name_zh": "场景台账",
+    "description": "Per-scenario accounting: which work orders ran under this scenario and how each ended. The demo's \"what happened\" summary.",
+    "description_zh": "按场景的台账：这个场景下跑了哪些工单、每个什么结局。演示的\"发生了什么\"汇总。",
+    "served_by": "fab demo page scenario panel",
+    "fields": [
+      {
+        "name": "entries",
+        "dataType": "map<string, string>",
+        "source": "eventField:run-completed.workOrderId",
+        "description": "WorkOrderId → completed | failed. [pilot derived_from: run-completed / run-failed events]"
+      },
+      {
+        "name": "totals",
+        "dataType": "map<string, integer>",
+        "source": "eventField:run-completed.passCount",
+        "description": "Aggregate pass / scrap counts across the scenario's runs. [pilot derived_from: sum over run states]"
+      }
+    ],
+    "sourceAggregate": "Fab Pipeline Run",
+    "sources": [
+      "Fab Pipeline Run",
+      "Work Order"
+    ],
+    "visible_to": []
+  }

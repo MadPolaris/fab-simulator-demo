@@ -1,0 +1,66 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: policy
+type: policy
+name: "Measurement Classification"
+origin:
+  stage: refining
+  board: reconstructed
+  seq: 46
+triggers:
+  - event: wafer-measured
+    aggregate: Wafer Lot
+invokes:
+  - command: classify-wafer
+    aggregate: Wafer Lot
+payload:
+  {
+    "id": "measurement-classification",
+    "type": "policy",
+    "name": "Measurement Classification",
+    "name_zh": "量测分类",
+    "description": "Every recorded CD measurement is classified against the DecisionConfig thresholds. The measurement is pure data (\"CD is 33.5nm\"); the judgment lives in the thresholds. Classification is what the disposition policy routes on.",
+    "description_zh": "每个记下的 CD 量测都对照 DecisionConfig 阈值分类。量测值是纯数据 （\"CD 是 33.5nm\"）；判断力在阈值里。分类结果是处置策略路由的依据。",
+    "links": [
+      "event:wafer-measured",
+      "command:classify-wafer"
+    ],
+    "info": {
+      "triggers": [
+        {
+          "event": "wafer-measured",
+          "aggregate": "Wafer Lot"
+        }
+      ],
+      "invokes": [
+        {
+          "command": "classify-wafer",
+          "aggregate": "Wafer Lot"
+        }
+      ]
+    },
+    "rules": [
+      {
+        "when": "lowerSpecNm <= cd <= upperSpecNm",
+        "then": "PASS — continue the flow"
+      },
+      {
+        "when": "upperSpecNm < cd <= upperSpecNm + borderlineWindowNm",
+        "then": "BORDERLINE — hold for review"
+      },
+      {
+        "when": "cd > upperSpecNm + borderlineWindowNm but reworkCount < maxReworkCount",
+        "then": "FAIL — route to rework"
+      },
+      {
+        "when": "cd far above spec, or reworkCount >= maxReworkCount",
+        "then": "SCRAP — leaves the lot permanently"
+      }
+    ],
+    "workshopCard": {
+      "name": "MeasurementClassification",
+      "name_zh": "量测分类",
+      "description": "Every recorded CD measurement is classified against DecisionConfig thresholds. The measurement is pure data ('CD is 33.5nm'); the judgment (PASS/BORDERLINE/FAIL/SCRAP) is the policy's.",
+      "description_zh": "每个记录的 CD 量测值按 DecisionConfig 阈值分类。量测是纯数据（'CD 是 33.5nm'），判断（PASS/BORDERLINE/FAIL/SCRAP）是策略的。"
+    }
+  }

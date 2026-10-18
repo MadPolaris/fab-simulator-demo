@@ -1,30 +1,28 @@
-# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
 kind: read-model
-id: event-feed
-name: Event Feed
-name_zh: 事件流
-description: >
-  The live firehose of domain events pushed to the demo pages as they
-  happen: demo start, equipment state changes, FOUP movements, processing
-  updates, measurements, decisions, OCAP triggers, transaction operations, lot
-  updates. The 3D view and the timeline both drink from this feed.
-  2026-10-18 ARBITRATED (CQRS authority split): this feed is a READ-side
-  projection for the UI — it never drives recovery and may lag or be rebuilt.
-  Write-side truth lives in the journals (run journal: per-step progress
-  records; lot journal: lot facts). If the feed says a step completed but the
-  run journal disagrees, the journal wins — recovery replays the journal,
-  never the feed.
-description_zh: >
-  推送到演示页面的实时领域事件流：演示启动、设备状态变化、FOUP 移动、
-  加工更新、量测、判定、OCAP 触发、事务操作、Lot 更新。3D 视图和时间线
-  都从这条流取数。
-served_by: fab demo and M3.5 pages (live socket)
-sources:
-  - fab-pipeline-run
-  - lot
-  - work-order
-fields:
-  - name: frames
-    type: "string[]"
-    description: Domain event frames in occurrence order (demo-started, equipment-state-changed, foup-in-transit, processing-started/completed, measurement-result, decision-made, ocap-action-triggered, transaction-operation, lot-updated, …).
-    derived_from: domain events as recorded
+name: "Event Feed"
+payload:
+  {
+    "id": "event-feed",
+    "name": "Event Feed",
+    "name_zh": "事件流",
+    "description": "The live firehose of domain events pushed to the demo pages as they happen: demo start, equipment state changes, FOUP movements, processing updates, measurements, decisions, OCAP triggers, transaction operations, lot updates. The 3D view and the timeline both drink from this feed. 2026-10-18 ARBITRATED (CQRS authority split): this feed is a READ-side projection for the UI — it never drives recovery and may lag or be rebuilt. Write-side truth lives in the journals (run journal: per-step progress records; lot journal: lot facts). If the feed says a step completed but the run journal disagrees, the journal wins — recovery replays the journal, never the feed.",
+    "description_zh": "推送到演示页面的实时领域事件流：演示启动、设备状态变化、FOUP 移动、 加工更新、量测、判定、OCAP 触发、事务操作、Lot 更新。3D 视图和时间线 都从这条流取数。",
+    "served_by": "fab demo and M3.5 pages (live socket)",
+    "fields": [
+      {
+        "name": "frames",
+        "dataType": "string[]",
+        "source": "eventField:run-started.workOrderId",
+        "description": "Domain event frames in occurrence order (demo-started, equipment-state-changed, foup-in-transit, processing-started/completed, measurement-result, decision-made, ocap-action-triggered, transaction-operation, lot-updated, …). [pilot derived_from: domain events as recorded]"
+      }
+    ],
+    "sourceAggregate": "Fab Pipeline Run",
+    "sources": [
+      "Fab Pipeline Run",
+      "Wafer Lot",
+      "Work Order"
+    ],
+    "visible_to": []
+  }

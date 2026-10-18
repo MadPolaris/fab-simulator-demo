@@ -1,0 +1,33 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: story
+name: M35DemoFlow
+origin:
+  stage: refining
+  board: reconstructed
+  seq: 38
+payload:
+  {
+    "type": "story",
+    "name": "M35DemoFlow",
+    "name_zh": "M3.5 演示流程",
+    "description": "M35DemoFlow: 创建工单并启动流水线; Lot 按 POR 走 24 步：上料→传输→track-in/out→跑配方→量测→分类; 量测异常触发 OCAP 处置（暂存/返工/报废）.",
+    "description_zh": "M3.5 演示流程：创建工单并启动流水线；Lot 按 POR 走 24 步：上料→传输→track-in/out→跑配方→量测→分类；量测异常触发 OCAP 处置（暂存/返工/报废）。",
+    "info": {
+      "pilotType": "useCase",
+      "preconditions": [
+        "M3.5 场景已配置（含 OCAP 规则与故障注入）"
+      ],
+      "steps": [
+        "创建工单并启动流水线",
+        "Lot 按 POR 走 24 步：上料→传输→track-in/out→跑配方→量测→分类",
+        "量测异常触发 OCAP 处置（暂存/返工/报废）",
+        "全流程走完封单"
+      ],
+      "extensions": [
+        "步骤失败无 OCAP 命中→运行失败告警",
+        "宕机→从断点续跑"
+      ]
+    }
+  }

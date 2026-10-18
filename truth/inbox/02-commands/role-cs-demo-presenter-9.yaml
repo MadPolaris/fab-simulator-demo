@@ -1,0 +1,34 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: role
+name: DemoPresenter
+origin:
+  stage: commandStorming
+  board: reconstructed
+  seq: 9
+payload:
+  {
+    "type": "role",
+    "name": "DemoPresenter",
+    "id": "demo-presenter",
+    "name_zh": "演示者",
+    "description": "The human demo role: injects equipment crashes to demonstrate recovery live. Watches the same demo pages as the process engineer.",
+    "description_zh": "演示用的人的角色：注入设备宕机以现场演示恢复。与工艺工程师看同一套演示页面。",
+    "links": [
+      "command:InjectCrash"
+    ],
+    "info": {
+      "roleId": "demo-presenter",
+      "can_issue": [
+        "inject-crash"
+      ],
+      "can_view": [
+        "equipment-board",
+        "event-feed",
+        "pipeline-timeline",
+        "recovery-status",
+        "scenario-ledger"
+      ]
+    }
+  }

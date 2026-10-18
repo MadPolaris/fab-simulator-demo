@@ -1,9 +1,0 @@
-# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
-kind: note
-type: messageFields
-name: CrashInjectedFields
-name_zh: 宕机注入字段
-description: Fields of CrashInjected.
-description_zh: CrashInjected 的字段。
-fields:
-- 'workOrderId: string'

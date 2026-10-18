@@ -1,0 +1,34 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: readModel
+name: ScenarioLedger
+origin:
+  stage: refining
+  board: reconstructed
+  seq: 44
+payload:
+  {
+    "type": "readModel",
+    "name": "ScenarioLedger",
+    "id": "scenario-ledger",
+    "name_zh": "场景台账",
+    "description": "Per-scenario ledger: lots launched, wafers by verdict, scrap count — the demo's scoreboard.",
+    "description_zh": "按场景的台账：投了哪些 Lot、各去向晶圆数、报废数——演示的记分牌。",
+    "info": {
+      "served_by": "fab-demo summary",
+      "sources": [
+        "fab-pipeline-run",
+        "lot"
+      ],
+      "fields": [
+        "lotsLaunched: integer",
+        "wafersByVerdict: map ← PASS/BORDERLINE/FAIL/SCRAP 计数",
+        "scrapCount: integer"
+      ],
+      "visible_to": [
+        "process-engineer",
+        "demo-presenter"
+      ]
+    }
+  }

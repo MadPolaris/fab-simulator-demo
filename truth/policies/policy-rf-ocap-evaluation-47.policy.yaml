@@ -1,0 +1,71 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: policy
+type: policy
+name: "OCAP Evaluation"
+origin:
+  stage: refining
+  board: reconstructed
+  seq: 47
+triggers:
+  - event: step-failed
+    aggregate: Fab Pipeline Run
+invokes:
+  - command: handle-ocap
+    aggregate: Fab Pipeline Run
+payload:
+  {
+    "id": "ocap-evaluation",
+    "type": "policy",
+    "name": "OCAP Evaluation",
+    "name_zh": "OCAP 求值",
+    "description": "When a step fails, evaluate the OCAP rules against the current run state in priority order (lower number first). The first matching rule whose per-lot trigger budget is not exhausted wins; its action plan is executed. A missing metric obeys the rule's MissingMetricPolicy: ConservativePass skips the rule, ConservativeReject fires it. With no matching rule, the failure stands.",
+    "description_zh": "步骤失败时，按优先级对当前运行状态求值 OCAP 规则（数字越小越先）。 第一条命中且本 Lot 触发预算没用完的规则获胜，执行其处置预案。 缺失的指标按规则的 MissingMetricPolicy 处理：ConservativePass 跳过 该规则，ConservativeReject 则触发。没有命中的规则，失败成立。",
+    "links": [
+      "event:step-failed",
+      "command:handle-ocap"
+    ],
+    "info": {
+      "triggers": [
+        {
+          "event": "step-failed",
+          "aggregate": "Fab Pipeline Run"
+        }
+      ],
+      "invokes": [
+        {
+          "command": "handle-ocap",
+          "aggregate": "Fab Pipeline Run"
+        }
+      ]
+    },
+    "rules": [
+      {
+        "when": "a rule's trigger condition holds on the run state",
+        "then": "execute its action plan via handle-ocap",
+        "note": "rules evaluated in priority order; first match wins"
+      },
+      {
+        "when": "the winning rule already hit maxTriggersPerLot for this lot",
+        "then": "skip it, try the next matching rule"
+      },
+      {
+        "when": "a needed metric is missing and onMissingMetric is ConservativePass",
+        "then": "skip the rule"
+      },
+      {
+        "when": "a needed metric is missing and onMissingMetric is ConservativeReject",
+        "then": "treat the rule as matched"
+      },
+      {
+        "when": "no rule matches",
+        "then": "the step failure stands; the run fails"
+      }
+    ],
+    "workshopCard": {
+      "name": "OcapEvaluation",
+      "name_zh": "OCAP 求值",
+      "description": "When a step fails, evaluate OCAP rules against the current run state in priority order (lower number first). The first matching rule whose trigger condition holds and which has not exceeded maxTriggersPerLot fires its action plan; the queue moves on.",
+      "description_zh": "步骤失败时按优先级对当前运行状态求值 OCAP 规则（数字小的先）。首条触发条件成立且未超本 Lot 触发上限的规则执行处置预案，队列继续。"
+    }
+  }

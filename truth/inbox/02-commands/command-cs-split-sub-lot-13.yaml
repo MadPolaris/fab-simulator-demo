@@ -1,0 +1,37 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: command
+name: SplitSubLot
+origin:
+  stage: commandStorming
+  board: reconstructed
+  seq: 13
+payload:
+  {
+    "type": "command",
+    "name": "SplitSubLot",
+    "id": "split-sublot",
+    "name_zh": "切分子 Lot",
+    "description": "Carve wafers out of a lot into a child lot (rework / pilot / scrap). Reserve-then-confirm transfer.",
+    "description_zh": "从 Lot 切出晶圆组成子 Lot（返工/先导/报废）。先预留后确认。",
+    "links": [
+      "event:SubLotSplit"
+    ],
+    "info": {
+      "triggers": [
+        "policy: 晶圆处置"
+      ],
+      "produces": [
+        "sublot-split"
+      ],
+      "parameters": [
+        "lotId: string",
+        "waferIds: string[]",
+        "purpose: string"
+      ],
+      "guards": [
+        "晶圆在 Lot 中且未被预留"
+      ]
+    }
+  }

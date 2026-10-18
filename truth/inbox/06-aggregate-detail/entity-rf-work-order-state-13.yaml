@@ -1,0 +1,20 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: entity
+name: WorkOrderState
+origin:
+  stage: refining
+  board: reconstructed
+  seq: 13
+payload:
+  {
+    "type": "entity",
+    "name": "WorkOrderState",
+    "name_zh": "工单状态",
+    "description": "State slots: workOrderId, lotId (first lot), scenarioId, porId. A work order is sealed when its run completes.",
+    "description_zh": "状态槽位：workOrderId、lotId（首批 Lot）、scenarioId、porId。运行完工则工单封单。",
+    "info": {
+      "pilotType": "aggregateState"
+    }
+  }

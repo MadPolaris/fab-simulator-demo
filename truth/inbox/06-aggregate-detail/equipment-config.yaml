@@ -1,7 +1,0 @@
-# ═══ truth note — reconstructed from truth/ tree (no live workshop was held) ═══
-kind: note
-type: valueObject
-name: EquipmentConfig
-name_zh: 设备配置
-description: 'Per-equipment configuration: area, capabilities, fault probabilities for the demo.'
-description_zh: 单台设备配置：所属区、能力、演示用的故障概率。

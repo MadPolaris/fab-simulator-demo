@@ -1,0 +1,23 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: field
+name: RunCompletedFields
+origin:
+  stage: refining
+  board: reconstructed
+  seq: 19
+payload:
+  {
+    "type": "field",
+    "name": "RunCompletedFields",
+    "name_zh": "流水线完工字段",
+    "description": "Fields of RunCompleted.",
+    "description_zh": "RunCompleted 的字段。",
+    "info": {
+      "pilotType": "messageFields",
+      "fields": [
+        "workOrderId: string"
+      ]
+    }
+  }

@@ -1,0 +1,20 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: entity
+name: OcapActionPlan
+origin:
+  stage: refining
+  board: reconstructed
+  seq: 8
+payload:
+  {
+    "type": "entity",
+    "name": "OcapActionPlan",
+    "name_zh": "OCAP 处置预案",
+    "description": "Six variants: Hold, Rework, Scrap, Notify, AdjustRecipe, Composite (combination).",
+    "description_zh": "六种：暂存、返工、报废、通知、调整配方、组合。",
+    "info": {
+      "pilotType": "valueObject"
+    }
+  }

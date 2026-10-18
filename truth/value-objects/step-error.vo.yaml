@@ -1,17 +1,34 @@
-# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
 kind: value-object
-id: step-error
-name: Step Error
-name_zh: 步骤失败
-description: >
-  What a failed step reports: which step, which equipment (if any), the
-  fault code, and a human-readable detail. This is what OCAP rules match
-  against.
-description_zh: >
-  失败步骤上报的内容：哪个步骤、哪台设备（若有）、故障码、
-  人可读的详情。OCAP 规则就按这个匹配。
-fields:
-  - { name: stepName, type: string, description: Failing step }
-  - { name: equipmentId, type: string, description: Equipment involved, if any }
-  - { name: errorCode, type: string, description: Fault code (HARDWARE_FAULT, COMM_TIMEOUT, SENSOR_ANOMALY, POWER_FLUCTUATION, ABORTED) }
-  - { name: detail, type: string, description: Human-readable detail }
+name: "Step Error"
+payload:
+  {
+    "id": "step-error",
+    "name": "Step Error",
+    "name_zh": "步骤失败",
+    "description": "What a failed step reports: which step, which equipment (if any), the fault code, and a human-readable detail. This is what OCAP rules match against.",
+    "description_zh": "失败步骤上报的内容：哪个步骤、哪台设备（若有）、故障码、 人可读的详情。OCAP 规则就按这个匹配。",
+    "fields": [
+      {
+        "name": "stepName",
+        "dataType": "string",
+        "description": "Failing step"
+      },
+      {
+        "name": "equipmentId",
+        "dataType": "string",
+        "description": "Equipment involved"
+      },
+      {
+        "name": "errorCode",
+        "dataType": "string",
+        "description": "Fault code (HARDWARE_FAULT"
+      },
+      {
+        "name": "detail",
+        "dataType": "string",
+        "description": "Human-readable detail"
+      }
+    ]
+  }

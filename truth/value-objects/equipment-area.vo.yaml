@@ -1,25 +1,165 @@
-# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
 kind: value-object
-id: equipment-area
-name: Equipment Area
-name_zh: 设备区
-description: >
-  The ten equipment areas of the fab: nine process areas plus the logistics
-  command system. Each area owns a pipeline + rebatch policy + physical
-  constraints but shares the connector components. A lot may re-enter the
-  same area multiple times — reentryIndex counts the visit (0, 1, 2, …).
-description_zh: >
-  晶圆厂的十个设备区：九个工艺区加物流指挥系统。每个区有自己的
-  Pipeline + ReBatchPolicy + 物理约束，但共享连接器组件。
-  Lot 可能多次重入同一设备区——reentryIndex 记录第几次访问（0, 1, 2, …）。
-variants:
-  - { name: WetClean,     fields: [{ name: areaId, type: string, description: '"CLEAN"' }, { name: displayName, type: string, description: '"湿法清洗"' }] }
-  - { name: Diffusion,    fields: [{ name: areaId, type: string, description: '"DIFF"' }, { name: displayName, type: string, description: '"扩散/氧化"' }] }
-  - { name: Lithography,  fields: [{ name: areaId, type: string, description: '"LITHO"' }, { name: displayName, type: string, description: '"光刻"' }] }
-  - { name: Etch,         fields: [{ name: areaId, type: string, description: '"ETCH"' }, { name: displayName, type: string, description: '"刻蚀"' }] }
-  - { name: Implant,      fields: [{ name: areaId, type: string, description: '"IMPL"' }, { name: displayName, type: string, description: '"离子注入"' }] }
-  - { name: Deposition,   fields: [{ name: areaId, type: string, description: '"DEP"' }, { name: displayName, type: string, description: '"薄膜沉积"' }] }
-  - { name: CMP,          fields: [{ name: areaId, type: string, description: '"CMP"' }, { name: displayName, type: string, description: '"化学机械抛光"' }] }
-  - { name: Metrology,    fields: [{ name: areaId, type: string, description: '"MET"' }, { name: displayName, type: string, description: '"量测"' }] }
-  - { name: Drying,       fields: [{ name: areaId, type: string, description: '"DRY"' }, { name: displayName, type: string, description: '"干燥"' }] }
-  - { name: Logistics,    fields: [{ name: areaId, type: string, description: '"LOG"' }, { name: displayName, type: string, description: '"物流指挥"' }] }
+name: "Equipment Area"
+payload:
+  {
+    "id": "equipment-area",
+    "name": "Equipment Area",
+    "name_zh": "设备区",
+    "description": "The ten equipment areas of the fab: nine process areas plus the logistics command system. Each area owns a pipeline + rebatch policy + physical constraints but shares the connector components. A lot may re-enter the same area multiple times — reentryIndex counts the visit (0, 1, 2, …).",
+    "description_zh": "晶圆厂的十个设备区：九个工艺区加物流指挥系统。每个区有自己的 Pipeline + ReBatchPolicy + 物理约束，但共享连接器组件。 Lot 可能多次重入同一设备区——reentryIndex 记录第几次访问（0, 1, 2, …）。",
+    "fields": [],
+    "variants": [
+      {
+        "name": "WetClean",
+        "fields": [
+          {
+            "name": "areaId",
+            "type": "string",
+            "description": "\"CLEAN\""
+          },
+          {
+            "name": "displayName",
+            "type": "string",
+            "description": "\"湿法清洗\""
+          }
+        ]
+      },
+      {
+        "name": "Diffusion",
+        "fields": [
+          {
+            "name": "areaId",
+            "type": "string",
+            "description": "\"DIFF\""
+          },
+          {
+            "name": "displayName",
+            "type": "string",
+            "description": "\"扩散/氧化\""
+          }
+        ]
+      },
+      {
+        "name": "Lithography",
+        "fields": [
+          {
+            "name": "areaId",
+            "type": "string",
+            "description": "\"LITHO\""
+          },
+          {
+            "name": "displayName",
+            "type": "string",
+            "description": "\"光刻\""
+          }
+        ]
+      },
+      {
+        "name": "Etch",
+        "fields": [
+          {
+            "name": "areaId",
+            "type": "string",
+            "description": "\"ETCH\""
+          },
+          {
+            "name": "displayName",
+            "type": "string",
+            "description": "\"刻蚀\""
+          }
+        ]
+      },
+      {
+        "name": "Implant",
+        "fields": [
+          {
+            "name": "areaId",
+            "type": "string",
+            "description": "\"IMPL\""
+          },
+          {
+            "name": "displayName",
+            "type": "string",
+            "description": "\"离子注入\""
+          }
+        ]
+      },
+      {
+        "name": "Deposition",
+        "fields": [
+          {
+            "name": "areaId",
+            "type": "string",
+            "description": "\"DEP\""
+          },
+          {
+            "name": "displayName",
+            "type": "string",
+            "description": "\"薄膜沉积\""
+          }
+        ]
+      },
+      {
+        "name": "CMP",
+        "fields": [
+          {
+            "name": "areaId",
+            "type": "string",
+            "description": "\"CMP\""
+          },
+          {
+            "name": "displayName",
+            "type": "string",
+            "description": "\"化学机械抛光\""
+          }
+        ]
+      },
+      {
+        "name": "Metrology",
+        "fields": [
+          {
+            "name": "areaId",
+            "type": "string",
+            "description": "\"MET\""
+          },
+          {
+            "name": "displayName",
+            "type": "string",
+            "description": "\"量测\""
+          }
+        ]
+      },
+      {
+        "name": "Drying",
+        "fields": [
+          {
+            "name": "areaId",
+            "type": "string",
+            "description": "\"DRY\""
+          },
+          {
+            "name": "displayName",
+            "type": "string",
+            "description": "\"干燥\""
+          }
+        ]
+      },
+      {
+        "name": "Logistics",
+        "fields": [
+          {
+            "name": "areaId",
+            "type": "string",
+            "description": "\"LOG\""
+          },
+          {
+            "name": "displayName",
+            "type": "string",
+            "description": "\"物流指挥\""
+          }
+        ]
+      }
+    ]
+  }

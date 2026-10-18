@@ -1,0 +1,35 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: command
+name: RecordMeasurement
+origin:
+  stage: commandStorming
+  board: reconstructed
+  seq: 8
+payload:
+  {
+    "type": "command",
+    "name": "RecordMeasurement",
+    "id": "record-measurement",
+    "name_zh": "记录量测",
+    "description": "Record a wafer's CD measurement from the metrology equipment. Pure data, no judgment.",
+    "description_zh": "记录量测设备报出的晶圆 CD 值。纯数据，不带判断。",
+    "links": [
+      "event:WaferMeasured",
+      "externalSystem:MetrologyEquipment"
+    ],
+    "info": {
+      "triggers": [
+        "externalSystem: 量测设备"
+      ],
+      "produces": [
+        "wafer-measured"
+      ],
+      "parameters": [
+        "waferId: string",
+        "cdNm: number",
+        "equipmentId: string"
+      ]
+    }
+  }

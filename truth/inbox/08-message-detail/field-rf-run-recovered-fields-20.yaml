@@ -1,0 +1,24 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: field
+name: RunRecoveredFields
+origin:
+  stage: refining
+  board: reconstructed
+  seq: 20
+payload:
+  {
+    "type": "field",
+    "name": "RunRecoveredFields",
+    "name_zh": "断点恢复字段",
+    "description": "Fields of RunRecovered.",
+    "description_zh": "RunRecovered 的字段。",
+    "info": {
+      "pilotType": "messageFields",
+      "fields": [
+        "workOrderId: string",
+        "completedStepCount: integer"
+      ]
+    }
+  }

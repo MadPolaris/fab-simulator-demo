@@ -1,0 +1,24 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: field
+name: WafersReleasedFields
+origin:
+  stage: refining
+  board: reconstructed
+  seq: 29
+payload:
+  {
+    "type": "field",
+    "name": "WafersReleasedFields",
+    "name_zh": "晶圆放行字段",
+    "description": "Fields of WafersReleased.",
+    "description_zh": "WafersReleased 的字段。",
+    "info": {
+      "pilotType": "messageFields",
+      "fields": [
+        "lotId: string",
+        "waferIds: string[]"
+      ]
+    }
+  }

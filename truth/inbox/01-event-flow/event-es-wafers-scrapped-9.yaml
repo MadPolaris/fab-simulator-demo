@@ -1,0 +1,28 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: event
+name: WafersScrapped
+origin:
+  stage: eventStorming
+  board: reconstructed
+  seq: 9
+payload:
+  {
+    "type": "event",
+    "name": "WafersScrapped",
+    "name_zh": "晶圆报废",
+    "description": "Wafers left the lot as scrap — terminal, no rework.",
+    "description_zh": "晶圆报废离 Lot——终态，不再返工。",
+    "links": [
+      "command:scrap-wafers"
+    ],
+    "info": {
+      "timeline": "fab-pipeline",
+      "sequence": 10,
+      "payloadFields": [
+        "lotId: string",
+        "waferIds: string[]"
+      ]
+    }
+  }

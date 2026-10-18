@@ -1,0 +1,22 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: story
+name: WatchOcapHandling
+origin:
+  stage: storyMapping
+  board: reconstructed
+  seq: 2
+payload:
+  {
+    "type": "story",
+    "name": "WatchOcapHandling",
+    "name_zh": "观察 OCAP 处置",
+    "description": "As 工艺工程师: 在步骤失败时看到 OCAP 规则命中与处置执行 — 确认异常有预案兜住.",
+    "description_zh": "工艺工程师在步骤失败时看到 OCAP 规则命中与处置执行，确认异常有预案兜住。",
+    "info": {
+      "role": "工艺工程师",
+      "goal": "在步骤失败时看到 OCAP 规则命中与处置执行",
+      "benefit": "确认异常有预案兜住"
+    }
+  }

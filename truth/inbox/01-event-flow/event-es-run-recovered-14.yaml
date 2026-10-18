@@ -1,0 +1,28 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: event
+name: RunRecovered
+origin:
+  stage: eventStorming
+  board: reconstructed
+  seq: 14
+payload:
+  {
+    "type": "event",
+    "name": "RunRecovered",
+    "name_zh": "断点恢复",
+    "description": "After an interruption the run resumed from the last recorded breakpoint; finished steps were skipped. Cross-lot transactions reuse their original numbers.",
+    "description_zh": "中断后运行从最后记录的断点续跑；已完成的步骤跳过。跨 Lot 事务沿用原编号。",
+    "links": [
+      "command:inject-crash"
+    ],
+    "info": {
+      "timeline": "fab-pipeline",
+      "sequence": 15,
+      "payloadFields": [
+        "workOrderId: string",
+        "completedStepCount: integer — 跳过的已完成步骤数"
+      ]
+    }
+  }

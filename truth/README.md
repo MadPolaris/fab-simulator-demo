@@ -23,25 +23,32 @@ fault injection); `web/` holds the Play UI plus the full CQRS stack
 
 | Directory | What's in it |
 |---|---|
-| `tree.yaml` | Root manifest: name, version, provenance, full index |
-| `types.yaml` | The **type vocabulary** — the 7 record kinds every file uses |
-| `aggregates/` | The three consistency boundaries: `fab-pipeline-run`, `lot`, `work-order` |
+| `workshop.yaml` | Tree root: schema version + workshop session order |
+| `inbox/` | The 13 workshop products, one directory per product (event flow, commands, aggregates, …) |
+| `aggregates/` | The three consistency boundaries: `fab-pipeline-run`, `lot`, `work-order` (+ one slice per command) |
 | `pipelines/` | The fab step vocabulary (step order, slots, failure codes) |
 | `value-objects/` | Shared immutable domain types (areas, OCAP plans, configs, …) |
 | `policies/` | Reactive domain rules (OCAP, classification, transaction-number reuse, disposition) |
 | `read-models/` | What the web UI serves (timeline, equipment board, event feed, …) |
 | `scenarios/` | The demo scripts (M3.5 crash/OCAP demo, standard tour) |
-| `tools/` | `validate-tree.py` — the machine gate (see below) |
 
-Each directory has its own `README.md`. Every atom file starts with
-`kind` / `id` / `name` / `description` — read those four lines and you know what it is.
+Format: **truthsrc v0.4** (see `MIGRATION-NOTES.md` for the migration from the
+pilot dialect). The atom vocabulary (`kind`) and the machine gate live in the
+truthsrc toolchain (`zhongdj/metarch-truthsrc`), not in this tree.
+
+Each directory has its own `README.md`. Every atom file starts with the
+`# ═══ truthsrc atom ═══` banner, then scalar header lines (`kind`, `name`, …),
+then verbatim JSON blocks (`payload`, `events`, `steps`, `script`) — read the
+headers and you know what it is; the JSON is the workshop's own content,
+byte-preserved.
 
 ## Conventions
 
 - **Stable IDs, never copied text.** Cross-references use `id` (e.g. `aggregate: lot`,
   `event: step-completed`). If a name changes, the id stays.
-- **One file = one typed record.** The `kind` comes from `types.yaml`; the validator
-  enforces required fields per kind.
+- **One file = one typed record.** The `kind` comes from the truthsrc v0.4
+  vocabulary (see the toolchain's `SCHEMA.md`); the validator enforces required
+  fields per kind.
 - **Chinese alongside English** where the concept is domain-heavy (fab / OCAP vocabulary),
   following the repo's `README-zh.md` precedent.
 - **No machine smell.** Fields that exist only for byte-identity or compiler bookkeeping
@@ -49,13 +56,18 @@ Each directory has its own `README.md`. Every atom file starts with
 
 ## Machine gate
 
+From a checkout of `zhongdj/metarch-truthsrc` (the toolchain is no longer
+vendored under `truth/tools/`):
+
 ```bash
-python3 truth/tools/validate-tree.py truth/
+node bin/truthsrc.js validate --tree <truthDir>    # V*/ES*/CS*/AG* structural + stage rules (0 hard required)
+node bin/truthsrc.js roundtrip --tree <truthDir>   # compile∘decompose∘compile byte-identity
 ```
 
-Checks: every file parses, kinds/ids valid, ids unique, all cross-references resolve,
-every aggregate has ≥1 slice, every policy trigger resolves to a produced event.
-Humans decide domain truth; the tool only reports structural breakage.
+Checks: every file parses, kinds valid, `order.commands`/`order.events` close
+exactly over the slice/event pool, every policy trigger/invokes resolves,
+read-model fields carry a `source` derivation. Humans decide domain truth;
+the tool only reports structural breakage.
 
 ## What this tree is NOT
 

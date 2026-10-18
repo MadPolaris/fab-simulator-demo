@@ -1,28 +1,38 @@
-# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
 kind: read-model
-id: recovery-status
-name: Recovery Status
-name_zh: 恢复状态
-description: >
-  M3.5 crash-demo observability: for one interrupted run, where the
-  breakpoint was, whether recovery finished, and the fault history that
-  led here. This is what the M3.5 page polls after you hit the crash button.
-description_zh: >
-  M3.5 宕机演示的可观测性：一次被打断的运行，断点在哪、恢复完了没、
-  走到这一步的故障历史。点了 crash 按钮后，M3.5 页面轮询的就是它。
-served_by: M3.5 demo page
-sources:
-  - fab-pipeline-run
-fields:
-  - name: breakpoint
-    type: string
-    description: Step the run was interrupted at / resumed from.
-    derived_from: last recorded completedStepCount
-  - name: recovered
-    type: boolean
-    description: Whether recovery finished.
-    derived_from: run-recovered event present
-  - name: faultHistory
-    type: "string[]"
-    description: Fault codes seen by this run, in order.
-    derived_from: step-failed events' error codes
+name: "Recovery Status"
+payload:
+  {
+    "id": "recovery-status",
+    "name": "Recovery Status",
+    "name_zh": "恢复状态",
+    "description": "M3.5 crash-demo observability: for one interrupted run, where the breakpoint was, whether recovery finished, and the fault history that led here. This is what the M3.5 page polls after you hit the crash button.",
+    "description_zh": "M3.5 宕机演示的可观测性：一次被打断的运行，断点在哪、恢复完了没、 走到这一步的故障历史。点了 crash 按钮后，M3.5 页面轮询的就是它。",
+    "served_by": "M3.5 demo page",
+    "fields": [
+      {
+        "name": "breakpoint",
+        "dataType": "string",
+        "source": "eventField:step-completed.completedStepCount",
+        "description": "Step the run was interrupted at / resumed from. [pilot derived_from: last recorded completedStepCount]"
+      },
+      {
+        "name": "recovered",
+        "dataType": "boolean",
+        "source": "eventField:run-recovered.workOrderId",
+        "description": "Whether recovery finished. [pilot derived_from: run-recovered event present]"
+      },
+      {
+        "name": "faultHistory",
+        "dataType": "string[]",
+        "source": "eventField:step-failed.error",
+        "description": "Fault codes seen by this run, in order. [pilot derived_from: step-failed events' error codes]"
+      }
+    ],
+    "sourceAggregate": "Fab Pipeline Run",
+    "sources": [
+      "Fab Pipeline Run"
+    ],
+    "visible_to": []
+  }

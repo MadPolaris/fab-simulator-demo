@@ -1,0 +1,33 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: readModel
+name: EquipmentBoard
+origin:
+  stage: refining
+  board: reconstructed
+  seq: 40
+payload:
+  {
+    "type": "readModel",
+    "name": "EquipmentBoard",
+    "id": "equipment-board",
+    "name_zh": "设备看板",
+    "description": "Per-area, per-equipment status board: which equipment is running, faulted, or idle, with error counts feeding OCAP conditions.",
+    "description_zh": "按设备区、单台设备的状态看板：谁在跑、谁故障、谁空闲，错误计数喂给 OCAP 条件。",
+    "info": {
+      "served_by": "fab-demo equipment page",
+      "sources": [
+        "fab-pipeline-run"
+      ],
+      "fields": [
+        "area.status: map ← 各区设备状态汇总",
+        "equipment.errorCount: map ← 单台错误计数 → OCAP 设备条件",
+        "equipment.state: map ← 运行/故障/空闲"
+      ],
+      "visible_to": [
+        "process-engineer",
+        "demo-presenter"
+      ]
+    }
+  }

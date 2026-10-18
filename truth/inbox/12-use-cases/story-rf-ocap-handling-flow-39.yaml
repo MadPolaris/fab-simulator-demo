@@ -1,0 +1,32 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: story
+name: OcapHandlingFlow
+origin:
+  stage: refining
+  board: reconstructed
+  seq: 39
+payload:
+  {
+    "type": "story",
+    "name": "OcapHandlingFlow",
+    "name_zh": "OCAP 处置流程",
+    "description": "OcapHandlingFlow: OCAP 求值按优先级匹配规则; 执行处置预案; 队列继续，救回记为独立事实.",
+    "description_zh": "OCAP 处置流程：OCAP 求值按优先级匹配规则；执行处置预案；队列继续，救回记为独立事实。",
+    "info": {
+      "pilotType": "useCase",
+      "preconditions": [
+        "运行中某步骤失败"
+      ],
+      "steps": [
+        "OCAP 求值按优先级匹配规则",
+        "执行处置预案",
+        "队列继续，救回记为独立事实"
+      ],
+      "extensions": [
+        "无规则命中→运行失败",
+        "超触发上限→转人工复核"
+      ]
+    }
+  }

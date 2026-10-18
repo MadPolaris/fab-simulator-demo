@@ -1,0 +1,25 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: field
+name: SubLotMergedFields
+origin:
+  stage: refining
+  board: reconstructed
+  seq: 24
+payload:
+  {
+    "type": "field",
+    "name": "SubLotMergedFields",
+    "name_zh": "合并子 Lot 字段",
+    "description": "Fields of SubLotMerged.",
+    "description_zh": "SubLotMerged 的字段。",
+    "info": {
+      "pilotType": "messageFields",
+      "fields": [
+        "parentLotId: string",
+        "childLotId: string",
+        "waferIds: string[]"
+      ]
+    }
+  }

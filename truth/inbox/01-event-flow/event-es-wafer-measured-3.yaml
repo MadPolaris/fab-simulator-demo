@@ -1,0 +1,29 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: event
+name: WaferMeasured
+origin:
+  stage: eventStorming
+  board: reconstructed
+  seq: 3
+payload:
+  {
+    "type": "event",
+    "name": "WaferMeasured",
+    "name_zh": "晶圆量测",
+    "description": "A wafer's CD measurement was recorded from the metrology equipment. The measurement carries no judgment — classification is a separate step.",
+    "description_zh": "量测设备报出一片晶圆的 CD 值并记录。量测值本身不带判断——分类是另一步。",
+    "links": [
+      "command:record-measurement"
+    ],
+    "info": {
+      "timeline": "fab-pipeline",
+      "sequence": 4,
+      "payloadFields": [
+        "waferId: string",
+        "cdNm: number — CD 值（nm）",
+        "equipmentId: string — 量测设备"
+      ]
+    }
+  }

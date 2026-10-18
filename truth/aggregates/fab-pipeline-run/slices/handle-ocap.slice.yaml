@@ -1,31 +1,68 @@
-# ═══ truth atom — hand-editable; types: truth/types.yaml ═══
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
 kind: slice
-id: handle-ocap
-name: Handle OCAP
-name_zh: 执行 OCAP 处置
-description: >
-  A step failed and an OCAP rule matched: carry out its action plan
-  (hold / rework / scrap / notify / adjust recipe, or a combination).
-  The queue then moves on — the save is recorded as its own fact, because
-  a rescued step is not a clean completion.
-description_zh: >
-  某步骤失败且命中 OCAP 规则：执行其处置预案（暂存 / 返工 / 报废 /
-  通知 / 调整配方，或组合）。然后队列继续往下走——救回记为一条独立
-  事实，因为被救回的步骤不算干净完成。
-aggregate: fab-pipeline-run
-parameters:
-  - { name: stepName, type: string, description: Failed step }
-  - { name: ruleId, type: string, description: OCAP rule that matched }
-  - { name: action, type: ocap-action-plan, description: Plan to execute }
-guards:
-  - description: the step failed and the rule's trigger condition holds
-  - description: the rule has not exceeded maxTriggersPerLot for this lot
-produces:
-  - ocap-handled
+aggregate: "Fab Pipeline Run"
+command: handle-ocap
+payload:
+  {
+    "id": "handle-ocap",
+    "name": "handle-ocap",
+    "title": "Handle OCAP",
+    "name_zh": "执行 OCAP 处置",
+    "description": "A step failed and an OCAP rule matched: carry out its action plan (hold / rework / scrap / notify / adjust recipe, or a combination). The queue then moves on — the save is recorded as its own fact, because a rescued step is not a clean completion.",
+    "description_zh": "某步骤失败且命中 OCAP 规则：执行其处置预案（暂存 / 返工 / 报废 / 通知 / 调整配方，或组合）。然后队列继续往下走——救回记为一条独立 事实，因为被救回的步骤不算干净完成。",
+    "parameters": [
+      {
+        "name": "stepName",
+        "dataType": "string",
+        "description": "Failed step"
+      },
+      {
+        "name": "ruleId",
+        "dataType": "string",
+        "description": "OCAP rule that matched"
+      },
+      {
+        "name": "action",
+        "dataType": "ocap-action-plan",
+        "description": "Plan to execute"
+      }
+    ],
+    "guards": [
+      {
+        "description": "the step failed and the rule's trigger condition holds"
+      },
+      {
+        "description": "the rule has not exceeded maxTriggersPerLot for this lot"
+      }
+    ],
+    "produces": [
+      "ocap-handled"
+    ]
+  }
 events:
-  ocap-handled:
-    description: An OCAP plan saved a failed step; the queue moved on.
-    payload:
-      - { name: stepName, type: string, description: Saved step }
-      - { name: ruleId, type: string, description: OCAP rule that fired }
-      - { name: action, type: ocap-action-plan, description: Action plan executed }
+  {
+    "ocap-handled": {
+      "name": "ocap-handled",
+      "description": "An OCAP plan saved a failed step; the queue moved on.",
+      "payloads": [
+        {
+          "name": "stepName",
+          "dataType": "string",
+          "description": "Saved step"
+        },
+        {
+          "name": "ruleId",
+          "dataType": "string",
+          "description": "OCAP rule that fired"
+        },
+        {
+          "name": "action",
+          "dataType": "ocap-action-plan",
+          "description": "Action plan executed"
+        }
+      ],
+      "bindings": [],
+      "foldAssignments": []
+    }
+  }

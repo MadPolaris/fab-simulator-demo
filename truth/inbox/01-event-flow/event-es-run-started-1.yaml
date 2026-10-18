@@ -1,0 +1,28 @@
+# ═══ truthsrc atom — hand-editable; contract: SCHEMA.md ═══
+
+kind: note
+type: event
+name: RunStarted
+origin:
+  stage: eventStorming
+  board: reconstructed
+  seq: 1
+payload:
+  {
+    "type": "event",
+    "name": "RunStarted",
+    "name_zh": "流水线启动",
+    "description": "Start executing the fab step queue for a work order: the run's start (with initial state) is recorded, then steps run in order. A second start for a running or finished work order is refused.",
+    "description_zh": "为一个工单启动 fab 步骤队列：记下运行开始（含初始状态），然后按序执行。对已在跑或已完工的工单再次启动被拒绝。",
+    "links": [
+      "command:start-pipeline-run"
+    ],
+    "info": {
+      "timeline": "fab-pipeline",
+      "sequence": 2,
+      "payloadFields": [
+        "workOrderId: string",
+        "scenarioId: string"
+      ]
+    }
+  }
